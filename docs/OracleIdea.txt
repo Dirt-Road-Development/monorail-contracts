@@ -1,0 +1,12 @@
+- Use SKALE Oracle to allow Provers to listen
+to messages posted on another chain
+and then mint tokens on a SKALE Chain directly
+- This would negate the need to route EVERYTHING via Europa
+- Would stay 100% collateralized
+- How to exit SKALE? 
+- Utilize a LayerZero Endpoint to send a proof back via Europa
+that unlocks tokens on the corresponding chain
+- Could also explore a non SKALE Oracle on the other side
+
+
+This becomes more of an intents based framework

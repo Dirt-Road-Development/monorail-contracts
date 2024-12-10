@@ -3,7 +3,7 @@ import assert from 'assert'
 import { type DeployFunction } from 'hardhat-deploy/types'
 
 // TODO declare your contract name here
-const contractName = 'FeeManager'
+const contractName = 'USDCs'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre
@@ -16,11 +16,16 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
+    const station = await deployments.getOrNull("SKALEStation");
+    if (!station) {
+        throw new Error("Must Deploy Station First");
+    }
+
     const { address } = await deploy(contractName, {
         from: deployer,
-        args: [],
+        args: ["USDC.s", "USDC.s", 6, station.address],
         log: true,
-        skipIfAlreadyDeployed: false,
+        skipIfAlreadyDeployed: true,
     })
 
     console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, address: ${address}`)

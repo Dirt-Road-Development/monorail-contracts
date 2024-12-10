@@ -1,36 +1,44 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import { Station } from "../evm/Station.sol";
 import { IMonorailNativeToken } from "../interfaces/IMonorailNativeToken.sol";
-import { MessagingReceipt, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import { OApp, MessagingReceipt, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import { MessagingParams } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { FeeManager } from "./FeeManager.sol";
 
 error LzAltTokenUnavailable();
 
-contract SKALEStation is Station {
+contract SKALEStation is OApp, FeeManager {
+
+    struct TripDetails {
+        address token;
+        address to;
+        uint256 amount;
+    }
 
     using SafeERC20 for IERC20;
 
-    // Chain Id => From Chain Token => SKALE Chain Token
-    mapping(uint32 => mapping(address => address)) public tokensByChain;
+    bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
-    function mapToken(
-        uint32 fromChain,
-        address fromToken,
-        address skaleToken
-    ) external onlyRole(MANAGER_ROLE) {
-        if (tokensByChain[fromChain][fromToken] != address(0)) revert("Token already Setup");
-        tokensByChain[fromChain][fromToken] = skaleToken;
-    }
+    address private feeCollector;
+    mapping(address => uint256) public supplyAvailable;
+    mapping(address => mapping(uint32 => IMonorailNativeToken)) public tokens;
+    mapping(IMonorailNativeToken => bool) public stable;
+
+    event AddToken(uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress);
 
     constructor(
-        address _endpoint,
-        address _feeManager,
-        address _feeCollector
-    ) Station(_endpoint, _feeManager, _feeCollector) {}
+        address _layerZeroEndpoint,
+        address _feeCollector,
+        address owner
+    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(owner) {
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(MANAGER_ROLE, _msgSender());
+    }
 
     function _lzSend(
         uint32 _dstEid,
@@ -77,6 +85,24 @@ contract SKALEStation is Station {
         return 0;
     }
 
+    function addToken(
+        uint32 layerZeroEndpointId,
+        address originTokenAddress,
+        address localTokenAddress,
+        bool isStable
+    ) external onlyRole(MANAGER_ROLE) {
+
+        if (address(tokens[originTokenAddress][layerZeroEndpointId]) != address(0)) {
+            revert("Token Already Added + Active");
+        }
+
+        IMonorailNativeToken localToken = IMonorailNativeToken(localTokenAddress);
+        tokens[originTokenAddress][layerZeroEndpointId] = localToken;
+        stable[localToken] = isStable;
+
+        emit AddToken(layerZeroEndpointId, originTokenAddress, localTokenAddress);
+    }
+
     /**
      * @dev Called when data is received from the protocol. It overrides the equivalent function in the parent contract.
      * Protocol messages are defined as packets, comprised of the following parameters.
@@ -94,9 +120,15 @@ contract SKALEStation is Station {
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
         TripDetails memory details = abi.decode(payload, (TripDetails));
-        address skaleTokenAddress = tokensByChain[_origin.srcEid][details.token];
 
-        IMonorailNativeToken(skaleTokenAddress).mint(details.recipientAddress, details.amount);
+         Fees memory fees = stable[tokens[details.token][_origin.srcEid]]
+            ? calculateStablecoinFees(details.amount)
+            : calculateNonStableTokenFees(details.amount);
+
+        tokens[details.token][_origin.srcEid].mint(details.to, details.amount - fees.totalFee);
+        tokens[details.token][_origin.srcEid].mint(feeCollector, fees.totalFee);
+
+        supplyAvailable[address(tokens[details.token][_origin.srcEid])] += details.amount;
 
     }   
 }

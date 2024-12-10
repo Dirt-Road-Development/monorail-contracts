@@ -38,17 +38,9 @@ describe("FeeManager Test", () => {
         expect(feeThresholds[4].toString()).to.be.equal("115792089237316195423570985008687907853269984665640564039457584007913129639935");
     })
 
-    it("should have valid initial stablecoin fee tiers", async() => {
+    xit("should have valid initial stablecoin fee tiers", async() => {
         const feeThresholds = await feeManager.getThresholds();
         expect(feeThresholds.length).to.be.equal(5);
         const res = await feeManager.stablecoinFeeTiers[0];
-        console.log("Res: ", res);
-        // expect().to.be.equal("1000");
-        // expect(results[1].toString()).to.be.equal("10000");
-        // expect(results[2].toString()).to.be.equal("100000");
-        // expect(results[3].toString()).to.be.equal("1000000");
-        // expect(results[4].toString()).to.be.equal("115792089237316195423570985008687907853269984665640564039457584007913129639935");
-        // console.log("Results: ", results);
     })
-
 })

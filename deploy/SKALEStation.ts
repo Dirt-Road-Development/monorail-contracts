@@ -16,7 +16,7 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
-    const feeManager = await hre.deployments.get("FeeManager");
+    // const feeManager = await hre.deployments.get("FeeManager");
 
     // This is an external deployment pulled in from @layerzerolabs/lz-evm-sdk-v2
     //
@@ -34,17 +34,18 @@ const deploy: DeployFunction = async (hre) => {
     //     eid: EndpointId.AVALANCHE_V2_TESTNET
     //   }
     // }
+    console.log(await hre.deployments.all())
     const endpointV2Deployment = await hre.deployments.get('EndpointV2')
 
     const { address } = await deploy(contractName, {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            feeManager.address, // owner
-            deployer
+            deployer,
+            deployer, // Switch to Multisig in Production
         ],
         log: true,
-        skipIfAlreadyDeployed: false,
+        skipIfAlreadyDeployed: true,
     })
 
     console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, address: ${address}`)

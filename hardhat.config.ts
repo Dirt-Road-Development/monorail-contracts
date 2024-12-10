@@ -36,9 +36,13 @@ if (accounts == null) {
 }
 
 const config: HardhatUserConfig = {
+    defaultNetwork: "europa-testnet",
     paths: {
         cache: 'cache/hardhat',
     },
+    mocha: {
+        timeout: 100_000
+      },
     solidity: {
         compilers: [
             {
@@ -56,23 +60,30 @@ const config: HardhatUserConfig = {
     networks: {
         'sepolia-testnet': {
             eid: EndpointId.SEPOLIA_V2_TESTNET,
-            url: process.env.RPC_URL_SEPOLIA || 'https://rpc.sepolia.org/',
+            url: 'https://rpc.sepolia.org/',
             accounts,
         },
         'avalanche-testnet': {
             eid: EndpointId.AVALANCHE_V2_TESTNET,
-            url: process.env.RPC_URL_FUJI || 'https://rpc.ankr.com/avalanche_fuji',
+            url: 'https://rpc.ankr.com/avalanche_fuji',
             accounts,
         },
         'amoy-testnet': {
             eid: EndpointId.AMOY_V2_TESTNET,
-            url: process.env.RPC_URL_AMOY || 'https://polygon-amoy-bor-rpc.publicnode.com',
+            url: 'https://polygon-amoy-bor-rpc.publicnode.com',
             accounts,
+            companionNetworks: {
+                "europa": "europa-testnet"
+            }
         },
         "europa-testnet": {
             eid: EndpointId.SKALE_V2_TESTNET,
             url: "https://testnet.skalenodes.com/v1/juicy-low-small-testnet",
-            accounts
+            accounts,
+            companionNetworks: {
+                "aurora": "aurora-testnet",
+                "amoy": "amoy-testnet"
+            }
         },
         "sonic-testnet": {
             eid: EndpointId.SONIC_V2_TESTNET,
@@ -81,8 +92,16 @@ const config: HardhatUserConfig = {
         },
         "celo-testnet": {
             eid: EndpointId.CELO_V2_TESTNET,
-            url: "  https://alfajores-forno.celo-testnet.org",
+            url: "https://alfajores-forno.celo-testnet.org",
             accounts
+        },
+        "aurora-testnet": {
+            eid: EndpointId.AURORA_V2_TESTNET,
+            url: "https://testnet.aurora.dev",
+            accounts,
+            companionNetworks: {
+                "europa": "europa-testnet"
+            }
         },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit

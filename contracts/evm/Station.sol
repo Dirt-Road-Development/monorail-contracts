@@ -5,7 +5,6 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { IFeeManager } from "../interfaces/IFeeManager.sol";
 import { OApp, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 
 error TokenBridgingPaused();
@@ -17,87 +16,61 @@ contract Station is OApp, AccessControl {
 
     using SafeERC20 for IERC20;
 
-    struct Chain {
-        string chainName;
-        bool isSupported;
-        mapping(address => bool) supportedTokens;
-        uint32 layerZeroDestinationId;
-    }
-
     struct Token {
-        uint256 deposits;
         bool isPaused;
-        bool isActive;
-        bool isStable;
+        bool isOFT;
+        uint256 deposits;
     }
 
     struct TripDetails {
         address token;
-        address recipientAddress;
-        bytes32 destination;
+        address to;
         uint256 amount;
     }
 
-    IFeeManager public feeManager;
-    address public feeCollector;
-
-    mapping(bytes32 => Chain) public chains;
-    mapping(address => Token) public tokens;
-
     bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
-    event Bridge(bytes32 indexed destination, address indexed token, uint256 indexed amount);
+    uint32 skaleEndpointId;
+
+    mapping(IERC20 => bool) public supported;
+    mapping(IERC20 => uint256) public deposits;
+
+    event AddToken(address indexed token);
+    event Bridge(address indexed token, uint256 indexed amount);
 
     constructor(
         address _layerZeroEndpoint,
-        address _feeManager,
-        address _feeCollector
-    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
-        feeManager = IFeeManager(_feeManager);
-        feeCollector = _feeCollector;
+        uint32 _skaleEndpointId,
+        address owner
+    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(owner) {
+        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        _grantRole(MANAGER_ROLE, owner);
+        _grantRole(MANAGER_ROLE, _msgSender());
     }
 
+    function addToken(IERC20 token) external onlyRole(MANAGER_ROLE) {
+        supported[token] = true;
+        emit AddToken(address(token));
+    }
 
     function bridge(
-        TripDetails memory tripDetails,
+        TripDetails memory details,
         bytes calldata options
     ) external payable {
 
-        if (!chains[tripDetails.destination].isSupported) {
-            revert UnsupportedChain();
-        }
-
-        if (!chains[tripDetails.destination].supportedTokens[tripDetails.token]) {
+        if (!supported[IERC20(details.token)]) {
             revert UnsupportedToken();
         }
 
-        if (!tokens[tripDetails.token].isActive) {
-            revert TokenNotAdded();
-        }
+        IERC20(details.token).safeTransferFrom(_msgSender(), address(this), details.amount);
 
-        if (tokens[tripDetails.token].isPaused) {
-            revert TokenBridgingPaused();
-        }
+        deposits[IERC20(details.token)] += details.amount;
 
-        IFeeManager.Fees memory fees = tokens[tripDetails.token].isStable
-            ? feeManager.calculateStablecoinFees(tripDetails.amount)
-            : feeManager.calculateNonStableTokenFees(tripDetails.amount);
-
-        
-        uint256 deposit = tripDetails.amount - fees.totalFee;
-
-        IERC20(tripDetails.token).safeTransferFrom(_msgSender(), feeCollector, fees.totalFee);
-        IERC20(tripDetails.token).safeTransferFrom(_msgSender(), address(this), deposit);
-
-        tokens[tripDetails.token].deposits += deposit;
-
-        tripDetails.amount = deposit;
-        // TODO: Send Message Via Layer Zero (requires msg.value)
-        // Sends a message from the source to destination chain.
-        bytes memory _payload = abi.encode(tripDetails); // Encodes message as bytes.
+        // Encodes message as bytes.
+        bytes memory _payload = abi.encode(details);
         
         _lzSend(
-            chains[tripDetails.destination].layerZeroDestinationId, // Destination chain's endpoint ID.
+            skaleEndpointId, // Destination chain's endpoint ID.
             _payload, // Encoded message payload being sent.
             options, // Message execution options (e.g., gas to use on destination).
             MessagingFee(msg.value, 0), // Fee struct containing native gas and ZRO token.
@@ -105,7 +78,7 @@ contract Station is OApp, AccessControl {
         );
 
         // Emit Successful Bridge
-        emit Bridge(tripDetails.destination, tripDetails.token, tripDetails.amount);
+        emit Bridge(details.token, details.amount);
     }
 
     /**
@@ -125,6 +98,16 @@ contract Station is OApp, AccessControl {
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
         TripDetails memory details = abi.decode(payload, (TripDetails));
+    }
+
+    function quote(
+        TripDetails memory _tripDetails, // The message to send.
+        bytes calldata _options, // Message execution options
+        bool _payInLzToken // boolean for which token to return fee in
+    ) public view returns (uint256 nativeFee, uint256 lzTokenFee) {
+        bytes memory _payload = abi.encode(_tripDetails);
+        MessagingFee memory fee = _quote(skaleEndpointId, _payload, _options, _payInLzToken);
+        return (fee.nativeFee, fee.lzTokenFee);
     }
 
     receive() external payable {}

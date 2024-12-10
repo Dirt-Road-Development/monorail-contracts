@@ -1,3 +1,4 @@
+import { EndpointId } from '@layerzerolabs/lz-definitions'
 import assert from 'assert'
 
 import { type DeployFunction } from 'hardhat-deploy/types'
@@ -16,7 +17,7 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
-    const feeManager = await hre.deployments.get("FeeManager");
+    // const feeManager = await hre.deployments.get("FeeManager");
 
     // This is an external deployment pulled in from @layerzerolabs/lz-evm-sdk-v2
     //
@@ -40,11 +41,11 @@ const deploy: DeployFunction = async (hre) => {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            feeManager.address, // owner
+            EndpointId.SKALE_V2_TESTNET,
             deployer
         ],
         log: true,
-        skipIfAlreadyDeployed: false,
+        skipIfAlreadyDeployed: true,
     })
 
     console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, address: ${address}`)
