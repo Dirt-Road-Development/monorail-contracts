@@ -101,7 +101,7 @@ const config: HardhatUserConfig = {
             accounts,
             companionNetworks: {
                 "europa": "europa-testnet"
-            }
+            },
         },
         hardhat: {
             // Need this for testing because TestHelperOz5.sol is exceeding the compiled contract size limit

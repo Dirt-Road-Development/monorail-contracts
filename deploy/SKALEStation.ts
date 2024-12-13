@@ -41,11 +41,11 @@ const deploy: DeployFunction = async (hre) => {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            deployer,
+            "0x49b30E1e0CaecF2D573d40AEFbb7f42Af2786b4a",
             deployer, // Switch to Multisig in Production
         ],
         log: true,
-        skipIfAlreadyDeployed: true,
+        skipIfAlreadyDeployed: true
     })
 
     console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, address: ${address}`)

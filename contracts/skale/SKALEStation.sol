@@ -25,11 +25,14 @@ contract SKALEStation is OApp, FeeManager {
     bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
-    mapping(address => uint256) public supplyAvailable;
-    mapping(address => mapping(uint32 => IMonorailNativeToken)) public tokens;
+    mapping(IMonorailNativeToken => uint256) public supplyAvailable;
+
+    // LayerZero Chain Id => Origin Token => Local Native Token
+    mapping(uint32 => mapping(address => IMonorailNativeToken)) public tokens;
     mapping(IMonorailNativeToken => bool) public stable;
 
     event AddToken(uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress);
+    event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
 
     constructor(
         address _layerZeroEndpoint,
@@ -38,8 +41,65 @@ contract SKALEStation is OApp, FeeManager {
     ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(owner) {
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(MANAGER_ROLE, _msgSender());
+
+        // Set Fee Collector. If failed to set will revert when minting
+        feeCollector = _feeCollector;
     }
 
+    function addToken(
+        uint32 layerZeroEndpointId,
+        address originTokenAddress,
+        address localTokenAddress,
+        bool isStable
+    ) external onlyRole(MANAGER_ROLE) {
+
+        if (address(tokens[layerZeroEndpointId][originTokenAddress]) != address(0)) {
+            revert("Token Already Added + Active");
+        }
+
+        IMonorailNativeToken localToken = IMonorailNativeToken(localTokenAddress);
+        tokens[layerZeroEndpointId][originTokenAddress] = localToken;
+        stable[localToken] = isStable;
+
+        emit AddToken(layerZeroEndpointId, originTokenAddress, localTokenAddress);
+    }
+
+    /**
+     * @dev Called when data is received from the protocol. It overrides the equivalent function in the parent contract.
+     * Protocol messages are defined as packets, comprised of the following parameters.
+     * @param _origin A struct containing information about where the packet came from.
+     * @param _guid A global unique identifier for tracking the packet.
+     * @param payload Encoded message.
+     */
+    function _lzReceive(
+        Origin calldata _origin,
+        bytes32 _guid,
+        bytes calldata payload,
+        address,  // Executor address as specified by the OApp.
+        bytes calldata  // Any extra data or options to trigger on receipt.
+    ) internal virtual override {
+        // Decode the payload to get the message
+        // In this case, type is string, but depends on your encoding!
+        (address token, address to, uint256 amount) = abi.decode(payload, (address,address,uint256)); // TripDetails
+
+        IMonorailNativeToken nativeToken = tokens[_origin.srcEid][token];
+
+        FeeDistribution memory fees = calculateFees(amount, nativeToken.decimals());
+        
+        nativeToken.mint(to, fees.userAmount);
+        // nativeToken.mint(feeCollector, fees.platformFee);
+        // nativeToken.mint(feeCollector, fees.liquidityFee);
+
+        supplyAvailable[nativeToken] += amount;
+
+        emit BridgeReceived(address(nativeToken), to, fees.userAmount);
+    }
+
+    /*******************************************************************************************/
+    /*******************************************************************************************/
+    /*                       Required Overrides for SKALE. DO NOT REMOVE BELOW.                */
+    /*******************************************************************************************/
+    /*******************************************************************************************/
     function _lzSend(
         uint32 _dstEid,
         bytes memory _message,
@@ -84,51 +144,4 @@ contract SKALEStation is OApp, FeeManager {
 
         return 0;
     }
-
-    function addToken(
-        uint32 layerZeroEndpointId,
-        address originTokenAddress,
-        address localTokenAddress,
-        bool isStable
-    ) external onlyRole(MANAGER_ROLE) {
-
-        if (address(tokens[originTokenAddress][layerZeroEndpointId]) != address(0)) {
-            revert("Token Already Added + Active");
-        }
-
-        IMonorailNativeToken localToken = IMonorailNativeToken(localTokenAddress);
-        tokens[originTokenAddress][layerZeroEndpointId] = localToken;
-        stable[localToken] = isStable;
-
-        emit AddToken(layerZeroEndpointId, originTokenAddress, localTokenAddress);
-    }
-
-    /**
-     * @dev Called when data is received from the protocol. It overrides the equivalent function in the parent contract.
-     * Protocol messages are defined as packets, comprised of the following parameters.
-     * @param _origin A struct containing information about where the packet came from.
-     * @param _guid A global unique identifier for tracking the packet.
-     * @param payload Encoded message.
-     */
-    function _lzReceive(
-        Origin calldata _origin,
-        bytes32 _guid,
-        bytes calldata payload,
-        address,  // Executor address as specified by the OApp.
-        bytes calldata  // Any extra data or options to trigger on receipt.
-    ) internal virtual override {
-        // Decode the payload to get the message
-        // In this case, type is string, but depends on your encoding!
-        TripDetails memory details = abi.decode(payload, (TripDetails));
-
-         Fees memory fees = stable[tokens[details.token][_origin.srcEid]]
-            ? calculateStablecoinFees(details.amount)
-            : calculateNonStableTokenFees(details.amount);
-
-        tokens[details.token][_origin.srcEid].mint(details.to, details.amount - fees.totalFee);
-        tokens[details.token][_origin.srcEid].mint(feeCollector, fees.totalFee);
-
-        supplyAvailable[address(tokens[details.token][_origin.srcEid])] += details.amount;
-
-    }   
 }

@@ -6,7 +6,7 @@ const USE_TESTNET = true;
 
 const europaTestnetContract: OmniPointHardhat = {
     eid: EndpointId.SKALE_V2_TESTNET,
-    contractName: 'SKALEStation',
+    contractName: 'SKALEStation'
 }
 
 const amoyTestnetContract: OmniPointHardhat = {
@@ -38,9 +38,9 @@ const testnetConfig: OAppOmniGraphHardhat = {
         {
             contract: amoyTestnetContract,
         },
-        {
-            contract: auroraTestnetContract
-        }
+        // {
+        //     contract: auroraTestnetContract
+        // }
     ],
     connections: [
         {
@@ -49,18 +49,18 @@ const testnetConfig: OAppOmniGraphHardhat = {
             config: {
                 sendConfig: {
                     ulnConfig: {
-                        confirmations: BigInt(10),
+                        confirmations: BigInt(1),
                         requiredDVNs: [
-                            "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
+                            "0x55c175dd5b039331db251424538169d8495c18d1"
                         ]
                     }
                 },
                 receiveConfig: {
                     ulnConfig: {
-                        confirmations: BigInt(10),
+                        confirmations: BigInt(1),
                         requiredDVNs: [
-                            "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-                        ]
+                            "0x55c175dd5b039331db251424538169d8495c18d1"
+                        ],
                     }
                 }
             },
@@ -71,7 +71,7 @@ const testnetConfig: OAppOmniGraphHardhat = {
             config: {
                 sendConfig: {
                     ulnConfig: {
-                        confirmations: BigInt(10),
+                        confirmations: BigInt(1),
                         requiredDVNs: [
                             "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
                         ]
@@ -79,7 +79,7 @@ const testnetConfig: OAppOmniGraphHardhat = {
                 },
                 receiveConfig: {
                     ulnConfig: {
-                        confirmations: BigInt(10),
+                        confirmations: BigInt(1),
                         requiredDVNs: [
                             "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
                         ]
@@ -87,50 +87,50 @@ const testnetConfig: OAppOmniGraphHardhat = {
                 }
             },
         },
-        {
-            from: auroraTestnetContract,
-            to: europaTestnetContract,
-            config: {
-                sendConfig: {
-                    ulnConfig: {
-                        confirmations: BigInt(10),
-                        requiredDVNs: [
-                            "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-                        ]
-                    }
-                },
-                receiveConfig: {
-                    ulnConfig: {
-                        confirmations: BigInt(10),
-                        requiredDVNs: [
-                            "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-                        ]
-                    }
-                }
-            },
-        },
-        {
-            from: europaTestnetContract,
-            to: auroraTestnetContract,
-            config: {
-                sendConfig: {
-                    ulnConfig: {
-                        confirmations: BigInt(10),
-                        requiredDVNs: [
-                            "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-                        ]
-                    }
-                },
-                receiveConfig: {
-                    ulnConfig: {
-                        confirmations: BigInt(10),
-                        requiredDVNs: [
-                            "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-                        ]
-                    }
-                }
-            },
-        }
+        // {
+        //     from: auroraTestnetContract,
+        //     to: europaTestnetContract,
+        //     config: {
+        //         sendConfig: {
+        //             ulnConfig: {
+        //                 confirmations: BigInt(1),
+        //                 requiredDVNs: [
+        //                     "0x988d898a9acf43f61fdbc72aad6eb3f0542e19e1"
+        //                 ]
+        //             }
+        //         },
+        //         receiveConfig: {
+        //             ulnConfig: {
+        //                 confirmations: BigInt(1),
+        //                 requiredDVNs: [
+        //                     "0x988d898a9acf43f61fdbc72aad6eb3f0542e19e1"
+        //                 ]
+        //             }
+        //         }
+        //     },
+        // },
+        // {
+        //     from: europaTestnetContract,
+        //     to: auroraTestnetContract,
+        //     config: {
+        //         sendConfig: {
+        //             ulnConfig: {
+        //                 confirmations: BigInt(1),
+        //                 requiredDVNs: [
+        //                     "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
+        //                 ]
+        //             }
+        //         },
+        //         receiveConfig: {
+        //             ulnConfig: {
+        //                 confirmations: BigInt(1),
+        //                 requiredDVNs: [
+        //                     "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
+        //                 ]
+        //             }
+        //         }
+        //     },
+        // }
     ]
 }
 

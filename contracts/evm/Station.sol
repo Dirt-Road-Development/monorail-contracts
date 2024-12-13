@@ -5,7 +5,8 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { OApp, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 
 error TokenBridgingPaused();
 error TokenNotAdded();
@@ -46,6 +47,7 @@ contract Station is OApp, AccessControl {
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(MANAGER_ROLE, owner);
         _grantRole(MANAGER_ROLE, _msgSender());
+        skaleEndpointId = _skaleEndpointId;
     }
 
     function addToken(IERC20 token) external onlyRole(MANAGER_ROLE) {
@@ -56,10 +58,14 @@ contract Station is OApp, AccessControl {
     function bridge(
         TripDetails memory details,
         bytes calldata options
-    ) external payable {
+    ) external payable returns (MessagingReceipt memory receipt) {
 
         if (!supported[IERC20(details.token)]) {
-            revert UnsupportedToken();
+            revert("Unsupported Token");
+        }
+
+        if (details.to == address(0)) { 
+            revert("To must not be address(0)");
         }
 
         IERC20(details.token).safeTransferFrom(_msgSender(), address(this), details.amount);
@@ -67,15 +73,8 @@ contract Station is OApp, AccessControl {
         deposits[IERC20(details.token)] += details.amount;
 
         // Encodes message as bytes.
-        bytes memory _payload = abi.encode(details);
-        
-        _lzSend(
-            skaleEndpointId, // Destination chain's endpoint ID.
-            _payload, // Encoded message payload being sent.
-            options, // Message execution options (e.g., gas to use on destination).
-            MessagingFee(msg.value, 0), // Fee struct containing native gas and ZRO token.
-            payable(msg.sender) // The refund address in case the send call reverts.
-        );
+        bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
+        receipt = _lzSend(skaleEndpointId, _payload, options, MessagingFee(msg.value, 0), payable(msg.sender));
 
         // Emit Successful Bridge
         emit Bridge(details.token, details.amount);
@@ -101,13 +100,12 @@ contract Station is OApp, AccessControl {
     }
 
     function quote(
-        TripDetails memory _tripDetails, // The message to send.
-        bytes calldata _options, // Message execution options
-        bool _payInLzToken // boolean for which token to return fee in
-    ) public view returns (uint256 nativeFee, uint256 lzTokenFee) {
-        bytes memory _payload = abi.encode(_tripDetails);
-        MessagingFee memory fee = _quote(skaleEndpointId, _payload, _options, _payInLzToken);
-        return (fee.nativeFee, fee.lzTokenFee);
+        TripDetails memory _tripDetails,
+        bytes memory _options,
+        bool _payInLzToken
+    ) public view returns (MessagingFee memory fee) {
+        bytes memory payload = abi.encode(_tripDetails);
+        fee = _quote(skaleEndpointId, payload, _options, _payInLzToken);
     }
 
     receive() external payable {}
