@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-
-contract FeeManager is AccessControl {
+library LibFeeCalculatorV1 {
+    
     // Struct to return fee breakdown
-    struct FeeDistribution {
+    struct FeeBreakdown {
         uint256 userAmount;     // 99% of original amount
-        uint256 platformFee;    // 0.7% platform fee
-        uint256 liquidityFee;   // 0.3% liquidity fee
+        uint256 platformFee;    // 0.8% platform fee
+        uint256 liquidityFee;   // 0.2% liquidity fee
     }
 
     // Constant for fee calculation precision
+    // Constant of 1%
     uint256 private constant FEE_DENOMINATOR = 10000;
 
     // Calculate fee distribution with dynamic decimal support
-    function calculateFees(uint256 amount, uint8 decimals) public view returns (FeeDistribution memory) {
+    function calculateFees(uint256 amount, uint8 decimals) public view returns (FeeBreakdown memory) {
         require(amount > 0, "Amount must be greater than zero");
         require(decimals >= 6 && decimals <= 18, "Unsupported token decimals");
 
@@ -39,7 +39,7 @@ contract FeeManager is AccessControl {
             "Fee calculation error"
         );
 
-        return FeeDistribution(
+        return FeeBreakdown(
             userAmount,
             platformFee,
             liquidityFee

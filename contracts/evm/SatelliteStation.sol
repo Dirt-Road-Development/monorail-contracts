@@ -7,13 +7,14 @@ import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol"
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import { LibTypesV1 } from "../lib/LibTypesV1.sol";
 
 error TokenBridgingPaused();
 error TokenNotAdded();
 error UnsupportedChain();
 error UnsupportedToken();
 
-contract Station is OApp, AccessControl {
+contract SatelliteStation is OApp, AccessControl {
 
     using SafeERC20 for IERC20;
 
@@ -23,17 +24,16 @@ contract Station is OApp, AccessControl {
         uint256 deposits;
     }
 
-    struct TripDetails {
-        address token;
-        address to;
-        uint256 amount;
-    }
-
     bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     uint32 skaleEndpointId;
 
-    mapping(IERC20 => bool) public supported;
+    // SKALE Token Address => Local Token Address
+    mapping(address => IERC20) public tokens;
+    
+    // Local Token Address (IERC20) => Supported
+    mapping(address => bool) public supported;
+
     mapping(IERC20 => uint256) public deposits;
 
     event AddToken(address indexed token);
@@ -50,17 +50,30 @@ contract Station is OApp, AccessControl {
         skaleEndpointId = _skaleEndpointId;
     }
 
-    function addToken(IERC20 token) external onlyRole(MANAGER_ROLE) {
-        supported[token] = true;
-        emit AddToken(address(token));
+    event AddToken(address indexed skaleTokenAddress, address indexed localTokenAddress);
+
+    function addToken(
+        address skaleTokenAddress,
+        address localTokenAddress
+    ) external onlyRole(MANAGER_ROLE) {
+        
+        if (address(tokens[skaleTokenAddress]) != address(0)) {
+            revert("Token Already Added + Active");
+        }
+
+        IERC20 localToken = IERC20(localTokenAddress);
+        tokens[skaleTokenAddress] = localToken;
+        supported[localTokenAddress] = true;
+
+        emit AddToken(skaleTokenAddress, localTokenAddress);
     }
 
     function bridge(
-        TripDetails memory details,
+        LibTypesV1.TripDetails memory details,
         bytes calldata options
     ) external payable returns (MessagingReceipt memory receipt) {
 
-        if (!supported[IERC20(details.token)]) {
+        if (!supported[details.token]) {
             revert("Unsupported Token");
         }
 
@@ -96,11 +109,11 @@ contract Station is OApp, AccessControl {
     ) internal virtual override {
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
-        TripDetails memory details = abi.decode(payload, (TripDetails));
+        LibTypesV1.TripDetails memory details = abi.decode(payload, (LibTypesV1.TripDetails));
     }
 
     function quote(
-        TripDetails memory _tripDetails,
+        LibTypesV1.TripDetails memory _tripDetails,
         bytes memory _options,
         bool _payInLzToken
     ) public view returns (MessagingFee memory fee) {

@@ -8,28 +8,28 @@ import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { FeeManager } from "./FeeManager.sol";
+import { LibFeeCalculatorV1 } from "../lib/LibFeeCalculatorV1.sol";
+import { LibTypesV1 } from "../lib/LibTypesV1.sol";
 
 error LzAltTokenUnavailable();
 
-contract SKALEStation is OApp, FeeManager {
-
-    struct TripDetails {
-        address token;
-        address to;
-        uint256 amount;
-    }
+contract SKALEStation is OApp, AccessControl {
 
     using SafeERC20 for IERC20;
+    using SafeERC20 for IMonorailNativeToken;
 
     bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
+
+    address private liquidityCollector;
+
     mapping(IMonorailNativeToken => uint256) public supplyAvailable;
 
     // LayerZero Chain Id => Origin Token => Local Native Token
     mapping(uint32 => mapping(address => IMonorailNativeToken)) public tokens;
-    mapping(IMonorailNativeToken => bool) public stable;
+    // Native Token => Supported Bool
+    mapping(IMonorailNativeToken => mapping(uint32 => bool)) public supported;
 
     event AddToken(uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress);
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
@@ -37,6 +37,7 @@ contract SKALEStation is OApp, FeeManager {
     constructor(
         address _layerZeroEndpoint,
         address _feeCollector,
+        address _liquidityCollector,
         address owner
     ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(owner) {
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
@@ -44,13 +45,13 @@ contract SKALEStation is OApp, FeeManager {
 
         // Set Fee Collector. If failed to set will revert when minting
         feeCollector = _feeCollector;
+        liquidityCollector = _liquidityCollector;
     }
 
     function addToken(
         uint32 layerZeroEndpointId,
         address originTokenAddress,
-        address localTokenAddress,
-        bool isStable
+        address localTokenAddress
     ) external onlyRole(MANAGER_ROLE) {
 
         if (address(tokens[layerZeroEndpointId][originTokenAddress]) != address(0)) {
@@ -59,9 +60,62 @@ contract SKALEStation is OApp, FeeManager {
 
         IMonorailNativeToken localToken = IMonorailNativeToken(localTokenAddress);
         tokens[layerZeroEndpointId][originTokenAddress] = localToken;
-        stable[localToken] = isStable;
+        supported[localToken][layerZeroEndpointId] = true;
 
         emit AddToken(layerZeroEndpointId, originTokenAddress, localTokenAddress);
+    }
+
+    function bridge(
+        uint32 destinationLayerZeroEndpointId,
+        LibTypesV1.TokenType tokenType,
+        LibTypesV1.TripDetails memory details,
+        MessagingFee memory fee,
+        bytes calldata options
+    ) external returns (MessagingReceipt memory receipt) {
+        if (tokenType == LibTypesV1.TokenType.Native) {
+
+            IMonorailNativeToken nativeToken = IMonorailNativeToken(details.token);
+
+            // 1. Validate Token is Supported
+            if (!supported[nativeToken][destinationLayerZeroEndpointId]) {
+                revert("Token Not Supported");
+            }
+
+            // 2. Calculate FeeBreakdown
+            LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(details.amount, nativeToken.decimals());
+            
+            // 3. User Transfers Tokens to Contract
+            nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
+
+            // 4. Burn Native Tokens that will be unlocked on destination
+            nativeToken.burn(fees.userAmount);
+
+            // 5. Reduce Supply by Burn Token Amount
+            supplyAvailable[nativeToken] -= fees.userAmount;
+
+            // 6. Transfer Fees to Fee Collector + Liquidity Collector
+            nativeToken.safeTransfer(feeCollector, fees.platformFee);
+            nativeToken.safeTransfer(liquidityCollector, fees.liquidityFee);
+
+            // 7. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
+            bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
+            receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
+
+        } else if (tokenType == LibTypesV1.TokenType.OFT) {
+            revert("OFT Type Not Supported");
+        } else {
+            revert("Invalid Transfer Type");   
+        }
+    }
+
+    function quote(
+        uint32 _dstEid,
+        LibTypesV1.TripDetails memory _tripDetails,
+        bytes memory _options,
+        bool _payInLzToken
+    ) public view returns (MessagingFee memory fee) {
+        bytes memory payload = abi.encode(_tripDetails);
+        fee = _quote(_dstEid, payload, _options, _payInLzToken);
     }
 
     /**
@@ -84,11 +138,11 @@ contract SKALEStation is OApp, FeeManager {
 
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][token];
 
-        FeeDistribution memory fees = calculateFees(amount, nativeToken.decimals());
+        LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(amount, nativeToken.decimals());
         
         nativeToken.mint(to, fees.userAmount);
-        // nativeToken.mint(feeCollector, fees.platformFee);
-        // nativeToken.mint(feeCollector, fees.liquidityFee);
+        nativeToken.mint(feeCollector, fees.platformFee);
+        nativeToken.mint(liquidityCollector, fees.liquidityFee);
 
         supplyAvailable[nativeToken] += amount;
 
@@ -122,7 +176,6 @@ contract SKALEStation is OApp, FeeManager {
                 _refundAddress
             );
     }
-
 
     /// @dev Internal function to pay the alt token fee associated with the message
     /// @param _nativeFee The alt token fee to be paid

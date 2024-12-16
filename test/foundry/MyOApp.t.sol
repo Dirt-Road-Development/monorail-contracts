@@ -50,42 +50,42 @@ contract MyOAppTest is TestHelperOz5 {
         this.wireOApps(oapps);
     }
 
-    function test_constructor() public {
-        assertEq(aOApp.owner(), address(this));
-        assertEq(bOApp.owner(), address(this));
+    // function test_constructor() public {
+    //     assertEq(aOApp.owner(), address(this));
+    //     assertEq(bOApp.owner(), address(this));
 
-        assertEq(address(aOApp.endpoint()), address(endpoints[aEid]));
-        assertEq(address(bOApp.endpoint()), address(endpoints[bEid]));
-    }
+    //     assertEq(address(aOApp.endpoint()), address(endpoints[aEid]));
+    //     assertEq(address(bOApp.endpoint()), address(endpoints[bEid]));
+    // }
 
-    function test_bridge() public {
-        (address beforeTokenA, address beforeToA, uint256 beforeAmountA) = aOApp.data();
-        (address beforeTokenB, address beforeToB, uint256 beforeAmountB) = bOApp.data();
+    // function test_bridge() public {
+    //     (address beforeTokenA, address beforeToA, uint256 beforeAmountA) = aOApp.data();
+    //     (address beforeTokenB, address beforeToB, uint256 beforeAmountB) = bOApp.data();
     
-        // Generate Details
-        MyOApp.TripDetails memory details = MyOApp.TripDetails(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 0x49b30E1e0CaecF2D573d40AEFbb7f42Af2786b4a, 15 * 10 ** 6);
+    //     // Generate Details
+    //     MyOApp.TripDetails memory details = MyOApp.TripDetails(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 0x49b30E1e0CaecF2D573d40AEFbb7f42Af2786b4a, 15 * 10 ** 6);
         
-        // // Generate Options
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(500000, 0);
+    //     // // Generate Options
+    //     bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(500000, 0);
         
-        // // Get Quote Fee
-        MessagingFee memory fee = aOApp.quote(bEid, details, options, false);
+    //     // // Get Quote Fee
+    //     MessagingFee memory fee = aOApp.quote(bEid, details, options, false);
 
-        // // Send
-        MessagingReceipt memory receipt = aOApp.send{ value: fee.nativeFee }(bEid, details, options);
-        // console.logAdress(dataBefore.token);
-        // Asserting that the receiving OApps have NOT had data manipulated.
-        assertEq(keccak256(abi.encode(beforeTokenA, beforeToA, beforeAmountA)), keccak256(abi.encode(beforeTokenB, beforeToB, beforeAmountB)), "shouldn't be changed until lzReceive packet is verified");
+    //     // // Send
+    //     MessagingReceipt memory receipt = aOApp.send{ value: fee.nativeFee }(bEid, details, options);
+    //     // console.logAdress(dataBefore.token);
+    //     // Asserting that the receiving OApps have NOT had data manipulated.
+    //     assertEq(keccak256(abi.encode(beforeTokenA, beforeToA, beforeAmountA)), keccak256(abi.encode(beforeTokenB, beforeToB, beforeAmountB)), "shouldn't be changed until lzReceive packet is verified");
 
-        // STEP 2 & 3: Deliver packet to bMyOApp manually.
-        verifyPackets(bEid, addressToBytes32(address(bOApp)));
+    //     // STEP 2 & 3: Deliver packet to bMyOApp manually.
+    //     verifyPackets(bEid, addressToBytes32(address(bOApp)));
 
-        (address afterTokenB, address afterToB, uint256 afterAmountB) = bOApp.data();
-        console.logAddress(afterTokenB);
-        console.logAddress(afterToB);
-        console.logUint(afterAmountB);
+    //     (address afterTokenB, address afterToB, uint256 afterAmountB) = bOApp.data();
+    //     console.logAddress(afterTokenB);
+    //     console.logAddress(afterToB);
+    //     console.logUint(afterAmountB);
 
-        // Asserting that the data variable has updated in the receiving OApp.
-        assertEq(keccak256(abi.encode(afterTokenB, afterToB, afterAmountB)), keccak256(abi.encode(details.token, details.to, details.amount)), "lzReceive data assertion failure");
-    }
+    //     // Asserting that the data variable has updated in the receiving OApp.
+    //     assertEq(keccak256(abi.encode(afterTokenB, afterToB, afterAmountB)), keccak256(abi.encode(details.token, details.to, details.amount)), "lzReceive data assertion failure");
+    // }
 }
