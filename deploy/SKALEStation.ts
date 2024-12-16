@@ -16,24 +16,6 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
-    // const feeManager = await hre.deployments.get("FeeManager");
-
-    // This is an external deployment pulled in from @layerzerolabs/lz-evm-sdk-v2
-    //
-    // @layerzerolabs/toolbox-hardhat takes care of plugging in the external deployments
-    // from @layerzerolabs packages based on the configuration in your hardhat config
-    //
-    // For this to work correctly, your network config must define an eid property
-    // set to `EndpointId` as defined in @layerzerolabs/lz-definitions
-    //
-    // For example:
-    //
-    // networks: {
-    //   fuji: {
-    //     ...
-    //     eid: EndpointId.AVALANCHE_V2_TESTNET
-    //   }
-    // }
     console.log(await hre.deployments.all())
     const endpointV2Deployment = await hre.deployments.get('EndpointV2')
 
@@ -41,8 +23,9 @@ const deploy: DeployFunction = async (hre) => {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            "0x49b30E1e0CaecF2D573d40AEFbb7f42Af2786b4a",
             deployer, // Switch to Multisig in Production
+            deployer, // Switch to Multisig in Production
+            deployer // Switch to Multisig in Production
         ],
         log: true,
         skipIfAlreadyDeployed: true
