@@ -56,12 +56,10 @@ contract BridgeTest is TestHelperOz5 {
         vm.deal(liquidityCollector, 1000 ether);
         
         skl = new SKALEToken("SKALE", "SKL");
-        // address[] memory nativeERC20Tokens = new address[]();
+        
         nativeTokens.push(address(0));
         nativeTokens.push(address(skl));
 
-        // nativeERC20Tokens[0] = address(skl);
-        // setUpEndpoints(2, LibraryType.UltraLightNode);
         createEndpoints(2, LibraryType.UltraLightNode, nativeTokens);
 
         station = SatelliteStation(payable(_deployOApp(type(SatelliteStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this)))));
@@ -150,6 +148,10 @@ contract BridgeTest is TestHelperOz5 {
 
         // Step 20. Assert Minted Supply
         assertEq(skaleStation.supplyAvailable(IMonorailNativeToken(address(mUSDC))), 49_000_000 + 1_200_000 + 300_000);
+
+        // Step 21. Check Fainal User Balance
+        assertEq(usdc.balanceOf(address(this)), 99999999999999999999950000000);
+        assertEq(usdc.balanceOf(address(station)), 50000000);
 
 
     }

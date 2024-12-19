@@ -8,6 +8,7 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 import { LibTypesV1 } from "../lib/LibTypesV1.sol";
+import { IOFT } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 error TokenBridgingPaused();
 error TokenNotAdded();
@@ -18,26 +19,18 @@ contract SatelliteStation is OApp, AccessControl {
 
     using SafeERC20 for IERC20;
 
-    struct Token {
-        bool isPaused;
-        bool isOFT;
-        uint256 deposits;
-    }
-
     bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     uint32 skaleEndpointId;
 
     // SKALE Token Address => Local Token Address
-    mapping(address => IERC20) public tokens;
-    
-    // Local Token Address (IERC20) => Supported
-    mapping(address => bool) public supported;
-
+    mapping(address => address) public tokenMappings;
+    mapping(IERC20 => bool) public supportedTokens;
     mapping(IERC20 => uint256) public deposits;
 
     event AddToken(address indexed token);
     event Bridge(address indexed token, uint256 indexed amount);
+    event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
 
     constructor(
         address _layerZeroEndpoint,
@@ -57,13 +50,14 @@ contract SatelliteStation is OApp, AccessControl {
         address localTokenAddress
     ) external onlyRole(MANAGER_ROLE) {
         
-        if (address(tokens[skaleTokenAddress]) != address(0)) {
+        IERC20 localToken = IERC20(localTokenAddress);
+        
+        if (supportedTokens[localToken]) {
             revert("Token Already Added + Active");
         }
 
-        IERC20 localToken = IERC20(localTokenAddress);
-        tokens[skaleTokenAddress] = localToken;
-        supported[localTokenAddress] = true;
+        tokenMappings[skaleTokenAddress] = localTokenAddress;
+        supportedTokens[localToken] = true;
 
         emit AddToken(skaleTokenAddress, localTokenAddress);
     }
@@ -73,7 +67,7 @@ contract SatelliteStation is OApp, AccessControl {
         bytes calldata options
     ) external payable returns (MessagingReceipt memory receipt) {
 
-        if (!supported[details.token]) {
+        if (!supportedTokens[IERC20(details.token)]) {
             revert("Unsupported Token");
         }
 
@@ -110,6 +104,23 @@ contract SatelliteStation is OApp, AccessControl {
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
         LibTypesV1.TripDetails memory details = abi.decode(payload, (LibTypesV1.TripDetails));
+
+        if (tokenMappings[details.token] == address(0)) {
+            revert("Invalid Token");
+        }
+
+        IERC20 localToken = IERC20(tokenMappings[details.token]);
+
+        if (deposits[localToken] < details.amount) {
+            revert("Insufficient Funds in Bridge");
+        }
+        
+        localToken.safeTransfer(details.to, details.amount);
+
+        deposits[localToken] -= details.amount;
+
+        emit BridgeReceived(address(localToken), details.to, details.amount);
+
     }
 
     function quote(
