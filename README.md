@@ -8,16 +8,20 @@ If you don't ensure that you have the proper version in .nvmrc set and run
 
 ## Deployment
 
-### SKALE Europa Testnet
+### Deploy to Testnet
 
-1. `npx hardhat deploy --network europa-testnet --tags FeeManager`
-2. `npx hardhat deploy --network europa-testnet --tags SKALEStation`
+```shell
+chmod +x ./deploy.sh && deploy.sh testnet
+```
 
-## Non EVM Testnet
+### Deploy to Mainnet
 
-1. `npx hardhat deploy --network <network-name> --tags FeeManager`
-2. `npx hardhat deploy --network <network-name> --tags Station`
+```shell
+chmod +x ./deploy.sh && deploy.sh
+```
 
-## Non Europa SKALE Chain
+## Testing
 
-Coming Soon...
+```shell
+forge test
+```
