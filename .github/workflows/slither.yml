@@ -7,8 +7,11 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      # required for all workflows
       security-events: write
+      # only required for workflows in private repositories
+      actions: read
+      contents: read
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -20,7 +23,6 @@ jobs:
         node-version: 22
         sarif: results.sarif
         fail-on: low
-        target: 'contracts/'
 
     - name: Upload SARIF file
       uses: github/codeql-action/upload-sarif@v3
