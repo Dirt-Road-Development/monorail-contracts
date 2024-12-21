@@ -19,9 +19,9 @@ contract SatelliteStation is OApp, AccessControl {
 
     using SafeERC20 for IERC20;
 
-    bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
+    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
-    uint32 skaleEndpointId;
+    uint32 public immutable skaleEndpointId;
 
     // SKALE Token Address => Local Token Address
     mapping(address => address) public tokenMappings;
@@ -34,11 +34,10 @@ contract SatelliteStation is OApp, AccessControl {
 
     constructor(
         address _layerZeroEndpoint,
-        uint32 _skaleEndpointId,
-        address owner
-    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(owner) {
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
-        _grantRole(MANAGER_ROLE, owner);
+        uint32 _skaleEndpointId
+    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        _grantRole(MANAGER_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
         skaleEndpointId = _skaleEndpointId;
     }
@@ -75,6 +74,9 @@ contract SatelliteStation is OApp, AccessControl {
             revert("To must not be address(0)");
         }
 
+        // Emit Successful Bridge
+        emit Bridge(details.token, details.amount);
+
         IERC20(details.token).safeTransferFrom(_msgSender(), address(this), details.amount);
 
         deposits[IERC20(details.token)] += details.amount;
@@ -82,9 +84,6 @@ contract SatelliteStation is OApp, AccessControl {
         // Encodes message as bytes.
         bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
         receipt = _lzSend(skaleEndpointId, _payload, options, MessagingFee(msg.value, 0), payable(msg.sender));
-
-        // Emit Successful Bridge
-        emit Bridge(details.token, details.amount);
     }
 
     /**
