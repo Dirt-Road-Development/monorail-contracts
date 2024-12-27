@@ -99,19 +99,19 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
             // 3. User Transfers Tokens to Contract
             nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
 
-            // 4. Burn Native Tokens that will be unlocked on destination
-            nativeToken.burn(fees.userAmount);
-
-            // 5. Reduce Supply by Burn Token Amount
+            // 4. Reduce Supply by Burn Token Amount
             supplyAvailable[nativeToken] -= fees.userAmount;
 
-            // 6. Transfer Fees to Fee Collector + Liquidity Collector
+            // 5. Transfer Fees to Fee Collector + Liquidity Collector
             nativeToken.safeTransfer(feeCollector, fees.platformFee);
             nativeToken.safeTransfer(liquidityCollector, fees.liquidityFee);
 
-            // 7. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
+            // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
             bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
             receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
+
+            // 7. Burn Native Tokens that will be unlocked on destination
+            nativeToken.burn(fees.userAmount);
 
         } else if (tokenType == LibTypesV1.TokenType.OFT) {
             revert("OFT Type Not Supported");
@@ -121,13 +121,13 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
     }
 
     function quote(
-        uint32 _dstEid,
-        LibTypesV1.TripDetails memory _tripDetails,
-        bytes memory _options,
-        bool _payInLzToken
+        uint32 dstEid,
+        LibTypesV1.TripDetails memory tripDetails,
+        bytes memory options,
+        bool payInLzToken
     ) public view returns (MessagingFee memory fee) {
-        bytes memory payload = abi.encode(_tripDetails);
-        fee = _quote(_dstEid, payload, _options, _payInLzToken);
+        bytes memory payload = abi.encode(tripDetails);
+        fee = _quote(dstEid, payload, options, payInLzToken);
     }
 
     /**
@@ -151,14 +151,14 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][token];
 
         LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(amount, nativeToken.decimals());
+
+        emit BridgeReceived(address(nativeToken), to, fees.userAmount);
         
+        supplyAvailable[nativeToken] += amount;
+
         nativeToken.mint(to, fees.userAmount);
         nativeToken.mint(feeCollector, fees.platformFee);
         nativeToken.mint(liquidityCollector, fees.liquidityFee);
-
-        supplyAvailable[nativeToken] += amount;
-
-        emit BridgeReceived(address(nativeToken), to, fees.userAmount);
     }
 
     /*******************************************************************************************/
@@ -214,10 +214,11 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
         // Function to withdraw Ether from the contract
     function withdraw(uint256 amount) external onlyRole(WITHDRAW_ROLE) {
         require(amount <= address(this).balance, "Insufficient balance");
-        (bool success, ) = payable(withdrawlAccount).call{value: amount}("");
-        require(success, "Transfer failed");
 
         emit Withdrawal(withdrawlAccount, amount);
+
+        payable(withdrawlAccount).transfer(amount);
+
     }
 
     receive() external payable {}

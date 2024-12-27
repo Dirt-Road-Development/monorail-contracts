@@ -123,12 +123,12 @@ contract SatelliteStation is OApp, AccessControl {
     }
 
     function quote(
-        LibTypesV1.TripDetails memory _tripDetails,
-        bytes memory _options,
-        bool _payInLzToken
+        LibTypesV1.TripDetails memory tripDetails,
+        bytes memory options,
+        bool payInLzToken
     ) public view returns (MessagingFee memory fee) {
-        bytes memory payload = abi.encode(_tripDetails);
-        fee = _quote(skaleEndpointId, payload, _options, _payInLzToken);
+        bytes memory payload = abi.encode(tripDetails);
+        fee = _quote(skaleEndpointId, payload, options, payInLzToken);
     }
 
     receive() external payable {}
