@@ -12,6 +12,14 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - name: Install NODE JS
+      uses: actions/setup-node@v3
+      with:
+        node-version: '23.5.0'
+
+    - name: Install project
+      run: npm install
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
