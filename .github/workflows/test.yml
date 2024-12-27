@@ -6,7 +6,7 @@ on:
   pull_request:
 
 env:
-  PYTHON_VERSION: 3.9.6
+  PYTHON_VERSION: 3.9
 
 jobs:
   test:
