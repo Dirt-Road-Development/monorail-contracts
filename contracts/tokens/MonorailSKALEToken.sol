@@ -14,8 +14,8 @@ import { MessagingFee, MessagingReceipt } from "@layerzerolabs/lz-evm-oapp-v2/co
 /// @dev Implements the ERC20 and the Omnichain Fungible Token (OFT) standards.
 /// @author TheGreatAxios - <thegreataxios@dirtroad.dev>
 contract MonorailOFT is OFT, AccessControl {
+    
     using SafeERC20 for IERC20;
-
 
     /// @dev Error used to handle cases where the native ERC20 token 
     ///      for fee payment is not set in the EndpointV2Alt contract

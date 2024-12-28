@@ -10,7 +10,7 @@ contract USDC is ERC20 {
         string memory _name,
         string memory _symbol
     ) ERC20(_name, _symbol) {
-        _mint(msg.sender, 100000000000 * 10 ** 18);
+        _mint(msg.sender, 100_000_000_000 * 10 ** 18);
     }
 
     function decimals() override public view returns (uint8) {

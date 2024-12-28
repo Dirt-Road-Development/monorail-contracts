@@ -4,6 +4,7 @@ pragma solidity 0.8.24;
 import { IMonorailNativeToken } from "../interfaces/IMonorailNativeToken.sol";
 import { OApp, MessagingReceipt, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import { MessagingParams } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
@@ -13,16 +14,17 @@ import { LibTypesV1 } from "../lib/LibTypesV1.sol";
 
 error LzAltTokenUnavailable();
 
-contract SKALEStation is OApp, AccessControl {
+contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
 
     using SafeERC20 for IERC20;
     using SafeERC20 for IMonorailNativeToken;
 
-    bytes32 public MANAGER_ROLE = keccak256("MANAGER_ROLE");
+    bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
+    bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
-
     address private liquidityCollector;
+    address private withdrawlAccount;
 
     mapping(IMonorailNativeToken => uint256) public supplyAvailable;
 
@@ -33,19 +35,29 @@ contract SKALEStation is OApp, AccessControl {
 
     event AddToken(uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress);
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
+    event Withdrawal(address indexed withdrawer, uint256 indexed amount);
 
     constructor(
         address _layerZeroEndpoint,
         address _feeCollector,
-        address _liquidityCollector,
-        address owner
-    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(owner) {
-        _grantRole(DEFAULT_ADMIN_ROLE, owner);
+        address _liquidityCollector
+    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
+        _grantRole(WITHDRAW_ROLE, _msgSender());
+
+        if (_feeCollector == address(0)) {
+            revert("Fee Collector Address Must Not Be 0");
+        }
+
+        if (_liquidityCollector == address(0)) {
+            revert("Fee Collector Address Must Not Be 0");
+        }
 
         // Set Fee Collector. If failed to set will revert when minting
         feeCollector = _feeCollector;
         liquidityCollector = _liquidityCollector;
+        withdrawlAccount = _liquidityCollector;
     }
 
     function addToken(
@@ -71,7 +83,7 @@ contract SKALEStation is OApp, AccessControl {
         LibTypesV1.TripDetails memory details,
         MessagingFee memory fee,
         bytes calldata options
-    ) external returns (MessagingReceipt memory receipt) {
+    ) nonReentrant external returns (MessagingReceipt memory receipt) {
         if (tokenType == LibTypesV1.TokenType.Native) {
 
             IMonorailNativeToken nativeToken = IMonorailNativeToken(details.token);
@@ -87,19 +99,19 @@ contract SKALEStation is OApp, AccessControl {
             // 3. User Transfers Tokens to Contract
             nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
 
-            // 4. Burn Native Tokens that will be unlocked on destination
-            nativeToken.burn(fees.userAmount);
-
-            // 5. Reduce Supply by Burn Token Amount
+            // 4. Reduce Supply by Burn Token Amount
             supplyAvailable[nativeToken] -= fees.userAmount;
 
-            // 6. Transfer Fees to Fee Collector + Liquidity Collector
+            // 5. Transfer Fees to Fee Collector + Liquidity Collector
             nativeToken.safeTransfer(feeCollector, fees.platformFee);
             nativeToken.safeTransfer(liquidityCollector, fees.liquidityFee);
 
-            // 7. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
+            // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
             bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
             receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
+
+            // 7. Burn Native Tokens that will be unlocked on destination
+            nativeToken.burn(fees.userAmount);
 
         } else if (tokenType == LibTypesV1.TokenType.OFT) {
             revert("OFT Type Not Supported");
@@ -109,13 +121,13 @@ contract SKALEStation is OApp, AccessControl {
     }
 
     function quote(
-        uint32 _dstEid,
-        LibTypesV1.TripDetails memory _tripDetails,
-        bytes memory _options,
-        bool _payInLzToken
+        uint32 dstEid,
+        LibTypesV1.TripDetails memory tripDetails,
+        bytes memory options,
+        bool payInLzToken
     ) public view returns (MessagingFee memory fee) {
-        bytes memory payload = abi.encode(_tripDetails);
-        fee = _quote(_dstEid, payload, _options, _payInLzToken);
+        bytes memory payload = abi.encode(tripDetails);
+        fee = _quote(dstEid, payload, options, payInLzToken);
     }
 
     /**
@@ -139,14 +151,14 @@ contract SKALEStation is OApp, AccessControl {
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][token];
 
         LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(amount, nativeToken.decimals());
+
+        emit BridgeReceived(address(nativeToken), to, fees.userAmount);
         
+        supplyAvailable[nativeToken] += amount;
+
         nativeToken.mint(to, fees.userAmount);
         nativeToken.mint(feeCollector, fees.platformFee);
         nativeToken.mint(liquidityCollector, fees.liquidityFee);
-
-        supplyAvailable[nativeToken] += amount;
-
-        emit BridgeReceived(address(nativeToken), to, fees.userAmount);
     }
 
     /*******************************************************************************************/
@@ -197,4 +209,19 @@ contract SKALEStation is OApp, AccessControl {
 
         return 0;
     }
+
+    // sFUEL Management
+        // Function to withdraw Ether from the contract
+    function withdraw(uint256 amount) external onlyRole(WITHDRAW_ROLE) {
+        require(amount <= address(this).balance, "Insufficient balance");
+
+        emit Withdrawal(withdrawlAccount, amount);
+
+        payable(withdrawlAccount).transfer(amount);
+
+    }
+
+    receive() external payable {}
+
+
 }

@@ -6,8 +6,8 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract MonorailNativeToken is ERC20, AccessControl {
 
-    bytes32 public BURNER_ROLE = keccak256("BURNER_ROLE");
-    bytes32 public MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     uint8 private _decimals = 18;
 
