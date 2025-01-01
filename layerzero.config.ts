@@ -11,7 +11,7 @@ const europaTestnetContract: OmniPointHardhat = {
 
 const amoyTestnetContract: OmniPointHardhat = {
     eid: EndpointId.AMOY_V2_TESTNET,
-    contractName: 'Station'
+    contractName: 'SatelliteStation'
 }
 
 const auroraTestnetContract: OmniPointHardhat = {

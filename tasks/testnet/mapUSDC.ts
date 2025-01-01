@@ -23,26 +23,31 @@ async function main() {
         const addToken2 = await station.addToken(
             EndpointId.AMOY_V2_TESTNET,
             amoyDeployments["USDC"].address,
-            deploys["USDCs"].address,
-            true
+            deploys["USDCs"].address
         );
 
         await addToken2.wait(1);
 
-        // console.log("Add USDC: ", addToken);
+        console.log("USDC Added on Europa");
 
     } else {
         
         const deploys = await deployments.all();
         const [ signer ] = await ethers.getSigners();
-        const station = new ethers.Contract(deploys["Station"].address, deploys["Station"].abi, signer);
+        const station = new ethers.Contract(deploys["SatelliteStation"].address, deploys["SatelliteStation"].abi, signer);
+        const europaDeployments = await companionNetworks["europa"].deployments.all();
 
         const addToken = await station.addToken(
+            europaDeployments["USDCs"].address,
             deploys["USDC"].address,
         );
 
-        console.log("Add USDC: ", addToken);
+        await addToken.wait(1);
+
+        
     }
+
+    console.log("USDC Mapped on: ", network.name);
 }
 
 main()

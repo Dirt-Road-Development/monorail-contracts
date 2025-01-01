@@ -1,0 +1,40 @@
+{
+  "address": "0xbf895CD520e9B07069376CF9b7668EB503895305",
+  "abi": [],
+  "transactionHash": "0x55f0493e5dd800cdb206fb3b8aae69998162875f8a465a4c1189e9db46c20e30",
+  "receipt": {
+    "to": "0x0000000000000000000000000000000000000000",
+    "from": "0x8965fc7537747Ff60FE141298Bc76563DF976030",
+    "contractAddress": "0xbf895CD520e9B07069376CF9b7668EB503895305",
+    "transactionIndex": 0,
+    "gasUsed": "71988",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x0f1becaa29fbcff72446297833e0adbdc5343b717cc7fb163f26286662215a88",
+    "transactionHash": "0x55f0493e5dd800cdb206fb3b8aae69998162875f8a465a4c1189e9db46c20e30",
+    "logs": [],
+    "blockNumber": 4980866,
+    "cumulativeGasUsed": "71988",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "b79a7c11dbe0e9f8aa58c99df371e46c",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/lib/LibTypesV1.sol\":\"LibTypesV1\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/lib/LibTypesV1.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.24;\\n\\nlibrary LibTypesV1 {\\n\\n    enum TokenType {\\n        Native,\\n        OFT\\n    }\\n\\n    struct TripDetails {\\n        address token;\\n        address to;\\n        uint256 amount;\\n    }\\n}\",\"keccak256\":\"0x97e3f2be09f9a4258f6a382aa4a916ab3ee7b2708b249572c309a30635bbfb59\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x60556032600b8282823980515f1a607314602657634e487b7160e01b5f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea264697066735822122009ca300309d3582b6324c95b15209a6d5b8fa493ab8c6f8619fc2d0f99b66e2564736f6c63430008180033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea264697066735822122009ca300309d3582b6324c95b15209a6d5b8fa493ab8c6f8619fc2d0f99b66e2564736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

@@ -4,7 +4,7 @@ import assert from 'assert'
 import { type DeployFunction } from 'hardhat-deploy/types'
 
 // TODO declare your contract name here
-const contractName = 'Station'
+const contractName = 'SatelliteStation'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre
@@ -25,9 +25,11 @@ const deploy: DeployFunction = async (hre) => {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            isTestnet ? EndpointId.SKALE_V2_TESTNET : EndpointId.SKALE_V2_MAINNET,
-            deployer
+            isTestnet ? EndpointId.SKALE_V2_TESTNET : EndpointId.SKALE_V2_MAINNET
         ],
+        libraries: {
+            "LibTypesV1": (await deployments.get("LibTypesV1")).address
+        },
         log: true,
         skipIfAlreadyDeployed: true,
     })

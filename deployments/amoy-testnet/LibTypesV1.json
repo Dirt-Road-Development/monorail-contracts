@@ -1,0 +1,56 @@
+{
+  "address": "0x2a8cF5CA5fB813D1D0e8701C8eea16D41514C65d",
+  "abi": [],
+  "transactionHash": "0xe0a2a513833df61873b98aa515e15f45aab0740b1535d17b4797526ef65ae4d3",
+  "receipt": {
+    "to": null,
+    "from": "0x8965fc7537747Ff60FE141298Bc76563DF976030",
+    "contractAddress": "0x2a8cF5CA5fB813D1D0e8701C8eea16D41514C65d",
+    "transactionIndex": 0,
+    "gasUsed": "71998",
+    "logsBloom": "0x00000000000000000200000000000000000000000080000000000000000000000000000000000000000000000000000000008000000000800000000000000000000000000000000000000000000000800000000000000000000100000000000000000000000000000000000000000000000000000000000080000000000000000000000000000000000000000000000000000000000000000000000000000001200000000000000000000000000000000000000000000000000000000000004000000000000000000001000000000000000000000000000000100000000000000000000000000080000000000000000000000000000000000020000000100000",
+    "blockHash": "0x86dcee9ec00bd6422e7d7370b52b170effc58e828daf9b3cb6c1df6524a3a3ac",
+    "transactionHash": "0xe0a2a513833df61873b98aa515e15f45aab0740b1535d17b4797526ef65ae4d3",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 16337346,
+        "transactionHash": "0xe0a2a513833df61873b98aa515e15f45aab0740b1535d17b4797526ef65ae4d3",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000008965fc7537747ff60fe141298bc76563df976030",
+          "0x000000000000000000000000d07dd60077d3a5628837ada6002ea8ac5e689795"
+        ],
+        "data": "0x0000000000000000000000000000000000000000000000000006650b845d0c000000000000000000000000000000000000000000000000004563918244f400000000000000000000000000000000000000000000000000564f1a655ea52525e6000000000000000000000000000000000000000000000000455d2c76c096f4000000000000000000000000000000000000000000000000564f20ca6a298231e6",
+        "logIndex": 0,
+        "blockHash": "0x86dcee9ec00bd6422e7d7370b52b170effc58e828daf9b3cb6c1df6524a3a3ac"
+      }
+    ],
+    "blockNumber": 16337346,
+    "cumulativeGasUsed": "71998",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "b79a7c11dbe0e9f8aa58c99df371e46c",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/lib/LibTypesV1.sol\":\"LibTypesV1\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/lib/LibTypesV1.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.24;\\n\\nlibrary LibTypesV1 {\\n\\n    enum TokenType {\\n        Native,\\n        OFT\\n    }\\n\\n    struct TripDetails {\\n        address token;\\n        address to;\\n        uint256 amount;\\n    }\\n}\",\"keccak256\":\"0x97e3f2be09f9a4258f6a382aa4a916ab3ee7b2708b249572c309a30635bbfb59\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x60556032600b8282823980515f1a607314602657634e487b7160e01b5f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea264697066735822122009ca300309d3582b6324c95b15209a6d5b8fa493ab8c6f8619fc2d0f99b66e2564736f6c63430008180033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea264697066735822122009ca300309d3582b6324c95b15209a6d5b8fa493ab8c6f8619fc2d0f99b66e2564736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}
