@@ -24,7 +24,6 @@ const deploy: DeployFunction = async (hre) => {
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
             deployer, // Switch to Multisig in Production
-            deployer, // Switch to Multisig in Production
         ],
         libraries: {
             "LibFeeCalculatorV1": (await deployments.get("LibFeeCalculatorV1")).address,

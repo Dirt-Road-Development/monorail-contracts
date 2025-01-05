@@ -39,8 +39,7 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
 
     constructor(
         address _layerZeroEndpoint,
-        address _feeCollector,
-        address _liquidityCollector
+        address _feeCollector
     ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
@@ -50,14 +49,8 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
             revert("Fee Collector Address Must Not Be 0");
         }
 
-        if (_liquidityCollector == address(0)) {
-            revert("Fee Collector Address Must Not Be 0");
-        }
-
         // Set Fee Collector. If failed to set will revert when minting
         feeCollector = _feeCollector;
-        liquidityCollector = _liquidityCollector;
-        withdrawlAccount = _liquidityCollector;
     }
 
     function addToken(
@@ -103,8 +96,7 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
             supplyAvailable[nativeToken] -= fees.userAmount;
 
             // 5. Transfer Fees to Fee Collector + Liquidity Collector
-            nativeToken.safeTransfer(feeCollector, fees.platformFee);
-            nativeToken.safeTransfer(liquidityCollector, fees.liquidityFee);
+            nativeToken.safeTransfer(feeCollector, fees.protocolFee);
 
             // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
             bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
@@ -157,8 +149,7 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
         supplyAvailable[nativeToken] += amount;
 
         nativeToken.mint(to, fees.userAmount);
-        nativeToken.mint(feeCollector, fees.platformFee);
-        nativeToken.mint(liquidityCollector, fees.liquidityFee);
+        nativeToken.mint(feeCollector, fees.protocolFee);
     }
 
     /*******************************************************************************************/
@@ -211,13 +202,13 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
     }
 
     // sFUEL Management
-        // Function to withdraw Ether from the contract
+    // Function to withdraw Ether from the contract
     function withdraw(uint256 amount) external onlyRole(WITHDRAW_ROLE) {
         require(amount <= address(this).balance, "Insufficient balance");
 
-        emit Withdrawal(withdrawlAccount, amount);
+        emit Withdrawal(owner(), amount);
 
-        payable(withdrawlAccount).transfer(amount);
+        payable(owner()).transfer(amount);
 
     }
 

@@ -3,46 +3,32 @@ pragma solidity 0.8.24;
 
 library LibFeeCalculatorV1 {
     
-    // Struct to return fee breakdown
+    uint256 constant FEE_DENOMINATOR = 10000; // To represent percentages (100 = 1%)
+    
     struct FeeBreakdown {
-        uint256 userAmount;     // 99% of original amount
-        uint256 platformFee;    // 0.8% platform fee
-        uint256 liquidityFee;   // 0.2% liquidity fee
+        uint256 userAmount;
+        uint256 protocolFee;
     }
 
-    // Constant for fee calculation precision
-    // Constant of 1%
-    uint256 private constant FEE_DENOMINATOR = 10000;
-
     // Calculate fee distribution with dynamic decimal support
-    function calculateFees(uint256 amount, uint8 decimals) public view returns (FeeBreakdown memory) {
+    function calculateFees(uint256 amount, uint8 decimals) public pure returns (FeeBreakdown memory) {
         require(amount > 0, "Amount must be greater than zero");
-        require(decimals >= 6 && decimals <= 18, "Unsupported token decimals");
+        require(decimals >= 1 && decimals <= 18, "Unsupported token decimals");
 
-        // Ensure minimum fee even for small amounts
-        uint256 userAmount = (amount * (FEE_DENOMINATOR - 100)) / FEE_DENOMINATOR;
-        uint256 platformFee = (amount * 80) / FEE_DENOMINATOR;
-        uint256 liquidityFee = (amount * 20) / FEE_DENOMINATOR;
+        // Calculate 1% fee based on decimals
+        uint256 protocolFee = (amount * 100) / FEE_DENOMINATOR; // 1% of the amount
 
-        // Minimum fee enforcement for tokens with fewer decimals
-        if (decimals < 18) {
-            uint256 minFeeUnit = 10 ** (18 - decimals);
-            
-            // Ensure at least 1 unit of fee for small amounts
-            platformFee = platformFee == 0 ? minFeeUnit : platformFee;
-            liquidityFee = liquidityFee == 0 ? minFeeUnit : liquidityFee;
+        // If protocolFee is zero, set it to a minimum value (1 unit in the smallest unit)
+        if (protocolFee == 0) {
+            protocolFee = 10 ** (18 - decimals); // Ensure at least 1 unit of fee
         }
 
-        // Sanity check to ensure total matches original amount
-        require(
-            userAmount + platformFee + liquidityFee == amount, 
-            "Fee calculation error"
-        );
+        // Calculate user amount after fee
+        uint256 userAmount = amount - protocolFee;
 
         return FeeBreakdown(
             userAmount,
-            platformFee,
-            liquidityFee
+            protocolFee
         );
     }
 }
