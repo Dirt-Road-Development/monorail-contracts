@@ -99,7 +99,7 @@ contract SKALEStation is OApp, AccessControl, ReentrancyGuard {
             nativeToken.safeTransfer(feeCollector, fees.protocolFee);
 
             // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
-            bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
+            bytes memory _payload = abi.encode(details.token, details.to, fees.userAmount);
             receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
 
             // 7. Burn Native Tokens that will be unlocked on destination
