@@ -36,23 +36,23 @@ if (accounts == null) {
 }
 
 const config: HardhatUserConfig = {
-    defaultNetwork: "europa-testnet",
+    defaultNetwork: 'europa-testnet',
     paths: {
         cache: 'cache/hardhat',
     },
     mocha: {
-        timeout: 100_000
-      },
+        timeout: 100_000,
+    },
     solidity: {
         compilers: [
             {
                 version: '0.8.24',
                 settings: {
-                    evmVersion: "shanghai",
+                    evmVersion: 'shanghai',
                     optimizer: {
                         enabled: true,
                         runs: 200,
-                    }
+                    },
                 },
             },
         ],
@@ -73,34 +73,34 @@ const config: HardhatUserConfig = {
             url: 'https://polygon-amoy-bor-rpc.publicnode.com',
             accounts,
             companionNetworks: {
-                "europa": "europa-testnet"
-            }
+                europa: 'europa-testnet',
+            },
         },
-        "europa-testnet": {
+        'europa-testnet': {
             eid: EndpointId.SKALE_V2_TESTNET,
-            url: "https://testnet.skalenodes.com/v1/juicy-low-small-testnet",
+            url: 'https://testnet.skalenodes.com/v1/juicy-low-small-testnet',
             accounts,
             companionNetworks: {
-                "aurora": "aurora-testnet",
-                "amoy": "amoy-testnet"
-            }
+                aurora: 'aurora-testnet',
+                amoy: 'amoy-testnet',
+            },
         },
-        "sonic-testnet": {
+        'sonic-testnet': {
             eid: EndpointId.SONIC_V2_TESTNET,
-            url: "https://rpc.testnet.soniclabs.com",
-            accounts
+            url: 'https://rpc.testnet.soniclabs.com',
+            accounts,
         },
-        "celo-testnet": {
+        'celo-testnet': {
             eid: EndpointId.CELO_V2_TESTNET,
-            url: "https://alfajores-forno.celo-testnet.org",
-            accounts
+            url: 'https://alfajores-forno.celo-testnet.org',
+            accounts,
         },
-        "aurora-testnet": {
+        'aurora-testnet': {
             eid: EndpointId.AURORA_V2_TESTNET,
-            url: "https://testnet.aurora.dev",
+            url: 'https://testnet.aurora.dev',
             accounts,
             companionNetworks: {
-                "europa": "europa-testnet"
+                europa: 'europa-testnet',
             },
         },
         hardhat: {

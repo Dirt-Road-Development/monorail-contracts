@@ -20,7 +20,6 @@ import "forge-std/console.sol";
 import { TestHelperOz5 } from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract MyOAppTest is TestHelperOz5 {
-
     using OptionsBuilder for bytes;
 
     uint32 private aEid = 1;
@@ -41,7 +40,6 @@ contract MyOAppTest is TestHelperOz5 {
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         aOApp = MyOApp(_deployOApp(type(MyOApp).creationCode, abi.encode(address(endpoints[aEid]), address(this))));
-
         bOApp = MyOApp(_deployOApp(type(MyOApp).creationCode, abi.encode(address(endpoints[bEid]), address(this))));
 
         address[] memory oapps = new address[](2);

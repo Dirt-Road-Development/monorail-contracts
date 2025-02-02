@@ -4,7 +4,6 @@ pragma solidity 0.8.24;
 import { MonorailNativeToken } from "../tokens/MonorailNativeToken.sol";
 
 contract USDCs is MonorailNativeToken {
-
     constructor(
         string memory _name,
         string memory _symbol,

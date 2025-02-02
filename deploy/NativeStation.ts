@@ -1,10 +1,11 @@
-import { EndpointId } from '@layerzerolabs/lz-definitions'
 import assert from 'assert'
 
 import { type DeployFunction } from 'hardhat-deploy/types'
 
+import { EndpointId } from '@layerzerolabs/lz-definitions'
+
 // TODO declare your contract name here
-const contractName = 'SatelliteStation'
+const contractName = 'NativeStation'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre
@@ -19,16 +20,16 @@ const deploy: DeployFunction = async (hre) => {
 
     const endpointV2Deployment = await hre.deployments.get('EndpointV2')
 
-    const isTestnet = hre.network.name.includes("test");
+    const isTestnet = hre.network.name.includes('test')
 
     const { address } = await deploy(contractName, {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            isTestnet ? EndpointId.SKALE_V2_TESTNET : EndpointId.SKALE_V2_MAINNET
+            isTestnet ? EndpointId.SKALE_V2_TESTNET : EndpointId.SKALE_V2_MAINNET,
         ],
         libraries: {
-            "LibTypesV1": (await deployments.get("LibTypesV1")).address
+            LibTypesV1: (await deployments.get('LibTypesV1')).address,
         },
         log: true,
         skipIfAlreadyDeployed: true,

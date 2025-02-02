@@ -15,8 +15,7 @@ error TokenNotAdded();
 error UnsupportedChain();
 error UnsupportedToken();
 
-contract SatelliteStation is OApp, AccessControl {
-
+contract NativeStation is OApp, AccessControl {
     using SafeERC20 for IERC20;
 
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
@@ -44,13 +43,9 @@ contract SatelliteStation is OApp, AccessControl {
 
     event AddToken(address indexed skaleTokenAddress, address indexed localTokenAddress);
 
-    function addToken(
-        address skaleTokenAddress,
-        address localTokenAddress
-    ) external onlyRole(MANAGER_ROLE) {
-        
+    function addToken(address skaleTokenAddress, address localTokenAddress) external onlyRole(MANAGER_ROLE) {
         IERC20 localToken = IERC20(localTokenAddress);
-        
+
         if (supportedTokens[localToken]) {
             revert("Token Already Added + Active");
         }
@@ -65,12 +60,11 @@ contract SatelliteStation is OApp, AccessControl {
         LibTypesV1.TripDetails memory details,
         bytes calldata options
     ) external payable returns (MessagingReceipt memory receipt) {
-
         if (!supportedTokens[IERC20(details.token)]) {
             revert("Unsupported Token");
         }
 
-        if (details.to == address(0)) { 
+        if (details.to == address(0)) {
             revert("To must not be address(0)");
         }
 
@@ -82,7 +76,7 @@ contract SatelliteStation is OApp, AccessControl {
         deposits[IERC20(details.token)] += details.amount;
 
         // Encodes message as bytes.
-        bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
+        bytes memory _payload = abi.encode(details.token, details.to, details.amount);
         receipt = _lzSend(skaleEndpointId, _payload, options, MessagingFee(msg.value, 0), payable(msg.sender));
     }
 
@@ -97,8 +91,8 @@ contract SatelliteStation is OApp, AccessControl {
         Origin calldata _origin,
         bytes32 _guid,
         bytes calldata payload,
-        address,  // Executor address as specified by the OApp.
-        bytes calldata  // Any extra data or options to trigger on receipt.
+        address, // Executor address as specified by the OApp.
+        bytes calldata // Any extra data or options to trigger on receipt.
     ) internal virtual override {
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
@@ -113,13 +107,12 @@ contract SatelliteStation is OApp, AccessControl {
         if (deposits[localToken] < details.amount) {
             revert("Insufficient Funds in Bridge");
         }
-        
+
         localToken.safeTransfer(details.to, details.amount);
 
         deposits[localToken] -= details.amount;
 
         emit BridgeReceived(address(localToken), details.to, details.amount);
-
     }
 
     function quote(

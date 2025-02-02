@@ -3,7 +3,7 @@ import assert from 'assert'
 import { type DeployFunction } from 'hardhat-deploy/types'
 
 // TODO declare your contract name here
-const contractName = 'SKALEStation'
+const contractName = 'NativeSkaleStation'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre
@@ -26,11 +26,11 @@ const deploy: DeployFunction = async (hre) => {
             deployer, // Switch to Multisig in Production
         ],
         libraries: {
-            "LibFeeCalculatorV1": (await deployments.get("LibFeeCalculatorV1")).address,
-            "LibTypesV1": (await deployments.get("LibTypesV1")).address
+            LibFeeCalculatorV1: (await deployments.get('LibFeeCalculatorV1')).address,
+            LibTypesV1: (await deployments.get('LibTypesV1')).address,
         },
         log: true,
-        skipIfAlreadyDeployed: true
+        skipIfAlreadyDeployed: true,
     })
 
     console.log(`Deployed contract: ${contractName}, network: ${hre.network.name}, address: ${address}`)

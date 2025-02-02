@@ -1,8 +1,13 @@
 {
-  "name": "@layerzerolabs/oapp-example",
-  "version": "0.5.2",
+  "name": "@monorail/bridge-deployments",
+  "version": "0.0.0",
   "private": true,
-  "license": "MIT",
+  "license": "BUSL-1",
+  "author": {
+    "name": "Sawyer",
+    "url": "https://github.com/TheGreatAxios",
+    "email": "sawyer@dirtroad.dev"
+  },
   "scripts": {
     "clean": "rm -rf artifacts cache out",
     "compile": "concurrently -c auto --names forge,hardhat '$npm_execpath run compile:forge' '$npm_execpath run compile:hardhat'",
@@ -12,9 +17,8 @@
     "lint:fix": "eslint --fix '**/*.{js,ts,json}' && prettier --write . && solhint 'contracts/**/*.sol' --fix --noPrompt",
     "lint:js": "eslint '**/*.{js,ts,json}' && prettier --check .",
     "lint:sol": "solhint 'contracts/**/*.sol'",
-    "test": "$npm_execpath run test:forge && $npm_execpath run test:hardhat",
-    "test:forge": "forge test",
-    "test:hardhat": "hardhat test"
+    "test": "$npm_execpath run test:forge",
+    "test:forge": "forge test"
   },
   "resolutions": {
     "ethers": "^5.7.2",

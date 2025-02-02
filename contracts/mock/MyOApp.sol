@@ -8,7 +8,6 @@ import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSen
 import { USDCs } from "./USDCs.sol";
 
 contract MyOApp is OApp {
-
     TripDetails public data;
 
     constructor(address _endpoint, address _delegate) OApp(_endpoint, _delegate) Ownable(_delegate) {}

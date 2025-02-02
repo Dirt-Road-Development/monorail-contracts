@@ -2,12 +2,6 @@
 pragma solidity 0.8.24;
 
 library LibTypesV1 {
-
-    enum TokenType {
-        Native,
-        OFT
-    }
-
     struct TripDetails {
         address token;
         address to;

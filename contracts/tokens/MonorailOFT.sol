@@ -14,10 +14,9 @@ import { MessagingFee, MessagingReceipt } from "@layerzerolabs/lz-evm-oapp-v2/co
 /// @dev Implements the ERC20 and the Omnichain Fungible Token (OFT) standards.
 /// @author TheGreatAxios - <thegreataxios@dirtroad.dev>
 contract MonorailOFT is OFT, AccessControl {
-    
     using SafeERC20 for IERC20;
 
-    /// @dev Error used to handle cases where the native ERC20 token 
+    /// @dev Error used to handle cases where the native ERC20 token
     ///      for fee payment is not set in the EndpointV2Alt contract
     error LzAltTokenUnavailable();
 
@@ -25,16 +24,13 @@ contract MonorailOFT is OFT, AccessControl {
         string memory _name,
         string memory _symbol,
         address _layerZeroEndpoint
-    )  OFT(_name, _symbol, _layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
-            _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        }
-
-    function withdrawStuckTokens(IERC20 token) 
-        external onlyRole(DEFAULT_ADMIN_ROLE)
-    {
-        token.safeTransferFrom(address(this), _msgSender(), token.balanceOf(address(this)));
+    ) OFT(_name, _symbol, _layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
+        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
+    function withdrawStuckTokens(IERC20 token) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        token.safeTransferFrom(address(this), _msgSender(), token.balanceOf(address(this)));
+    }
 
     /**
      * @dev Internal function to interact with the LayerZero EndpointV2.send() for sending a message.
@@ -56,41 +52,34 @@ contract MonorailOFT is OFT, AccessControl {
         bytes memory _options,
         MessagingFee memory _fee,
         address _refundAddress
-    ) internal virtual override returns (MessagingReceipt memory receipt) 
-    {
+    ) internal virtual override returns (MessagingReceipt memory receipt) {
         // Push corresponding fees to the endpoint, any excess is sent back to the _refundAddress from the endpoint
         _payNative(_fee.nativeFee);
-        if (_fee.lzTokenFee > 0)
-        {
+        if (_fee.lzTokenFee > 0) {
             _payLzToken(_fee.lzTokenFee);
         }
 
         return
-            // solhint-disable-next-line check-send-result
             endpoint.send(
+                // solhint-disable-next-line check-send-result
                 MessagingParams(_dstEid, _getPeerOrRevert(_dstEid), _message, _options, _fee.lzTokenFee > 0),
                 _refundAddress
             );
     }
-
 
     /// @dev Internal function to pay the alt token fee associated with the message
     /// @param _nativeFee The alt token fee to be paid
     /// @return nativeFee The amount of native currency paid
     /// @dev If the OApp needs to initiate MULTIPLE LayerZero messages in a single transaction,
     ///      this will need to be overridden because alt token would contain multiple lzFees
-    function _payNative(uint _nativeFee) 
-        internal virtual override returns(uint nativeFee) 
-    {
+    function _payNative(uint256 _nativeFee) internal virtual override returns (uint256 nativeFee) {
         address nativeErc20 = endpoint.nativeToken();
-        if (nativeErc20 == address(0)) 
-        {
+        if (nativeErc20 == address(0)) {
             revert LzAltTokenUnavailable();
         }
 
         // Pay Alt token fee by sending tokens to the endpoint
-        IERC20(nativeErc20).safeTransferFrom(
-            msg.sender, address(endpoint), _nativeFee);
+        IERC20(nativeErc20).safeTransferFrom(msg.sender, address(endpoint), _nativeFee);
 
         return 0;
     }
