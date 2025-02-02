@@ -15,7 +15,7 @@ error TokenNotAdded();
 error UnsupportedChain();
 error UnsupportedToken();
 
-contract SatelliteStation is OApp, AccessControl {
+contract NativeStation is OApp, AccessControl {
     using SafeERC20 for IERC20;
 
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
 
-import "../../contracts/evm/SatelliteStation.sol";
-import "../../contracts/evm/SKALEStation.sol";
+import "../../contracts/native/NativeStation.sol";
+import "../../contracts/native/NativeSkaleStation.sol";
 
 import "../../contracts/mock/USDC.sol";
 import "../../contracts/mock/USDCs.sol";
@@ -32,8 +32,8 @@ contract BridgeTest is TestHelperOz5 {
     uint32 private aEid = 1;
     uint32 private bEid = 2;
 
-    SKALEStation private skaleStation;
-    SatelliteStation private station;
+    NativeSkaleStation private skaleStation;
+    NativeStation private station;
 
     address private userA = address(0x1);
     address private feeCollector = address(0x02);
@@ -59,17 +59,17 @@ contract BridgeTest is TestHelperOz5 {
 
         createEndpoints(2, LibraryType.UltraLightNode, nativeTokens);
 
-        station = SatelliteStation(
+        station = NativeStation(
             payable(
                 _deployOApp(
-                    type(SatelliteStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this))
+                    type(NativeStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this))
                 )
             )
         );
-        skaleStation = SKALEStation(
+        skaleStation = NativeSkaleStation(
             payable(
                 _deployOApp(
-                    type(SKALEStation).creationCode,
+                    type(NativeSkaleStation).creationCode,
                     abi.encode(address(endpoints[bEid]), feeCollector, address(this))
                 )
             )
@@ -95,7 +95,7 @@ contract BridgeTest is TestHelperOz5 {
         assertEq(skaleStation.owner(), address(this));
     }
 
-    function test_bridge_native() public {
+    function test_multichainBridge() public {
         // Step 1. Approve Token - 100 USDC
         usdc.approve(address(station), 100 * 10 ** 6);
 

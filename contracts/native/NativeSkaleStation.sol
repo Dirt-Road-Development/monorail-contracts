@@ -12,7 +12,7 @@ import {LibFeeCalculatorV1} from "../lib/LibFeeCalculatorV1.sol";
 import {LibTypesV1} from "../lib/LibTypesV1.sol";
 import {SKALEOApp} from "../SKALEOApp.sol";
 
-contract SKALEStation is SKALEOApp, AccessControl, ReentrancyGuard {
+contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeERC20 for IMonorailNativeToken;
 
@@ -20,7 +20,6 @@ contract SKALEStation is SKALEOApp, AccessControl, ReentrancyGuard {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
-    address private liquidityCollector;
     address private withdrawlAccount;
 
     mapping(IMonorailNativeToken => uint256) public supplyAvailable;
@@ -86,7 +85,7 @@ contract SKALEStation is SKALEOApp, AccessControl, ReentrancyGuard {
         // 4. Reduce Supply by Burn Token Amount
         supplyAvailable[nativeToken] -= fees.userAmount;
 
-        // 5. Transfer Fees to Fee Collector + Liquidity Collector
+        // 5. Transfer Fees to Fee Collector
         nativeToken.safeTransfer(feeCollector, fees.protocolFee);
 
         // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
