@@ -20,7 +20,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
-    address private withdrawlAccount;
 
     mapping(IMonorailNativeToken => uint256) public supplyAvailable;
 
