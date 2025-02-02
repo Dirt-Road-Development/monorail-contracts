@@ -1,6 +1,6 @@
 {
-  "name": "@monorail/bridge-deployments",
-  "version": "0.0.0",
+  "name": "@monorail.fi/smart-contracts",
+  "version": "0.1.0",
   "private": true,
   "license": "BUSL-1",
   "author": {
