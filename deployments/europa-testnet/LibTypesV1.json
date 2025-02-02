@@ -1,0 +1,40 @@
+{
+  "address": "0xF0B029aAE15da98758494f27253c65d26A323731",
+  "abi": [],
+  "transactionHash": "0xcb1fb5f1fff6c53b8ca0752c0824b5b97d338ec2eae97f3d1a57c4e3b052e33d",
+  "receipt": {
+    "to": "0x0000000000000000000000000000000000000000",
+    "from": "0x8965fc7537747Ff60FE141298Bc76563DF976030",
+    "contractAddress": "0xF0B029aAE15da98758494f27253c65d26A323731",
+    "transactionIndex": 0,
+    "gasUsed": "71988",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x0dc9d0d5870c0d74d8ec58e4b23f4c03c3de80acbd794b13c24f371f44e78cae",
+    "transactionHash": "0xcb1fb5f1fff6c53b8ca0752c0824b5b97d338ec2eae97f3d1a57c4e3b052e33d",
+    "logs": [],
+    "blockNumber": 5337093,
+    "cumulativeGasUsed": "71988",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "2777c456c7d9963977718441f3316314",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/lib/LibTypesV1.sol\":\"LibTypesV1\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"contracts/lib/LibTypesV1.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.24;\\n\\nlibrary LibTypesV1 {\\n    struct TripDetails {\\n        address token;\\n        address to;\\n        uint256 amount;\\n    }\\n}\\n\",\"keccak256\":\"0x4e1c33de07c1a47bdc5b14c780e0905cf76bb9b15588e568829b868559f02814\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x60556032600b8282823980515f1a607314602657634e487b7160e01b5f525f60045260245ffd5b305f52607381538281f3fe730000000000000000000000000000000000000000301460806040525f80fdfea2646970667358221220ad6a7c21d2d6aada96c2def0e6f94061f78d40522ae30437d61777fe23ccd2a664736f6c63430008180033",
+  "deployedBytecode": "0x730000000000000000000000000000000000000000301460806040525f80fdfea2646970667358221220ad6a7c21d2d6aada96c2def0e6f94061f78d40522ae30437d61777fe23ccd2a664736f6c63430008180033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [],
+    "types": null
+  }
+}

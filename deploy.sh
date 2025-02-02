@@ -19,4 +19,8 @@ else
     exit 1
 fi
 
+git add .
+
+git commit -am "Prepare Deployment"
+
 ./publish.sh

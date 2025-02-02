@@ -9,7 +9,7 @@ async function main() {
         const amoyDeployments = await companionNetworks['amoy'].deployments.all()
         const [signer] = await ethers.getSigners()
 
-        const station = new ethers.Contract(deploys['SKALEStation'].address, deploys['SKALEStation'].abi, signer)
+        const station = new ethers.Contract(deploys['NativeSkaleStation'].address, deploys['NativeSkaleStation'].abi, signer)
 
         // const addToken = await station.addToken(
         //     EndpointId.AURORA_V2_TESTNET,
@@ -33,8 +33,8 @@ async function main() {
         const deploys = await deployments.all()
         const [signer] = await ethers.getSigners()
         const station = new ethers.Contract(
-            deploys['SatelliteStation'].address,
-            deploys['SatelliteStation'].abi,
+            deploys['NativeStation'].address,
+            deploys['NativeStation'].abi,
             signer
         )
         const europaDeployments = await companionNetworks['europa'].deployments.all()
@@ -49,5 +49,4 @@ async function main() {
 
 main().catch((err) => {
     console.error(err)
-    process.exitCode = 1
 })

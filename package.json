@@ -1,8 +1,13 @@
 {
   "name": "@monorail/bridge-deployments",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "private": true,
   "license": "BUSL-1",
+  "author": {
+    "name": "Sawyer",
+    "url": "https://github.com/TheGreatAxios",
+    "email": "sawyer@dirtroad.dev"
+  },
   "scripts": {
     "clean": "rm -rf artifacts cache out",
     "compile": "concurrently -c auto --names forge,hardhat '$npm_execpath run compile:forge' '$npm_execpath run compile:hardhat'",
