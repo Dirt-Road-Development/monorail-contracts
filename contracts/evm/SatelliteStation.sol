@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
-import { LibTypesV1 } from "../lib/LibTypesV1.sol";
-import { IOFT } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OApp, MessagingFee, Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import {LibTypesV1} from "../lib/LibTypesV1.sol";
+import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 error TokenBridgingPaused();
 error TokenNotAdded();
@@ -16,7 +16,6 @@ error UnsupportedChain();
 error UnsupportedToken();
 
 contract SatelliteStation is OApp, AccessControl {
-
     using SafeERC20 for IERC20;
 
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
@@ -32,10 +31,10 @@ contract SatelliteStation is OApp, AccessControl {
     event Bridge(address indexed token, uint256 indexed amount);
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
 
-    constructor(
-        address _layerZeroEndpoint,
-        uint32 _skaleEndpointId
-    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
+    constructor(address _layerZeroEndpoint, uint32 _skaleEndpointId)
+        OApp(_layerZeroEndpoint, _msgSender())
+        Ownable(_msgSender())
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
@@ -44,13 +43,9 @@ contract SatelliteStation is OApp, AccessControl {
 
     event AddToken(address indexed skaleTokenAddress, address indexed localTokenAddress);
 
-    function addToken(
-        address skaleTokenAddress,
-        address localTokenAddress
-    ) external onlyRole(MANAGER_ROLE) {
-        
+    function addToken(address skaleTokenAddress, address localTokenAddress) external onlyRole(MANAGER_ROLE) {
         IERC20 localToken = IERC20(localTokenAddress);
-        
+
         if (supportedTokens[localToken]) {
             revert("Token Already Added + Active");
         }
@@ -61,16 +56,16 @@ contract SatelliteStation is OApp, AccessControl {
         emit AddToken(skaleTokenAddress, localTokenAddress);
     }
 
-    function bridge(
-        LibTypesV1.TripDetails memory details,
-        bytes calldata options
-    ) external payable returns (MessagingReceipt memory receipt) {
-
+    function bridge(LibTypesV1.TripDetails memory details, bytes calldata options)
+        external
+        payable
+        returns (MessagingReceipt memory receipt)
+    {
         if (!supportedTokens[IERC20(details.token)]) {
             revert("Unsupported Token");
         }
 
-        if (details.to == address(0)) { 
+        if (details.to == address(0)) {
             revert("To must not be address(0)");
         }
 
@@ -82,7 +77,7 @@ contract SatelliteStation is OApp, AccessControl {
         deposits[IERC20(details.token)] += details.amount;
 
         // Encodes message as bytes.
-        bytes memory _payload = abi.encode(details.token, details.to, details.amount);        
+        bytes memory _payload = abi.encode(details.token, details.to, details.amount);
         receipt = _lzSend(skaleEndpointId, _payload, options, MessagingFee(msg.value, 0), payable(msg.sender));
     }
 
@@ -97,8 +92,8 @@ contract SatelliteStation is OApp, AccessControl {
         Origin calldata _origin,
         bytes32 _guid,
         bytes calldata payload,
-        address,  // Executor address as specified by the OApp.
-        bytes calldata  // Any extra data or options to trigger on receipt.
+        address, // Executor address as specified by the OApp.
+        bytes calldata // Any extra data or options to trigger on receipt.
     ) internal virtual override {
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
@@ -113,20 +108,19 @@ contract SatelliteStation is OApp, AccessControl {
         if (deposits[localToken] < details.amount) {
             revert("Insufficient Funds in Bridge");
         }
-        
+
         localToken.safeTransfer(details.to, details.amount);
 
         deposits[localToken] -= details.amount;
 
         emit BridgeReceived(address(localToken), details.to, details.amount);
-
     }
 
-    function quote(
-        LibTypesV1.TripDetails memory tripDetails,
-        bytes memory options,
-        bool payInLzToken
-    ) public view returns (MessagingFee memory fee) {
+    function quote(LibTypesV1.TripDetails memory tripDetails, bytes memory options, bool payInLzToken)
+        public
+        view
+        returns (MessagingFee memory fee)
+    {
         bytes memory payload = abi.encode(tripDetails);
         fee = _quote(skaleEndpointId, payload, options, payInLzToken);
     }

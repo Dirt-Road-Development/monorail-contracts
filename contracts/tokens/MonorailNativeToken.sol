@@ -5,21 +5,16 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract MonorailNativeToken is ERC20, AccessControl {
-
     bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     uint8 private _decimals = 18;
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        uint8 _decimalsValue
-    ) ERC20(_name, _symbol) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimalsValue) ERC20(_name, _symbol) {
         _decimals = _decimalsValue;
     }
 
-    function decimals() override public view returns (uint8) {
+    function decimals() public view override returns (uint8) {
         return _decimals;
     }
 

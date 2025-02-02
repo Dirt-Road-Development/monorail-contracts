@@ -2,9 +2,8 @@
 pragma solidity 0.8.24;
 
 library LibFeeCalculatorV1 {
-    
     uint256 constant FEE_DENOMINATOR = 10000; // To represent percentages (100 = 1%)
-    
+
     struct FeeBreakdown {
         uint256 userAmount;
         uint256 protocolFee;
@@ -26,9 +25,6 @@ library LibFeeCalculatorV1 {
         // Calculate user amount after fee
         uint256 userAmount = amount - protocolFee;
 
-        return FeeBreakdown(
-            userAmount,
-            protocolFee
-        );
+        return FeeBreakdown(userAmount, protocolFee);
     }
 }
