@@ -5,7 +5,7 @@ import { type DeployFunction } from 'hardhat-deploy/types'
 import { EndpointId } from '@layerzerolabs/lz-definitions'
 
 // TODO declare your contract name here
-const contractName = 'SatelliteStation'
+const contractName = 'NativeStation'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre

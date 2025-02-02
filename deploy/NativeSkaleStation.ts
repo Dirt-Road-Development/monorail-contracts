@@ -3,7 +3,7 @@ import assert from 'assert'
 import { type DeployFunction } from 'hardhat-deploy/types'
 
 // TODO declare your contract name here
-const contractName = 'SKALEStation'
+const contractName = 'NativeSkaleStation'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre

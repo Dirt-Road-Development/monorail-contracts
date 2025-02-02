@@ -1,8 +1,8 @@
 {
-  "name": "@layerzerolabs/oapp-example",
-  "version": "0.5.2",
+  "name": "@dirtroad/monorail-deployments",
+  "version": "0.1.0",
   "private": true,
-  "license": "MIT",
+  "license": "BUSL-1",
   "scripts": {
     "clean": "rm -rf artifacts cache out",
     "compile": "concurrently -c auto --names forge,hardhat '$npm_execpath run compile:forge' '$npm_execpath run compile:hardhat'",
