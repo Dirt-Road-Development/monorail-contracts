@@ -23,4 +23,4 @@ git add .
 
 git commit -am "Prepare Deployment"
 
-publish.sh
+sh ./publish.sh
