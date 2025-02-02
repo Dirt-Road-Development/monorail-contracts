@@ -1,5 +1,6 @@
 {
   "name": "@monorail/bridge-deployments",
+  "private": false,
   "version": "0.0.0",
   "license": "MIT",
   "description": "The Monorail Bridge Contracts are covered under BUSL-1 License. The ABIs and addresses are available under the MIT license for other developers to build on top of.",
