@@ -18,3 +18,5 @@ else
     echo "Mainnet Not yet Supported!" >&2
     exit 1
 fi
+
+./publish.sh

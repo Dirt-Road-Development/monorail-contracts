@@ -6,12 +6,12 @@ const USE_TESTNET = true
 
 const europaTestnetContract: OmniPointHardhat = {
     eid: EndpointId.SKALE_V2_TESTNET,
-    contractName: 'SKALEStation',
+    contractName: 'NativeSkaleStation',
 }
 
 const amoyTestnetContract: OmniPointHardhat = {
     eid: EndpointId.AMOY_V2_TESTNET,
-    contractName: 'SatelliteStation',
+    contractName: 'NativeStation',
 }
 
 const auroraTestnetContract: OmniPointHardhat = {

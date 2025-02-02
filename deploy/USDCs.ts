@@ -16,7 +16,7 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
-    const station = await deployments.getOrNull('SKALEStation')
+    const station = await deployments.getOrNull('NativeSkaleStation')
     if (!station) {
         throw new Error('Must Deploy Station First')
     }
