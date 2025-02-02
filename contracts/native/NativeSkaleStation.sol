@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import {IMonorailNativeToken} from "../interfaces/IMonorailNativeToken.sol";
-import {MessagingReceipt, Origin, MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {LibFeeCalculatorV1} from "../lib/LibFeeCalculatorV1.sol";
-import {LibTypesV1} from "../lib/LibTypesV1.sol";
-import {SKALEOApp} from "../SKALEOApp.sol";
+import { IMonorailNativeToken } from "../interfaces/IMonorailNativeToken.sol";
+import { MessagingReceipt, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { LibFeeCalculatorV1 } from "../lib/LibFeeCalculatorV1.sol";
+import { LibTypesV1 } from "../lib/LibTypesV1.sol";
+import { SKALEOApp } from "../SKALEOApp.sol";
 
 contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -30,7 +30,9 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     mapping(IMonorailNativeToken => mapping(uint32 => bool)) public supported;
 
     event AddToken(
-        uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress
+        uint32 indexed layerZeroEndpointId,
+        address indexed originTokenAddress,
+        address indexed localTokenAddress
     );
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
 
@@ -47,10 +49,11 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         feeCollector = _feeCollector;
     }
 
-    function addToken(uint32 layerZeroEndpointId, address originTokenAddress, address localTokenAddress)
-        external
-        onlyRole(MANAGER_ROLE)
-    {
+    function addToken(
+        uint32 layerZeroEndpointId,
+        address originTokenAddress,
+        address localTokenAddress
+    ) external onlyRole(MANAGER_ROLE) {
         if (address(tokens[layerZeroEndpointId][originTokenAddress]) != address(0)) {
             revert("Token Already Added + Active");
         }
@@ -76,8 +79,10 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         }
 
         // 2. Calculate FeeBreakdown
-        LibFeeCalculatorV1.FeeBreakdown memory fees =
-            LibFeeCalculatorV1.calculateFees(details.amount, nativeToken.decimals());
+        LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(
+            details.amount,
+            nativeToken.decimals()
+        );
 
         // 3. User Transfers Tokens to Contract
         nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
@@ -96,11 +101,12 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         nativeToken.burn(fees.userAmount);
     }
 
-    function quote(uint32 dstEid, LibTypesV1.TripDetails memory tripDetails, bytes memory options, bool payInLzToken)
-        public
-        view
-        returns (MessagingFee memory fee)
-    {
+    function quote(
+        uint32 dstEid,
+        LibTypesV1.TripDetails memory tripDetails,
+        bytes memory options,
+        bool payInLzToken
+    ) public view returns (MessagingFee memory fee) {
         bytes memory payload = abi.encode(tripDetails);
         fee = _quote(dstEid, payload, options, payInLzToken);
     }

@@ -2,10 +2,10 @@
 
 pragma solidity ^0.8.22;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {OApp, MessagingFee, Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
-import {USDCs} from "./USDCs.sol";
+import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import { USDCs } from "./USDCs.sol";
 
 contract MyOApp is OApp {
     TripDetails public data;
@@ -26,11 +26,11 @@ contract MyOApp is OApp {
      * @dev Encodes the message as bytes and sends it using the `_lzSend` internal function.
      * @return receipt A `MessagingReceipt` struct containing details of the message sent.
      */
-    function send(uint32 _dstEid, TripDetails memory _tripDetails, bytes calldata _options)
-        external
-        payable
-        returns (MessagingReceipt memory receipt)
-    {
+    function send(
+        uint32 _dstEid,
+        TripDetails memory _tripDetails,
+        bytes calldata _options
+    ) external payable returns (MessagingReceipt memory receipt) {
         bytes memory _payload = abi.encode(_tripDetails);
         receipt = _lzSend(_dstEid, _payload, _options, MessagingFee(msg.value, 0), payable(msg.sender));
     }
@@ -43,11 +43,12 @@ contract MyOApp is OApp {
      * @param _payInLzToken Whether to return fee in ZRO token.
      * @return fee A `MessagingFee` struct containing the calculated gas fee in either the native token or ZRO token.
      */
-    function quote(uint32 _dstEid, TripDetails memory _tripDetails, bytes memory _options, bool _payInLzToken)
-        public
-        view
-        returns (MessagingFee memory fee)
-    {
+    function quote(
+        uint32 _dstEid,
+        TripDetails memory _tripDetails,
+        bytes memory _options,
+        bool _payInLzToken
+    ) public view returns (MessagingFee memory fee) {
         bytes memory payload = abi.encode(_tripDetails);
         fee = _quote(_dstEid, payload, _options, _payInLzToken);
     }
@@ -65,10 +66,10 @@ contract MyOApp is OApp {
      * Decodes the received payload and processes it as per the business logic defined in the function.
      */
     function _lzReceive(
-        Origin calldata, /*_origin*/
-        bytes32, /*_guid*/
+        Origin calldata /*_origin*/,
+        bytes32 /*_guid*/,
         bytes calldata payload,
-        address, /*_executor*/
+        address /*_executor*/,
         bytes calldata /*_extraData*/
     ) internal override {
         data = abi.decode(payload, (TripDetails));

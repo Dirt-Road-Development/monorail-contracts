@@ -16,14 +16,14 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
 
-    const station = await deployments.getOrNull("SKALEStation");
+    const station = await deployments.getOrNull('SKALEStation')
     if (!station) {
-        throw new Error("Must Deploy Station First");
+        throw new Error('Must Deploy Station First')
     }
 
     const { address } = await deploy(contractName, {
         from: deployer,
-        args: ["USDC.s", "USDC.s", 6, station.address],
+        args: ['USDC.s', 'USDC.s', 6, station.address],
         log: true,
         skipIfAlreadyDeployed: true,
     })

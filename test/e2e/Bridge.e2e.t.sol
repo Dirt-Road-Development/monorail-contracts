@@ -8,23 +8,21 @@ import "../../contracts/mock/USDC.sol";
 import "../../contracts/mock/USDCs.sol";
 import "../../contracts/mock/SKALEToken.sol";
 
-import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
+import { IMonorailNativeToken } from "../../contracts/interfaces/IMonorailNativeToken.sol";
 // OApp imports
-import {
-    IOAppOptionsType3, EnforcedOptionParam
-} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
-import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
-import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import { IOAppOptionsType3, EnforcedOptionParam } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import { MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 
 // OZ imports
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import { IERC20 } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // Forge imports
 import "forge-std/console.sol";
 
 // DevTools imports
-import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import { TestHelperOz5 } from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract BridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
@@ -61,9 +59,7 @@ contract BridgeTest is TestHelperOz5 {
 
         station = NativeStation(
             payable(
-                _deployOApp(
-                    type(NativeStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this))
-                )
+                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this)))
             )
         );
         skaleStation = NativeSkaleStation(
@@ -109,7 +105,8 @@ contract BridgeTest is TestHelperOz5 {
         MessagingFee memory fee = station.quote(details, options, false);
 
         // Step 5. Send
-        /* MessagingReceipt memory receipt = */station.bridge{value: fee.nativeFee}(details, options);
+        /* MessagingReceipt memory receipt = */
+        station.bridge{ value: fee.nativeFee }(details, options);
 
         // STEP 6 & 7. Deliver packet manually.
         verifyPackets(bEid, addressToBytes32(address(skaleStation)));
@@ -140,7 +137,8 @@ contract BridgeTest is TestHelperOz5 {
         skl.approve(address(skaleStation), fee2.nativeFee);
 
         // Step 16. Send
-        /* MessagingReceipt memory receipt2 = */skaleStation.bridge(aEid, details2, fee2, options2);
+        /* MessagingReceipt memory receipt2 = */
+        skaleStation.bridge(aEid, details2, fee2, options2);
 
         // STEP 17 & 18. Deliver packet manually.
         verifyPackets(aEid, addressToBytes32(address(station)));
