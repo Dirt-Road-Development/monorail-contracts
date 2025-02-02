@@ -1,0 +1,11 @@
+{
+  "name": "@monorail/bridge-deployments",
+  "version": "0.0.0",
+  "private": true,
+  "license": "BUSL-1",
+  "author": {
+    "name": "Sawyer",
+    "url": "https://github.com/TheGreatAxios",
+    "email": "sawyer@dirtroad.dev"
+  }
+}

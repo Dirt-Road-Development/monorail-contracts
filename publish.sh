@@ -4,8 +4,8 @@ set -e
 
 echo "Preparing Publishable Package"
 
+cd deployments
+
 npm version minor
 
-git push
-
-npm publish deployments
+npm publish
