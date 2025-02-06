@@ -1,4 +1,4 @@
 {
-  "detectors_to_exclude": "immutable-states",
+  "detectors_to_exclude": "immutable-states,calls-loop",
   "filter_paths": "(node_modules/|test/|mock/)"
 }

@@ -59,8 +59,9 @@ contract FeeManager is AccessControl {
         require(tokenAddress != address(0), "Invalid token address");
 
         uint256 indexToRemove = type(uint256).max;
+        uint256 tokensLength = feeTokens.length;
 
-        for (uint256 i = 0; i < feeTokens.length; i++) {
+        for (uint256 i = 0; i < tokensLength; i++) {
             if (feeTokens[i].tokenAddress == tokenAddress) {
                 indexToRemove = i;
                 break;
