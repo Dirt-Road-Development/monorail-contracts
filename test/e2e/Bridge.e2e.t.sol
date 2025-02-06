@@ -99,8 +99,6 @@ contract BridgeTest is TestHelperOz5 {
         skaleStation.addToken(aEid, address(usdc), address(mUSDC));
 
         station.addToken(address(mUSDC), address(usdc));
-
-
     }
 
     function test_constructor() public {
@@ -173,22 +171,24 @@ contract BridgeTest is TestHelperOz5 {
     }
 
     function test_customERC20CustomFees() public {
-        (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
-        
+        (uint256 userAmountA, uint256 protocolFeeA) =
+            feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
+
         assertEq(userAmountA, 98500000000);
         assertEq(protocolFeeA, 1500000000);
 
         uint256 balance = tokenA.balanceOf(address(this));
-        
+
         feeManager.configureTokenFee(
             address(tokenA),
-            100,  // 100 basis points = 1%
-            100 * 10**18,  // minimum holding requirement
+            100, // 100 basis points = 1%
+            100 * 10 ** 18, // minimum holding requirement
             0,
-            1  // ERC20
+            1 // ERC20
         );
 
-        (uint256 userAmountB, uint256 protocolFeeB) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
+        (uint256 userAmountB, uint256 protocolFeeB) =
+            feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
 
         assertEq(userAmountB, 99000000000);
         assertEq(protocolFeeB, 1000000000);

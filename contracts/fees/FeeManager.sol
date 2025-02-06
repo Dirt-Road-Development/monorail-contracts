@@ -14,23 +14,18 @@ contract FeeManager is AccessControl {
 
     // Token configuration struct for custom fees
     struct TokenConfig {
-        uint256 fee;           // Custom fee in basis points (e.g., 100 = 1%)
-        uint256 minThreshold;  // Minimum token holding required for custom fee
-        address tokenAddress;  // The address of the ERC-20, ERC-721, or ERC-1155 token
-        uint8 tokenType;      // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155
-        uint256 tokenId;      // Used for ERC-1155
+        uint256 fee; // Custom fee in basis points (e.g., 100 = 1%)
+        uint256 minThreshold; // Minimum token holding required for custom fee
+        address tokenAddress; // The address of the ERC-20, ERC-721, or ERC-1155 token
+        uint8 tokenType; // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155
+        uint256 tokenId; // Used for ERC-1155
     }
 
     // List of tokens with custom fees
     TokenConfig[] public feeTokens;
 
     // Events
-    event TokenFeeConfigured(
-        address tokenAddress,
-        uint256 customFee,
-        uint256 minThreshold,
-        uint8 tokenType
-    );
+    event TokenFeeConfigured(address tokenAddress, uint256 customFee, uint256 minThreshold, uint8 tokenType);
     event TokenRemoved(address tokenAddress);
 
     constructor() {
@@ -64,7 +59,7 @@ contract FeeManager is AccessControl {
         require(tokenAddress != address(0), "Invalid token address");
 
         uint256 indexToRemove = type(uint256).max;
-        
+
         for (uint256 i = 0; i < feeTokens.length; i++) {
             if (feeTokens[i].tokenAddress == tokenAddress) {
                 indexToRemove = i;
@@ -103,7 +98,7 @@ contract FeeManager is AccessControl {
 
             if (meetsThreshold) {
                 applicableFee = config.fee;
-                break;  // Use the first qualifying custom fee
+                break; // Use the first qualifying custom fee
             }
         }
 
@@ -116,17 +111,17 @@ contract FeeManager is AccessControl {
         returns (uint256 userAmount, uint256 protocolFee)
     {
         uint256 feePercentage = getApplicableFee(user);
-        
+
         // Calculate protocol fee in basis points
         protocolFee = (amount * feePercentage) / FEE_DENOMINATOR;
-        
+
         // Ensure minimum fee for non-zero amounts
         if (protocolFee == 0 && amount > 0) {
             uint8 decimals = IERC20Metadata(tokenAddress).decimals();
             require(decimals <= 18, "Token decimals too high");
             protocolFee = 10 ** (18 - decimals); // Minimum fee
         }
-        
+
         require(protocolFee <= amount, "Fee exceeds amount");
         userAmount = amount - protocolFee;
     }

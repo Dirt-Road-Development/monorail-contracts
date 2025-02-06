@@ -49,7 +49,6 @@ contract BridgeTest is TestHelperOz5 {
 
         feeManager = new FeeManager();
         feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
-
     }
 
     function test_constructor() public {
@@ -57,7 +56,8 @@ contract BridgeTest is TestHelperOz5 {
     }
 
     function test_noDiscount() public {
-        (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+        (uint256 userAmountA, uint256 protocolFeeA) =
+            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
         assertEq(userAmountA, 98500000000);
         assertEq(protocolFeeA, 1500000000);
     }
@@ -65,13 +65,13 @@ contract BridgeTest is TestHelperOz5 {
     function test_addDiscount() public {
         feeManager.configureTokenFee(
             address(tokenA),
-            100,  // 100 basis points = 1%
-            100 * 10**18,  // minimum holding requirement
+            100, // 100 basis points = 1%
+            100 * 10 ** 18, // minimum holding requirement
             0,
-            1  // ERC20
+            1 // ERC20
         );
 
-        (,,,uint8 tokenType, uint256 tokenId) = feeManager.feeTokens(0);
+        (,,, uint8 tokenType, uint256 tokenId) = feeManager.feeTokens(0);
 
         assertEq(tokenType, 1);
         assertEq(tokenId, 0);
@@ -80,69 +80,68 @@ contract BridgeTest is TestHelperOz5 {
     function test_use1PercentDiscount() public {
         feeManager.configureTokenFee(
             address(tokenA),
-            100,  // 100 basis points = 1%
-            100 * 10**18,  // minimum holding requirement
+            100, // 100 basis points = 1%
+            100 * 10 ** 18, // minimum holding requirement
             0,
-            1  // ERC20
+            1 // ERC20
         );
 
-        (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+        (uint256 userAmountA, uint256 protocolFeeA) =
+            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
         assertEq(userAmountA, 99000000000);
         assertEq(protocolFeeA, 1000000000);
-        
     }
 
     function test_use2PercentDiscount() public {
         feeManager.configureTokenFee(
             address(tokenA),
-            200,  // 100 basis points = 1%
-            100 * 10**18,  // minimum holding requirement
+            200, // 100 basis points = 1%
+            100 * 10 ** 18, // minimum holding requirement
             0,
-            1  // ERC20
+            1 // ERC20
         );
 
-        (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+        (uint256 userAmountA, uint256 protocolFeeA) =
+            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
         assertEq(userAmountA, 98000000000);
         assertEq(protocolFeeA, 2000000000);
-        
     }
 
     function test_use5PercentDiscount() public {
         feeManager.configureTokenFee(
             address(tokenA),
-            500,  // 100 basis points = 1%
-            100 * 10**18,  // minimum holding requirement
+            500, // 100 basis points = 1%
+            100 * 10 ** 18, // minimum holding requirement
             0,
-            1  // ERC20
+            1 // ERC20
         );
 
-        (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+        (uint256 userAmountA, uint256 protocolFeeA) =
+            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
         assertEq(userAmountA, 95000000000);
         assertEq(protocolFeeA, 5000000000);
-        
     }
 
     // function test_customERC20CustomFees() public {
     //     (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
-        
-        // assertEq(userAmountA, 98500000000);
-        // assertEq(protocolFeeA, 1500000000);
+
+    // assertEq(userAmountA, 98500000000);
+    // assertEq(protocolFeeA, 1500000000);
 
     //     // uint256 balance = tokenA.balanceOf(address(this));
-        
-        // feeManager.addToken(
-        //     address(tokenA),
-        //     100 * 10 ** 18,
-        //     100 * 10 ** 18,
-        //     1,
-        //     1
-        // );
+
+    // feeManager.addToken(
+    //     address(tokenA),
+    //     100 * 10 ** 18,
+    //     100 * 10 ** 18,
+    //     1,
+    //     1
+    // );
 
     //     (uint256 userAmountB, uint256 protocolFeeB) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
     //     console.log("RES: ", userAmountB, protocolFeeB);
     //     assertEq(userAmountA, 99000000000);
     //     assertEq(protocolFeeA, 1000000000);
-
 
     // }
 }
