@@ -3,26 +3,30 @@ pragma solidity 0.8.24;
 
 import "../../contracts/native/NativeStation.sol";
 import "../../contracts/native/NativeSkaleStation.sol";
+import "../../contracts/fees/FeeManager.sol";
+import "../../contracts/interfaces/IFeeManager.sol";
 
 import "../../contracts/mock/USDC.sol";
 import "../../contracts/mock/USDCs.sol";
 import "../../contracts/mock/SKALEToken.sol";
 
-import { IMonorailNativeToken } from "../../contracts/interfaces/IMonorailNativeToken.sol";
+import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
 // OApp imports
-import { IOAppOptionsType3, EnforcedOptionParam } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
-import { OptionsBuilder } from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
-import { MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import {
+    IOAppOptionsType3, EnforcedOptionParam
+} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
+import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
+import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 
 // OZ imports
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // Forge imports
 import "forge-std/console.sol";
 
 // DevTools imports
-import { TestHelperOz5 } from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
 contract BridgeTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
@@ -32,6 +36,7 @@ contract BridgeTest is TestHelperOz5 {
 
     NativeSkaleStation private skaleStation;
     NativeStation private station;
+    FeeManager private feeManager;
 
     address private userA = address(0x1);
     address private feeCollector = address(0x02);
@@ -57,6 +62,8 @@ contract BridgeTest is TestHelperOz5 {
 
         createEndpoints(2, LibraryType.UltraLightNode, nativeTokens);
 
+        feeManager = new FeeManager();
+
         station = NativeStation(
             payable(
                 _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this)))
@@ -66,7 +73,7 @@ contract BridgeTest is TestHelperOz5 {
             payable(
                 _deployOApp(
                     type(NativeSkaleStation).creationCode,
-                    abi.encode(address(endpoints[bEid]), feeCollector, address(this))
+                    abi.encode(address(endpoints[bEid]), feeCollector, IFeeManager(address(feeManager)))
                 )
             )
         );
@@ -106,14 +113,14 @@ contract BridgeTest is TestHelperOz5 {
 
         // Step 5. Send
         /* MessagingReceipt memory receipt = */
-        station.bridge{ value: fee.nativeFee }(details, options);
+        station.bridge{value: fee.nativeFee}(details, options);
 
         // STEP 6 & 7. Deliver packet manually.
         verifyPackets(bEid, addressToBytes32(address(skaleStation)));
 
         // Step 8. Assert Balances
-        assertEq(mUSDC.balanceOf(address(this)), 99_000_000);
-        assertEq(mUSDC.balanceOf(feeCollector), 1_000_000);
+        assertEq(mUSDC.balanceOf(address(this)), 98_500_000);
+        assertEq(mUSDC.balanceOf(feeCollector), 1_500_000);
 
         // Step 9. Asset Locked Supply
         assertEq(usdc.balanceOf(address(station)), oneHundredUSDC);
@@ -144,14 +151,14 @@ contract BridgeTest is TestHelperOz5 {
         verifyPackets(aEid, addressToBytes32(address(station)));
 
         // Step 19. Verify Balances
-        assertEq(mUSDC.balanceOf(feeCollector), 1_500_000);
-        assertEq(mUSDC.balanceOf(address(this)), 49_000_000);
+        assertEq(mUSDC.balanceOf(feeCollector), 2_250_000);
+        assertEq(mUSDC.balanceOf(address(this)), 48_500_000);
 
         // Step 20. Assert Minted Supply
-        assertEq(skaleStation.supplyAvailable(IMonorailNativeToken(address(mUSDC))), 49_000_000 + 1_200_000 + 300_000);
+        assertEq(skaleStation.supplyAvailable(IMonorailNativeToken(address(mUSDC))), 50750000);
 
         // Step 21. Check Fainal User Balance
-        assertEq(usdc.balanceOf(address(this)), 99999999999999999999949500000);
-        assertEq(usdc.balanceOf(address(station)), 50500000);
+        assertEq(usdc.balanceOf(address(this)), 99999999999999999999949250000);
+        assertEq(usdc.balanceOf(address(station)), 50750000);
     }
 }

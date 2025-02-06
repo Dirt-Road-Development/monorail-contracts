@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import { IMonorailNativeToken } from "../interfaces/IMonorailNativeToken.sol";
-import { MessagingReceipt, Origin, MessagingFee } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import { ReentrancyGuard } from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { LibFeeCalculatorV1 } from "../lib/LibFeeCalculatorV1.sol";
-import { LibTypesV1 } from "../lib/LibTypesV1.sol";
-import { SKALEOApp } from "../SKALEOApp.sol";
+import {IMonorailNativeToken} from "../interfaces/IMonorailNativeToken.sol";
+import {MessagingReceipt, Origin, MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IFeeManager} from "../interfaces/IFeeManager.sol";
+import {LibTypesV1} from "../lib/LibTypesV1.sol";
+import {SKALEOApp} from "../SKALEOApp.sol";
 
 contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -20,6 +20,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
+    IFeeManager public feeManager;
 
     mapping(IMonorailNativeToken => uint256) public supplyAvailable;
 
@@ -29,13 +30,13 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     mapping(IMonorailNativeToken => mapping(uint32 => bool)) public supported;
 
     event AddToken(
-        uint32 indexed layerZeroEndpointId,
-        address indexed originTokenAddress,
-        address indexed localTokenAddress
+        uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress
     );
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
 
-    constructor(address _layerZeroEndpoint, address _feeCollector) SKALEOApp(_layerZeroEndpoint) {
+    constructor(address _layerZeroEndpoint, address _feeCollector, IFeeManager _feeManager)
+        SKALEOApp(_layerZeroEndpoint)
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
         _grantRole(WITHDRAW_ROLE, _msgSender());
@@ -46,13 +47,13 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
 
         // Set Fee Collector. If failed to set will revert when minting
         feeCollector = _feeCollector;
+        feeManager = _feeManager;
     }
 
-    function addToken(
-        uint32 layerZeroEndpointId,
-        address originTokenAddress,
-        address localTokenAddress
-    ) external onlyRole(MANAGER_ROLE) {
+    function addToken(uint32 layerZeroEndpointId, address originTokenAddress, address localTokenAddress)
+        external
+        onlyRole(MANAGER_ROLE)
+    {
         if (address(tokens[layerZeroEndpointId][originTokenAddress]) != address(0)) {
             revert("Token Already Added + Active");
         }
@@ -78,34 +79,35 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         }
 
         // 2. Calculate FeeBreakdown
-        LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(
-            details.amount,
-            nativeToken.decimals()
-        );
+        // LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(
+        //     details.amount,
+        //     nativeToken.decimals()
+        // );
+        (uint256 userAmount, uint256 protocolFee) =
+            feeManager.getFeeBreakdown(address(nativeToken), details.amount, _msgSender());
 
         // 3. User Transfers Tokens to Contract
         nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
 
         // 4. Reduce Supply by Burn Token Amount
-        supplyAvailable[nativeToken] -= fees.userAmount;
+        supplyAvailable[nativeToken] -= userAmount;
 
         // 5. Transfer Fees to Fee Collector
-        nativeToken.safeTransfer(feeCollector, fees.protocolFee);
+        nativeToken.safeTransfer(feeCollector, protocolFee);
 
         // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
-        bytes memory _payload = abi.encode(details.token, details.to, fees.userAmount);
+        bytes memory _payload = abi.encode(details.token, details.to, userAmount);
         receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
 
         // 7. Burn Native Tokens that will be unlocked on destination
-        nativeToken.burn(fees.userAmount);
+        nativeToken.burn(userAmount);
     }
 
-    function quote(
-        uint32 dstEid,
-        LibTypesV1.TripDetails memory tripDetails,
-        bytes memory options,
-        bool payInLzToken
-    ) public view returns (MessagingFee memory fee) {
+    function quote(uint32 dstEid, LibTypesV1.TripDetails memory tripDetails, bytes memory options, bool payInLzToken)
+        public
+        view
+        returns (MessagingFee memory fee)
+    {
         bytes memory payload = abi.encode(tripDetails);
         fee = _quote(dstEid, payload, options, payInLzToken);
     }
@@ -130,13 +132,14 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
 
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][token];
 
-        LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(amount, nativeToken.decimals());
+        // LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(amount, nativeToken.decimals());
+        (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(address(nativeToken), amount, to);
 
-        emit BridgeReceived(address(nativeToken), to, fees.userAmount);
+        emit BridgeReceived(address(nativeToken), to, userAmount);
 
         supplyAvailable[nativeToken] += amount;
 
-        nativeToken.mint(to, fees.userAmount);
-        nativeToken.mint(feeCollector, fees.protocolFee);
+        nativeToken.mint(to, userAmount);
+        nativeToken.mint(feeCollector, protocolFee);
     }
 }

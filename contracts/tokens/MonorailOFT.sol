@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { OFT } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
-import { MessagingParams } from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
-import { MessagingFee, MessagingReceipt } from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {OFT} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/OFT.sol";
+import {MessagingParams} from "@layerzerolabs/lz-evm-protocol-v2/contracts/interfaces/ILayerZeroEndpointV2.sol";
+import {MessagingFee, MessagingReceipt} from "@layerzerolabs/lz-evm-oapp-v2/contracts/oft/interfaces/IOFT.sol";
 
 /// @title Monorail OFT
 /// @notice Base Contract for Monorail OFT
@@ -20,11 +20,10 @@ contract MonorailOFT is OFT, AccessControl {
     ///      for fee payment is not set in the EndpointV2Alt contract
     error LzAltTokenUnavailable();
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _layerZeroEndpoint
-    ) OFT(_name, _symbol, _layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
+    constructor(string memory _name, string memory _symbol, address _layerZeroEndpoint)
+        OFT(_name, _symbol, _layerZeroEndpoint, _msgSender())
+        Ownable(_msgSender())
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
@@ -59,12 +58,11 @@ contract MonorailOFT is OFT, AccessControl {
             _payLzToken(_fee.lzTokenFee);
         }
 
-        return
-            endpoint.send(
-                // solhint-disable-next-line check-send-result
-                MessagingParams(_dstEid, _getPeerOrRevert(_dstEid), _message, _options, _fee.lzTokenFee > 0),
-                _refundAddress
-            );
+        return endpoint.send(
+            // solhint-disable-next-line check-send-result
+            MessagingParams(_dstEid, _getPeerOrRevert(_dstEid), _message, _options, _fee.lzTokenFee > 0),
+            _refundAddress
+        );
     }
 
     /// @dev Internal function to pay the alt token fee associated with the message

@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: BUSL-1.1
 pragma solidity 0.8.24;
 
-import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import { AccessControl } from "@openzeppelin/contracts/access/AccessControl.sol";
-import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
-import { OApp, MessagingFee, Origin } from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import { MessagingReceipt } from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
-import { LibTypesV1 } from "../lib/LibTypesV1.sol";
-import { IOFT } from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {OApp, MessagingFee, Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
+import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
+import {LibTypesV1} from "../lib/LibTypesV1.sol";
+import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 
 error TokenBridgingPaused();
 error TokenNotAdded();
@@ -31,10 +31,10 @@ contract NativeStation is OApp, AccessControl {
     event Bridge(address indexed token, uint256 indexed amount);
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
 
-    constructor(
-        address _layerZeroEndpoint,
-        uint32 _skaleEndpointId
-    ) OApp(_layerZeroEndpoint, _msgSender()) Ownable(_msgSender()) {
+    constructor(address _layerZeroEndpoint, uint32 _skaleEndpointId)
+        OApp(_layerZeroEndpoint, _msgSender())
+        Ownable(_msgSender())
+    {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
@@ -56,10 +56,11 @@ contract NativeStation is OApp, AccessControl {
         emit AddToken(skaleTokenAddress, localTokenAddress);
     }
 
-    function bridge(
-        LibTypesV1.TripDetails memory details,
-        bytes calldata options
-    ) external payable returns (MessagingReceipt memory receipt) {
+    function bridge(LibTypesV1.TripDetails memory details, bytes calldata options)
+        external
+        payable
+        returns (MessagingReceipt memory receipt)
+    {
         if (!supportedTokens[IERC20(details.token)]) {
             revert("Unsupported Token");
         }
@@ -115,11 +116,11 @@ contract NativeStation is OApp, AccessControl {
         emit BridgeReceived(address(localToken), details.to, details.amount);
     }
 
-    function quote(
-        LibTypesV1.TripDetails memory tripDetails,
-        bytes memory options,
-        bool payInLzToken
-    ) public view returns (MessagingFee memory fee) {
+    function quote(LibTypesV1.TripDetails memory tripDetails, bytes memory options, bool payInLzToken)
+        public
+        view
+        returns (MessagingFee memory fee)
+    {
         bytes memory payload = abi.encode(tripDetails);
         fee = _quote(skaleEndpointId, payload, options, payInLzToken);
     }
