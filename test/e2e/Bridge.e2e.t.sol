@@ -44,6 +44,9 @@ contract BridgeTest is TestHelperOz5 {
     USDC private usdc;
     USDCs private mUSDC;
     SKALEToken public skl;
+    SKALEToken public tokenA;
+    SKALEToken public tokenB;
+    SKALEToken public tokenC;
 
     uint256 private oneHundredUSDC = 100 * 10 ** 6;
 
@@ -56,6 +59,9 @@ contract BridgeTest is TestHelperOz5 {
         vm.deal(feeCollector, 1000 ether);
 
         skl = new SKALEToken("SKALE", "SKL");
+        tokenA = new SKALEToken("TokenA", "TKA");
+        tokenB = new SKALEToken("TokenB", "TKB");
+        tokenC = new SKALEToken("TokenB", "TKC");
 
         nativeTokens.push(address(0));
         nativeTokens.push(address(skl));
@@ -63,6 +69,8 @@ contract BridgeTest is TestHelperOz5 {
         createEndpoints(2, LibraryType.UltraLightNode, nativeTokens);
 
         feeManager = new FeeManager();
+
+        feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
 
         station = NativeStation(
             payable(
@@ -91,6 +99,8 @@ contract BridgeTest is TestHelperOz5 {
         skaleStation.addToken(aEid, address(usdc), address(mUSDC));
 
         station.addToken(address(mUSDC), address(usdc));
+
+
     }
 
     function test_constructor() public {
@@ -158,7 +168,29 @@ contract BridgeTest is TestHelperOz5 {
         assertEq(skaleStation.supplyAvailable(IMonorailNativeToken(address(mUSDC))), 50750000);
 
         // Step 21. Check Fainal User Balance
-        assertEq(usdc.balanceOf(address(this)), 99999999999999999999949250000);
+        assertEq(usdc.balanceOf(address(this)), 99999949250000);
         assertEq(usdc.balanceOf(address(station)), 50750000);
+    }
+
+    function test_customERC20CustomFees() public {
+        (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
+        
+        assertEq(userAmountA, 98500000000);
+        assertEq(protocolFeeA, 1500000000);
+
+        uint256 balance = tokenA.balanceOf(address(this));
+        
+        feeManager.configureTokenFee(
+            address(tokenA),
+            100,  // 100 basis points = 1%
+            100 * 10**18,  // minimum holding requirement
+            0,
+            1  // ERC20
+        );
+
+        (uint256 userAmountB, uint256 protocolFeeB) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
+
+        assertEq(userAmountB, 99000000000);
+        assertEq(protocolFeeB, 1000000000);
     }
 }

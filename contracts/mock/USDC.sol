@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract USDC is ERC20 {
     constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
-        _mint(msg.sender, 100_000_000_000 * 10 ** 18);
+        _mint(msg.sender, 100_000_000 * 10 ** 6);
     }
 
     function decimals() public view override returns (uint8) {

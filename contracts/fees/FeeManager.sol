@@ -9,149 +9,128 @@ import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IER
 
 contract FeeManager is AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
+    uint256 public constant DEFAULT_FEE = 150; // 1.5% in basis points
+    uint256 public constant FEE_DENOMINATOR = 10000;
 
-    uint256 constant FEE_DENOMINATOR = 10000; // Default to 1%
-
-    // Token configuration struct for tracking discount eligibility
+    // Token configuration struct for custom fees
     struct TokenConfig {
-        uint256 baseFee; // Base fee percentage (e.g., 1.5% = 150)
-        uint256 discountedFee; // Discounted fee percentage (e.g., 0.5% = 50)
-        uint256 minThreshold; // Minimum threshold required to get discounted fee (ERC-20 amount, ERC-1155 amount, or ERC-721 ownership)
-        address tokenAddress; // The address of the ERC-20, ERC-721, or ERC-1155 token
-        uint8 tokenType; // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155
-        uint256 tokenId;
+        uint256 fee;           // Custom fee in basis points (e.g., 100 = 1%)
+        uint256 minThreshold;  // Minimum token holding required for custom fee
+        address tokenAddress;  // The address of the ERC-20, ERC-721, or ERC-1155 token
+        uint8 tokenType;      // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155
+        uint256 tokenId;      // Used for ERC-1155
     }
 
-    // List of discount tokens configured (could be ERC-20, ERC-721, or ERC-1155)
-    TokenConfig[] public discountTokens;
+    // List of tokens with custom fees
+    TokenConfig[] public feeTokens;
 
     // Events
-    event TokenAdded(
-        address tokenAddress, uint256 baseFee, uint256 discountedFee, uint256 minThreshold, uint8 tokenType
+    event TokenFeeConfigured(
+        address tokenAddress,
+        uint256 customFee,
+        uint256 minThreshold,
+        uint8 tokenType
     );
     event TokenRemoved(address tokenAddress);
 
-    // Constructor to grant default roles
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
-    // Add token configuration (manager only)
-    function addToken(
+    function configureTokenFee(
         address tokenAddress,
-        uint256 baseFee,
-        uint256 discountedFee,
+        uint256 customFee,
         uint256 minThreshold,
         uint256 tokenId,
-        uint8 tokenType // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155
+        uint8 tokenType
     ) external onlyRole(MANAGER_ROLE) {
         require(tokenAddress != address(0), "Invalid token address");
-        require(baseFee > 0, "Base fee must be greater than 0");
-        require(discountedFee < baseFee, "Discounted fee cannot be higher than base fee");
+        require(customFee <= FEE_DENOMINATOR, "Fee exceeds 100%");
 
-        discountTokens.push(
+        feeTokens.push(
             TokenConfig({
-                baseFee: baseFee,
-                discountedFee: discountedFee,
+                fee: customFee,
                 minThreshold: minThreshold,
                 tokenAddress: tokenAddress,
                 tokenType: tokenType,
-                tokenId: tokenId // default to 0 for ERC-20/ERC-721
+                tokenId: tokenId
             })
         );
 
-        emit TokenAdded(tokenAddress, baseFee, discountedFee, minThreshold, tokenType);
+        emit TokenFeeConfigured(tokenAddress, customFee, minThreshold, tokenType);
     }
 
-    // Remove a token from the configuration list by its address
     function removeToken(address tokenAddress) external onlyRole(MANAGER_ROLE) {
         require(tokenAddress != address(0), "Invalid token address");
 
         uint256 indexToRemove = type(uint256).max;
-
-        // Find the token index in the array
-        for (uint256 i = 0; i < discountTokens.length; i++) {
-            if (discountTokens[i].tokenAddress == tokenAddress) {
+        
+        for (uint256 i = 0; i < feeTokens.length; i++) {
+            if (feeTokens[i].tokenAddress == tokenAddress) {
                 indexToRemove = i;
                 break;
             }
         }
 
-        // Ensure the token was found
         require(indexToRemove != type(uint256).max, "Token not found");
 
-        // Shift the array elements to remove the token
-        discountTokens[indexToRemove] = discountTokens[discountTokens.length - 1];
-        discountTokens.pop(); // Remove the last element (now a duplicate)
+        feeTokens[indexToRemove] = feeTokens[feeTokens.length - 1];
+        feeTokens.pop();
 
         emit TokenRemoved(tokenAddress);
     }
 
-    // Calculate the highest applicable discount for the user
-    function getHighestDiscount(address user) public view returns (uint256) {
-        uint256 highestDiscount = 0;
+    function getApplicableFee(address user) public view returns (uint256) {
+        uint256 applicableFee = DEFAULT_FEE;
 
-        // Loop through all discount tokens to find the highest discount
-        for (uint256 i = 0; i < discountTokens.length; i++) {
-            TokenConfig memory config = discountTokens[i];
-
-            // Check eligibility for discount based on token type
-            uint256 discount = 0;
+        for (uint256 i = 0; i < feeTokens.length; i++) {
+            TokenConfig memory config = feeTokens[i];
+            bool meetsThreshold = false;
 
             if (config.tokenType == 1) {
-                // ERC-20 (e.g., SKL token)
-                uint256 userBalance = IERC20(config.tokenAddress).balanceOf(user);
-                if (userBalance >= config.minThreshold) {
-                    discount = config.discountedFee; // Apply discounted fee if user holds enough tokens
-                }
+                // ERC-20
+                uint256 balance = IERC20(config.tokenAddress).balanceOf(user);
+                meetsThreshold = balance >= config.minThreshold;
             } else if (config.tokenType == 2) {
-                // ERC-721 (e.g., user must own a token)
-                uint256 userBalance = IERC721(config.tokenAddress).balanceOf(user);
-                if (userBalance >= config.minThreshold) {
-                    discount = config.discountedFee; // Apply discounted fee if user holds enough tokens
-                }
+                // ERC-721
+                uint256 balance = IERC721(config.tokenAddress).balanceOf(user);
+                meetsThreshold = balance >= config.minThreshold;
             } else if (config.tokenType == 3) {
-                // ERC-1155 (e.g., user must own a minimum amount of tokens)
-                uint256 userBalance = IERC1155(config.tokenAddress).balanceOf(user, config.tokenId);
-                if (userBalance >= config.minThreshold) {
-                    discount = config.discountedFee; // Apply discounted fee if user holds enough tokens
-                }
+                // ERC-1155
+                uint256 balance = IERC1155(config.tokenAddress).balanceOf(user, config.tokenId);
+                meetsThreshold = balance >= config.minThreshold;
             }
 
-            // Track the highest discount
-            if (discount > highestDiscount) {
-                highestDiscount = discount;
+            if (meetsThreshold) {
+                applicableFee = config.fee;
+                break;  // Use the first qualifying custom fee
             }
         }
 
-        return highestDiscount;
+        return applicableFee;
     }
 
-    // Calculate fee based on the user's balance of the ERC-20 token or token ownership
     function calculateFees(address tokenAddress, uint256 amount, address user)
         public
         view
         returns (uint256 userAmount, uint256 protocolFee)
     {
-        uint256 highestDiscount = getHighestDiscount(user);
-
-        // Default to base fee if no discount is found
-        uint256 feePercentage = highestDiscount > 0 ? highestDiscount : 150; // Default to 1.5% if no discount is available
-
-        // Calculate protocol fee
+        uint256 feePercentage = getApplicableFee(user);
+        
+        // Calculate protocol fee in basis points
         protocolFee = (amount * feePercentage) / FEE_DENOMINATOR;
-
-        // Ensure the protocol fee isn't zero
-        if (protocolFee == 0) {
+        
+        // Ensure minimum fee for non-zero amounts
+        if (protocolFee == 0 && amount > 0) {
             uint8 decimals = IERC20Metadata(tokenAddress).decimals();
-            protocolFee = 10 ** (18 - decimals); // Minimum fee (1 unit of smallest token)
+            require(decimals <= 18, "Token decimals too high");
+            protocolFee = 10 ** (18 - decimals); // Minimum fee
         }
-
-        // Calculate user amount after the fee
+        
+        require(protocolFee <= amount, "Fee exceeds amount");
         userAmount = amount - protocolFee;
     }
 
-    // Get fee breakdown for bridging tokens
     function getFeeBreakdown(address tokenAddress, uint256 amount, address user)
         external
         view
@@ -160,9 +139,7 @@ contract FeeManager is AccessControl {
         return calculateFees(tokenAddress, amount, user);
     }
 
-    // Helper function to check if the user meets the minimum requirement for the discount
-    function meetsMinimumRequirement(address user) public view returns (bool) {
-        uint256 highestDiscount = getHighestDiscount(user);
-        return highestDiscount > 0;
+    function meetsCustomFeeRequirement(address user) public view returns (bool) {
+        return getApplicableFee(user) != DEFAULT_FEE;
     }
 }
