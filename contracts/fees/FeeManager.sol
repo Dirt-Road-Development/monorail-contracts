@@ -77,8 +77,8 @@ contract FeeManager is AccessControl {
 
     function getApplicableFee(address user) public view returns (uint256) {
         uint256 applicableFee = DEFAULT_FEE;
-
-        for (uint256 i = 0; i < feeTokens.length; i++) {
+        uint256 feeTokensLength = feeTokens.length;
+        for (uint256 i = 0; i < feeTokensLength; i++) {
             TokenConfig memory config = feeTokens[i];
             bool meetsThreshold = false;
 
