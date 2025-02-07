@@ -18,15 +18,16 @@ const deploy: DeployFunction = async (hre) => {
 
     console.log(await hre.deployments.all())
     const endpointV2Deployment = await hre.deployments.get('EndpointV2')
+    const feeManager = await hre.deployments.get("FeeManager");
 
     const { address } = await deploy(contractName, {
         from: deployer,
         args: [
             endpointV2Deployment.address, // LayerZero's EndpointV2 address
-            deployer, // Switch to Multisig in Production
+            deployer,
+            feeManager.address // Switch to Multisig in Production
         ],
         libraries: {
-            LibFeeCalculatorV1: (await deployments.get('LibFeeCalculatorV1')).address,
             LibTypesV1: (await deployments.get('LibTypesV1')).address,
         },
         log: true,
