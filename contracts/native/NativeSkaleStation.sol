@@ -84,7 +84,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         //     nativeToken.decimals()
         // );
         (uint256 userAmount, uint256 protocolFee) =
-            feeManager.getFeeBreakdown(address(nativeToken), details.amount, _msgSender());
+            feeManager.getFeeBreakdown(details.amount, _msgSender(), nativeToken.decimals());
 
         // 3. User Transfers Tokens to Contract
         nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
@@ -133,7 +133,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][token];
 
         // LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(amount, nativeToken.decimals());
-        (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(address(nativeToken), amount, to);
+        (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(amount, to, nativeToken.decimals());
 
         emit BridgeReceived(address(nativeToken), to, userAmount);
 

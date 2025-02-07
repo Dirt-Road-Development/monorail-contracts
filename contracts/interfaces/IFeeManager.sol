@@ -24,7 +24,7 @@ interface IFeeManager {
     function getHighestDiscount(address user) external view returns (uint256);
 
     // Function to calculate the fee breakdown for a specific transfer
-    function getFeeBreakdown(address tokenAddress, uint256 amount, address user)
+    function getFeeBreakdown(uint256 amount, address user, uint8 decimals)
         external
         view
         returns (uint256 userAmount, uint256 protocolFee);
