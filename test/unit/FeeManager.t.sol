@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
 
-import "../../contracts/native/NativeStation.sol";
-import "../../contracts/native/NativeSkaleStation.sol";
-import "../../contracts/fees/FeeManager.sol";
-import "../../contracts/interfaces/IFeeManager.sol";
+import {NativeStation} from "../../contracts/native/NativeStation.sol";
+import {NativeSkaleStation} from "../../contracts/native/NativeSkaleStation.sol";
+import {FeeManager} from "../../contracts/fees/FeeManager.sol";
+import {IFeeManager} from "../../contracts/interfaces/IFeeManager.sol";
 
-import "../../contracts/mock/USDC.sol";
-import "../../contracts/mock/USDCs.sol";
-import "../../contracts/mock/SKALEToken.sol";
+import {USDC} from "../../contracts/mock/USDC.sol";
+import {USDCs} from "../../contracts/mock/USDCs.sol";
+import {SKALEToken } from "../../contracts/mock/SKALEToken.sol";
 
 import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
 
@@ -17,11 +17,12 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metad
 
 // Forge imports
 import "forge-std/console.sol";
+import {Test} from "forge-std/Test.sol";
 
 // DevTools imports
-import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
+// import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract BridgeTest is TestHelperOz5 {
+contract BridgeTest is Test {
     FeeManager private feeManager;
 
     address private userA = address(0x1);
@@ -35,8 +36,7 @@ contract BridgeTest is TestHelperOz5 {
 
     uint256 private oneHundredUSDC = 100 * 10 ** 6;
 
-    function setUp() public virtual override {
-        super.setUp();
+    function setUp() public virtual {
 
         vm.deal(userA, 1000 ether);
         vm.deal(feeCollector, 1000 ether);

@@ -139,21 +139,18 @@ contract BridgeTest is TestHelperOz5 {
         // Step 11. Approve SKALEStation for 50 USDC
         mUSDC.approve(address(skaleStation), 50 * 10 ** 6);
 
-        // Step 12. Prepare Options from SKALE
-        bytes memory options2 = OptionsBuilder.newOptions().addExecutorLzReceiveOption(500_000, 0);
-
         // Step 13. Prepare Trip Details
         LibTypesV1.TripDetails memory details2 = LibTypesV1.TripDetails(address(mUSDC), address(this), 50 * 10 ** 6);
 
         // Step 14. Quote Native Gas Fee
-        MessagingFee memory fee2 = skaleStation.quote(aEid, details2, options2, false);
+        MessagingFee memory fee2 = skaleStation.quote(aEid, details2, options, false);
 
         // Step 15. Approve SKL Tokens by Fee
         skl.approve(address(skaleStation), fee2.nativeFee);
 
         // Step 16. Send
         /* MessagingReceipt memory receipt2 = */
-        skaleStation.bridge(aEid, details2, fee2, options2);
+        skaleStation.bridge(aEid, details2, fee2, options);
 
         // STEP 17 & 18. Deliver packet manually.
         verifyPackets(aEid, addressToBytes32(address(station)));

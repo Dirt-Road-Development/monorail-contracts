@@ -35,10 +35,11 @@ contract MyOAppTest is TestHelperOz5 {
     uint256 private initialBalance = 100 ether;
 
     function setUp() public virtual override {
+        super.setUp();
+        
         vm.deal(userA, 1000 ether);
         vm.deal(userB, 1000 ether);
 
-        super.setUp();
         setUpEndpoints(2, LibraryType.UltraLightNode);
 
         aOApp = MyOApp(_deployOApp(type(MyOApp).creationCode, abi.encode(address(endpoints[aEid]), address(this))));
