@@ -1,0 +1,13 @@
+{
+  "name": "@monorail.fi/bridge-deployments",
+  "private": false,
+  "version": "0.2.0",
+  "license": "MIT",
+  "description": "The Monorail Bridge Contracts are covered under BUSL-1 License. The ABIs and addresses are available under the MIT license for other developers to build on top of.",
+  "keywords": "Blockchain, Bridge, Solidity, SKALE",
+  "author": {
+    "name": "Sawyer",
+    "url": "https://github.com/TheGreatAxios",
+    "email": "sawyer@dirtroad.dev"
+  }
+}
