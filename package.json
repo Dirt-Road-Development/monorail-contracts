@@ -1,6 +1,6 @@
 {
   "name": "@monorail.fi/smart-contracts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "license": "BUSL-1",
   "author": {
@@ -13,6 +13,7 @@
     "compile": "concurrently -c auto --names forge,hardhat '$npm_execpath run compile:forge' '$npm_execpath run compile:hardhat'",
     "compile:forge": "forge build",
     "compile:hardhat": "hardhat compile",
+    "coverage": "forge coverage --ir-minimum",
     "lint": "$npm_execpath run lint:js && $npm_execpath run lint:sol",
     "lint:fix": "eslint --fix '**/*.{js,ts,json}' && prettier --write . && solhint 'contracts/**/*.sol' --fix --noPrompt",
     "lint:js": "eslint '**/*.{js,ts,json}' && prettier --check .",

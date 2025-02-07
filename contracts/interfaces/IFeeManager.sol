@@ -2,35 +2,33 @@
 pragma solidity 0.8.24;
 
 interface IFeeManager {
-    struct FeeRates {
-        uint256 baseFee; // Fixed fee in token decimals
-        uint256 variableRate; // Variable rate in basis points (1% = 100 bps)
-        uint256 liquidityRate; // Liquidity rate in basis points (1% = 100 bps)
-    }
-
-    struct Fees {
-        uint256 baseFee;
-        uint256 variableFee;
-        uint256 liquidityFee;
-        uint256 totalFee;
-    }
-
     // Events
-    event FeeTierUpdated(uint256 threshold, FeeRates rates);
-    event FeeTierRemoved(uint256 threshold);
-    event NonStableTokenFeesUpdated(FeeRates rates);
+    event TokenAdded(
+        address tokenAddress, uint256 baseFee, uint256 discountedFee, uint256 minThreshold, uint8 tokenType
+    );
+    event TokenRemoved(address tokenAddress);
 
-    // View Functions
-    function calculateStablecoinFees(uint256 amount) external view returns (Fees memory);
-    function calculateNonStableTokenFees(uint256 amount) external view returns (Fees memory);
-    function getStablecoinFeeRates(uint256 amount) external view returns (FeeRates memory);
-    function stablecoinFeeTiers(uint256 threshold) external view returns (FeeRates memory);
-    function nonStableTokenFees() external view returns (FeeRates memory);
-    function feeThresholds(uint256 index) external view returns (uint256);
-    function feeThresholdsLength() external view returns (uint256);
+    // Functions to add and remove token configurations
+    function addToken(
+        address tokenAddress,
+        uint256 baseFee,
+        uint256 discountedFee,
+        uint256 minThreshold,
+        uint8 tokenType, // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155
+        uint256 tokenId // Used for ERC-721 (specific tokenId) or ERC-1155 (tokenId + required amount)
+    ) external;
 
-    // Mutative Functions
-    function updateFeeTier(uint256 threshold, FeeRates memory rates) external;
-    function removeFeeTier(uint256 threshold) external;
-    function updateNonStableTokenFees(FeeRates memory rates) external;
+    function removeToken(address tokenAddress) external;
+
+    // Function to calculate the highest discount for a user based on owned tokens
+    function getHighestDiscount(address user) external view returns (uint256);
+
+    // Function to calculate the fee breakdown for a specific transfer
+    function getFeeBreakdown(uint256 amount, address user, uint8 decimals)
+        external
+        view
+        returns (uint256 userAmount, uint256 protocolFee);
+
+    // Helper function to check if the user meets the minimum requirement for the discount
+    function meetsMinimumRequirement(address user) external view returns (bool);
 }

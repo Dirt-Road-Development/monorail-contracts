@@ -5,7 +5,8 @@ src = 'contracts'
 out = 'out'
 test = 'test'
 cache_path = 'cache/foundry'
-verbosity = 3
+verbosity = 4
+
 libs = [
     # We provide a set of useful contract utilities
     # in the lib directory of @layerzerolabs/toolbox-foundry:

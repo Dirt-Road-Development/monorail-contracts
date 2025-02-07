@@ -6,6 +6,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract SKALEToken is ERC20 {
     constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
-        _mint(msg.sender, 9999999999 * 10 ** 18);
+        _mint(msg.sender, 100 ether);
     }
 }

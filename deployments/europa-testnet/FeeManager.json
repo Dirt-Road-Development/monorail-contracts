@@ -1,0 +1,736 @@
+{
+  "address": "0x9C01c961F4547f7b44FD7568Bd4C693c363a4e1D",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AccessControlBadConfirmation",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "neededRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "AccessControlUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "previousAdminRole",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "newAdminRole",
+          "type": "bytes32"
+        }
+      ],
+      "name": "RoleAdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "sender",
+          "type": "address"
+        }
+      ],
+      "name": "RoleRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "customFee",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "minThreshold",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "tokenType",
+          "type": "uint8"
+        }
+      ],
+      "name": "TokenFeeConfigured",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        }
+      ],
+      "name": "TokenRemoved",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_ADMIN_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "DEFAULT_FEE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "FEE_DENOMINATOR",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MANAGER_ROLE",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "decimals",
+          "type": "uint8"
+        }
+      ],
+      "name": "calculateFees",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "userAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "protocolFee",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "customFee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "minThreshold",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint8",
+          "name": "tokenType",
+          "type": "uint8"
+        }
+      ],
+      "name": "configureTokenFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "feeTokens",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "fee",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "minThreshold",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "tokenType",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "getApplicableFee",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "internalType": "uint8",
+          "name": "decimals",
+          "type": "uint8"
+        }
+      ],
+      "name": "getFeeBreakdown",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "userAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "protocolFee",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        }
+      ],
+      "name": "getRoleAdmin",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "grantRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "hasRole",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "meetsCustomFeeRequirement",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "tokenAddress",
+          "type": "address"
+        }
+      ],
+      "name": "removeToken",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "callerConfirmation",
+          "type": "address"
+        }
+      ],
+      "name": "renounceRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "role",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "revokeRole",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes4",
+          "name": "interfaceId",
+          "type": "bytes4"
+        }
+      ],
+      "name": "supportsInterface",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x726cf22819fdce2a9e38737ca7c24f153e1d414a1395ae41e41bee962c899108",
+  "receipt": {
+    "to": "0x0000000000000000000000000000000000000000",
+    "from": "0x8965fc7537747Ff60FE141298Bc76563DF976030",
+    "contractAddress": "0x9C01c961F4547f7b44FD7568Bd4C693c363a4e1D",
+    "transactionIndex": 0,
+    "gasUsed": "976514",
+    "logsBloom": "0x00000004000000000000000000000000000000000080000000000000000000000000000000000000000000080000000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000000000000000000020000000000000000000800000000000000000000000000000000000000000000000000000000000000000000000000400000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000100000000000020000020000000000080000000000000000000000000000000000000000000000000",
+    "blockHash": "0x0723d1dc7e6ecebc216689bb29f9ecaa36f32ad905596c15a926d487c054aecc",
+    "transactionHash": "0x726cf22819fdce2a9e38737ca7c24f153e1d414a1395ae41e41bee962c899108",
+    "logs": [
+      {
+        "transactionIndex": 0,
+        "blockNumber": 5391652,
+        "transactionHash": "0x726cf22819fdce2a9e38737ca7c24f153e1d414a1395ae41e41bee962c899108",
+        "address": "0x9C01c961F4547f7b44FD7568Bd4C693c363a4e1D",
+        "topics": [
+          "0x2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000008965fc7537747ff60fe141298bc76563df976030",
+          "0x0000000000000000000000008965fc7537747ff60fe141298bc76563df976030"
+        ],
+        "data": "0x",
+        "logIndex": 0,
+        "blockHash": "0x0723d1dc7e6ecebc216689bb29f9ecaa36f32ad905596c15a926d487c054aecc"
+      }
+    ],
+    "blockNumber": 5391652,
+    "cumulativeGasUsed": "976514",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "numDeployments": 1,
+  "solcInputHash": "5d334e1c7eb40a322fd4568852e851a9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.24+commit.e11b9ed9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccessControlBadConfirmation\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"neededRole\",\"type\":\"bytes32\"}],\"name\":\"AccessControlUnauthorizedAccount\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"previousAdminRole\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"newAdminRole\",\"type\":\"bytes32\"}],\"name\":\"RoleAdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleGranted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"sender\",\"type\":\"address\"}],\"name\":\"RoleRevoked\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"customFee\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"minThreshold\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"tokenType\",\"type\":\"uint8\"}],\"name\":\"TokenFeeConfigured\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"}],\"name\":\"TokenRemoved\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"DEFAULT_ADMIN_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"DEFAULT_FEE\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"FEE_DENOMINATOR\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"MANAGER_ROLE\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"decimals\",\"type\":\"uint8\"}],\"name\":\"calculateFees\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"userAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"protocolFee\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"customFee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"minThreshold\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"tokenType\",\"type\":\"uint8\"}],\"name\":\"configureTokenFee\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"feeTokens\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"fee\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"minThreshold\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"tokenType\",\"type\":\"uint8\"},{\"internalType\":\"uint256\",\"name\":\"tokenId\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"getApplicableFee\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"internalType\":\"uint8\",\"name\":\"decimals\",\"type\":\"uint8\"}],\"name\":\"getFeeBreakdown\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"userAmount\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"protocolFee\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"}],\"name\":\"getRoleAdmin\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"grantRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"hasRole\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"}],\"name\":\"meetsCustomFeeRequirement\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"tokenAddress\",\"type\":\"address\"}],\"name\":\"removeToken\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"callerConfirmation\",\"type\":\"address\"}],\"name\":\"renounceRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"role\",\"type\":\"bytes32\"},{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"revokeRole\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes4\",\"name\":\"interfaceId\",\"type\":\"bytes4\"}],\"name\":\"supportsInterface\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"errors\":{\"AccessControlBadConfirmation()\":[{\"details\":\"The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\"}],\"AccessControlUnauthorizedAccount(address,bytes32)\":[{\"details\":\"The `account` is missing a role.\"}]},\"events\":{\"RoleAdminChanged(bytes32,bytes32,bytes32)\":{\"details\":\"Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this.\"},\"RoleGranted(bytes32,address,address)\":{\"details\":\"Emitted when `account` is granted `role`. `sender` is the account that originated the contract call. This account bears the admin role (for the granted role). Expected in cases where the role was granted using the internal {AccessControl-_grantRole}.\"},\"RoleRevoked(bytes32,address,address)\":{\"details\":\"Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)\"}},\"kind\":\"dev\",\"methods\":{\"getRoleAdmin(bytes32)\":{\"details\":\"Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}.\"},\"grantRole(bytes32,address)\":{\"details\":\"Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event.\"},\"hasRole(bytes32,address)\":{\"details\":\"Returns `true` if `account` has been granted `role`.\"},\"renounceRole(bytes32,address)\":{\"details\":\"Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event.\"},\"revokeRole(bytes32,address)\":{\"details\":\"Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event.\"},\"supportsInterface(bytes4)\":{\"details\":\"See {IERC165-supportsInterface}.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/fees/FeeManager.sol\":\"FeeManager\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts/access/AccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.0) (access/AccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IAccessControl} from \\\"./IAccessControl.sol\\\";\\nimport {Context} from \\\"../utils/Context.sol\\\";\\nimport {ERC165} from \\\"../utils/introspection/ERC165.sol\\\";\\n\\n/**\\n * @dev Contract module that allows children to implement role-based access\\n * control mechanisms. This is a lightweight version that doesn't allow enumerating role\\n * members except through off-chain means by accessing the contract event logs. Some\\n * applications may benefit from on-chain enumerability, for those cases see\\n * {AccessControlEnumerable}.\\n *\\n * Roles are referred to by their `bytes32` identifier. These should be exposed\\n * in the external API and be unique. The best way to achieve this is by\\n * using `public constant` hash digests:\\n *\\n * ```solidity\\n * bytes32 public constant MY_ROLE = keccak256(\\\"MY_ROLE\\\");\\n * ```\\n *\\n * Roles can be used to represent a set of permissions. To restrict access to a\\n * function call, use {hasRole}:\\n *\\n * ```solidity\\n * function foo() public {\\n *     require(hasRole(MY_ROLE, msg.sender));\\n *     ...\\n * }\\n * ```\\n *\\n * Roles can be granted and revoked dynamically via the {grantRole} and\\n * {revokeRole} functions. Each role has an associated admin role, and only\\n * accounts that have a role's admin role can call {grantRole} and {revokeRole}.\\n *\\n * By default, the admin role for all roles is `DEFAULT_ADMIN_ROLE`, which means\\n * that only accounts with this role will be able to grant or revoke other\\n * roles. More complex role relationships can be created by using\\n * {_setRoleAdmin}.\\n *\\n * WARNING: The `DEFAULT_ADMIN_ROLE` is also its own admin: it has permission to\\n * grant and revoke this role. Extra precautions should be taken to secure\\n * accounts that have been granted it. We recommend using {AccessControlDefaultAdminRules}\\n * to enforce additional security measures for this role.\\n */\\nabstract contract AccessControl is Context, IAccessControl, ERC165 {\\n    struct RoleData {\\n        mapping(address account => bool) hasRole;\\n        bytes32 adminRole;\\n    }\\n\\n    mapping(bytes32 role => RoleData) private _roles;\\n\\n    bytes32 public constant DEFAULT_ADMIN_ROLE = 0x00;\\n\\n    /**\\n     * @dev Modifier that checks that an account has a specific role. Reverts\\n     * with an {AccessControlUnauthorizedAccount} error including the required role.\\n     */\\n    modifier onlyRole(bytes32 role) {\\n        _checkRole(role);\\n        _;\\n    }\\n\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n        return interfaceId == type(IAccessControl).interfaceId || super.supportsInterface(interfaceId);\\n    }\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) public view virtual returns (bool) {\\n        return _roles[role].hasRole[account];\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `_msgSender()`\\n     * is missing `role`. Overriding this function changes the behavior of the {onlyRole} modifier.\\n     */\\n    function _checkRole(bytes32 role) internal view virtual {\\n        _checkRole(role, _msgSender());\\n    }\\n\\n    /**\\n     * @dev Reverts with an {AccessControlUnauthorizedAccount} error if `account`\\n     * is missing `role`.\\n     */\\n    function _checkRole(bytes32 role, address account) internal view virtual {\\n        if (!hasRole(role, account)) {\\n            revert AccessControlUnauthorizedAccount(account, role);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) public view virtual returns (bytes32) {\\n        return _roles[role].adminRole;\\n    }\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function grantRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _grantRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function revokeRole(bytes32 role, address account) public virtual onlyRole(getRoleAdmin(role)) {\\n        _revokeRole(role, account);\\n    }\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been revoked `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) public virtual {\\n        if (callerConfirmation != _msgSender()) {\\n            revert AccessControlBadConfirmation();\\n        }\\n\\n        _revokeRole(role, callerConfirmation);\\n    }\\n\\n    /**\\n     * @dev Sets `adminRole` as ``role``'s admin role.\\n     *\\n     * Emits a {RoleAdminChanged} event.\\n     */\\n    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal virtual {\\n        bytes32 previousAdminRole = getRoleAdmin(role);\\n        _roles[role].adminRole = adminRole;\\n        emit RoleAdminChanged(role, previousAdminRole, adminRole);\\n    }\\n\\n    /**\\n     * @dev Attempts to grant `role` to `account` and returns a boolean indicating if `role` was granted.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleGranted} event.\\n     */\\n    function _grantRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (!hasRole(role, account)) {\\n            _roles[role].hasRole[account] = true;\\n            emit RoleGranted(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n\\n    /**\\n     * @dev Attempts to revoke `role` to `account` and returns a boolean indicating if `role` was revoked.\\n     *\\n     * Internal function without access restriction.\\n     *\\n     * May emit a {RoleRevoked} event.\\n     */\\n    function _revokeRole(bytes32 role, address account) internal virtual returns (bool) {\\n        if (hasRole(role, account)) {\\n            _roles[role].hasRole[account] = false;\\n            emit RoleRevoked(role, account, _msgSender());\\n            return true;\\n        } else {\\n            return false;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xa0e92d42942f4f57c5be50568dac11e9d00c93efcb458026e18d2d9b9b2e7308\",\"license\":\"MIT\"},\"@openzeppelin/contracts/access/IAccessControl.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (access/IAccessControl.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev External interface of AccessControl declared to support ERC-165 detection.\\n */\\ninterface IAccessControl {\\n    /**\\n     * @dev The `account` is missing a role.\\n     */\\n    error AccessControlUnauthorizedAccount(address account, bytes32 neededRole);\\n\\n    /**\\n     * @dev The caller of a function is not the expected one.\\n     *\\n     * NOTE: Don't confuse with {AccessControlUnauthorizedAccount}.\\n     */\\n    error AccessControlBadConfirmation();\\n\\n    /**\\n     * @dev Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole`\\n     *\\n     * `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite\\n     * {RoleAdminChanged} not being emitted signaling this.\\n     */\\n    event RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole);\\n\\n    /**\\n     * @dev Emitted when `account` is granted `role`.\\n     *\\n     * `sender` is the account that originated the contract call. This account bears the admin role (for the granted role).\\n     * Expected in cases where the role was granted using the internal {AccessControl-_grantRole}.\\n     */\\n    event RoleGranted(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Emitted when `account` is revoked `role`.\\n     *\\n     * `sender` is the account that originated the contract call:\\n     *   - if using `revokeRole`, it is the admin role bearer\\n     *   - if using `renounceRole`, it is the role bearer (i.e. `account`)\\n     */\\n    event RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender);\\n\\n    /**\\n     * @dev Returns `true` if `account` has been granted `role`.\\n     */\\n    function hasRole(bytes32 role, address account) external view returns (bool);\\n\\n    /**\\n     * @dev Returns the admin role that controls `role`. See {grantRole} and\\n     * {revokeRole}.\\n     *\\n     * To change a role's admin, use {AccessControl-_setRoleAdmin}.\\n     */\\n    function getRoleAdmin(bytes32 role) external view returns (bytes32);\\n\\n    /**\\n     * @dev Grants `role` to `account`.\\n     *\\n     * If `account` had not been already granted `role`, emits a {RoleGranted}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function grantRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from `account`.\\n     *\\n     * If `account` had been granted `role`, emits a {RoleRevoked} event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must have ``role``'s admin role.\\n     */\\n    function revokeRole(bytes32 role, address account) external;\\n\\n    /**\\n     * @dev Revokes `role` from the calling account.\\n     *\\n     * Roles are often managed via {grantRole} and {revokeRole}: this function's\\n     * purpose is to provide a mechanism for accounts to lose their privileges\\n     * if they are compromised (such as when a trusted device is misplaced).\\n     *\\n     * If the calling account had been granted `role`, emits a {RoleRevoked}\\n     * event.\\n     *\\n     * Requirements:\\n     *\\n     * - the caller must be `callerConfirmation`.\\n     */\\n    function renounceRole(bytes32 role, address callerConfirmation) external;\\n}\\n\",\"keccak256\":\"0xc1c2a7f1563b77050dc6d507db9f4ada5d042c1f6a9ddbffdc49c77cdc0a1606\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC1155/IERC1155.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC1155/IERC1155.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC-1155 compliant contract, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-1155[ERC].\\n */\\ninterface IERC1155 is IERC165 {\\n    /**\\n     * @dev Emitted when `value` amount of tokens of type `id` are transferred from `from` to `to` by `operator`.\\n     */\\n    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);\\n\\n    /**\\n     * @dev Equivalent to multiple {TransferSingle} events, where `operator`, `from` and `to` are the same for all\\n     * transfers.\\n     */\\n    event TransferBatch(\\n        address indexed operator,\\n        address indexed from,\\n        address indexed to,\\n        uint256[] ids,\\n        uint256[] values\\n    );\\n\\n    /**\\n     * @dev Emitted when `account` grants or revokes permission to `operator` to transfer their tokens, according to\\n     * `approved`.\\n     */\\n    event ApprovalForAll(address indexed account, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Emitted when the URI for token type `id` changes to `value`, if it is a non-programmatic URI.\\n     *\\n     * If an {URI} event was emitted for `id`, the standard\\n     * https://eips.ethereum.org/EIPS/eip-1155#metadata-extensions[guarantees] that `value` will equal the value\\n     * returned by {IERC1155MetadataURI-uri}.\\n     */\\n    event URI(string value, uint256 indexed id);\\n\\n    /**\\n     * @dev Returns the value of tokens of token type `id` owned by `account`.\\n     */\\n    function balanceOf(address account, uint256 id) external view returns (uint256);\\n\\n    /**\\n     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {balanceOf}.\\n     *\\n     * Requirements:\\n     *\\n     * - `accounts` and `ids` must have the same length.\\n     */\\n    function balanceOfBatch(\\n        address[] calldata accounts,\\n        uint256[] calldata ids\\n    ) external view returns (uint256[] memory);\\n\\n    /**\\n     * @dev Grants or revokes permission to `operator` to transfer the caller's tokens, according to `approved`,\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `operator` cannot be the zero address.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns true if `operator` is approved to transfer ``account``'s tokens.\\n     *\\n     * See {setApprovalForAll}.\\n     */\\n    function isApprovedForAll(address account, address operator) external view returns (bool);\\n\\n    /**\\n     * @dev Transfers a `value` amount of tokens of type `id` from `from` to `to`.\\n     *\\n     * WARNING: This function can potentially allow a reentrancy attack when transferring tokens\\n     * to an untrusted contract, when invoking {onERC1155Received} on the receiver.\\n     * Ensure to follow the checks-effects-interactions pattern and consider employing\\n     * reentrancy guards when interacting with untrusted contracts.\\n     *\\n     * Emits a {TransferSingle} event.\\n     *\\n     * Requirements:\\n     *\\n     * - `to` cannot be the zero address.\\n     * - If the caller is not `from`, it must have been approved to spend ``from``'s tokens via {setApprovalForAll}.\\n     * - `from` must have a balance of tokens of type `id` of at least `value` amount.\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155Received} and return the\\n     * acceptance magic value.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 id, uint256 value, bytes calldata data) external;\\n\\n    /**\\n     * @dev xref:ROOT:erc1155.adoc#batch-operations[Batched] version of {safeTransferFrom}.\\n     *\\n     * WARNING: This function can potentially allow a reentrancy attack when transferring tokens\\n     * to an untrusted contract, when invoking {onERC1155BatchReceived} on the receiver.\\n     * Ensure to follow the checks-effects-interactions pattern and consider employing\\n     * reentrancy guards when interacting with untrusted contracts.\\n     *\\n     * Emits either a {TransferSingle} or a {TransferBatch} event, depending on the length of the array arguments.\\n     *\\n     * Requirements:\\n     *\\n     * - `ids` and `values` must have the same length.\\n     * - If `to` refers to a smart contract, it must implement {IERC1155Receiver-onERC1155BatchReceived} and return the\\n     * acceptance magic value.\\n     */\\n    function safeBatchTransferFrom(\\n        address from,\\n        address to,\\n        uint256[] calldata ids,\\n        uint256[] calldata values,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0x68d6fdbeb467192c3627a46aa7bf5cbb73267363b740abc511f521a5a41a446e\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC20/IERC20.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC20/IERC20.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC-20 standard as defined in the ERC.\\n */\\ninterface IERC20 {\\n    /**\\n     * @dev Emitted when `value` tokens are moved from one account (`from`) to\\n     * another (`to`).\\n     *\\n     * Note that `value` may be zero.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /**\\n     * @dev Emitted when the allowance of a `spender` for an `owner` is set by\\n     * a call to {approve}. `value` is the new allowance.\\n     */\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /**\\n     * @dev Returns the value of tokens in existence.\\n     */\\n    function totalSupply() external view returns (uint256);\\n\\n    /**\\n     * @dev Returns the value of tokens owned by `account`.\\n     */\\n    function balanceOf(address account) external view returns (uint256);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from the caller's account to `to`.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transfer(address to, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Returns the remaining number of tokens that `spender` will be\\n     * allowed to spend on behalf of `owner` through {transferFrom}. This is\\n     * zero by default.\\n     *\\n     * This value changes when {approve} or {transferFrom} are called.\\n     */\\n    function allowance(address owner, address spender) external view returns (uint256);\\n\\n    /**\\n     * @dev Sets a `value` amount of tokens as the allowance of `spender` over the\\n     * caller's tokens.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * IMPORTANT: Beware that changing an allowance with this method brings the risk\\n     * that someone may use both the old and the new allowance by unfortunate\\n     * transaction ordering. One possible solution to mitigate this race\\n     * condition is to first reduce the spender's allowance to 0 and set the\\n     * desired value afterwards:\\n     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address spender, uint256 value) external returns (bool);\\n\\n    /**\\n     * @dev Moves a `value` amount of tokens from `from` to `to` using the\\n     * allowance mechanism. `value` is then deducted from the caller's\\n     * allowance.\\n     *\\n     * Returns a boolean value indicating whether the operation succeeded.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 value) external returns (bool);\\n}\\n\",\"keccak256\":\"0xe06a3f08a987af6ad2e1c1e774405d4fe08f1694b67517438b467cecf0da0ef7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/IERC721.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev Required interface of an ERC-721 compliant contract.\\n */\\ninterface IERC721 is IERC165 {\\n    /**\\n     * @dev Emitted when `tokenId` token is transferred from `from` to `to`.\\n     */\\n    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.\\n     */\\n    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);\\n\\n    /**\\n     * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.\\n     */\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    /**\\n     * @dev Returns the number of tokens in ``owner``'s account.\\n     */\\n    function balanceOf(address owner) external view returns (uint256 balance);\\n\\n    /**\\n     * @dev Returns the owner of the `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function ownerOf(uint256 tokenId) external view returns (address owner);\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId, bytes calldata data) external;\\n\\n    /**\\n     * @dev Safely transfers `tokenId` token from `from` to `to`, checking first that contract recipients\\n     * are aware of the ERC-721 protocol to prevent tokens from being forever locked.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must exist and be owned by `from`.\\n     * - If the caller is not `from`, it must have been allowed to move this token by either {approve} or\\n     *   {setApprovalForAll}.\\n     * - If `to` refers to a smart contract, it must implement {IERC721Receiver-onERC721Received}, which is called upon\\n     *   a safe transfer.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function safeTransferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Transfers `tokenId` token from `from` to `to`.\\n     *\\n     * WARNING: Note that the caller is responsible to confirm that the recipient is capable of receiving ERC-721\\n     * or else they may be permanently lost. Usage of {safeTransferFrom} prevents loss, though the caller must\\n     * understand this adds an external call which potentially creates a reentrancy vulnerability.\\n     *\\n     * Requirements:\\n     *\\n     * - `from` cannot be the zero address.\\n     * - `to` cannot be the zero address.\\n     * - `tokenId` token must be owned by `from`.\\n     * - If the caller is not `from`, it must be approved to move this token by either {approve} or {setApprovalForAll}.\\n     *\\n     * Emits a {Transfer} event.\\n     */\\n    function transferFrom(address from, address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Gives permission to `to` to transfer `tokenId` token to another account.\\n     * The approval is cleared when the token is transferred.\\n     *\\n     * Only a single account can be approved at a time, so approving the zero address clears previous approvals.\\n     *\\n     * Requirements:\\n     *\\n     * - The caller must own the token or be an approved operator.\\n     * - `tokenId` must exist.\\n     *\\n     * Emits an {Approval} event.\\n     */\\n    function approve(address to, uint256 tokenId) external;\\n\\n    /**\\n     * @dev Approve or remove `operator` as an operator for the caller.\\n     * Operators can call {transferFrom} or {safeTransferFrom} for any token owned by the caller.\\n     *\\n     * Requirements:\\n     *\\n     * - The `operator` cannot be the address zero.\\n     *\\n     * Emits an {ApprovalForAll} event.\\n     */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n     * @dev Returns the account approved for `tokenId` token.\\n     *\\n     * Requirements:\\n     *\\n     * - `tokenId` must exist.\\n     */\\n    function getApproved(uint256 tokenId) external view returns (address operator);\\n\\n    /**\\n     * @dev Returns if the `operator` is allowed to manage all of the assets of `owner`.\\n     *\\n     * See {setApprovalForAll}\\n     */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x5dc63d1c6a12fe1b17793e1745877b2fcbe1964c3edfd0a482fac21ca8f18261\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.0.1) (utils/Context.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n\\n    function _contextSuffixLength() internal view virtual returns (uint256) {\\n        return 0;\\n    }\\n}\\n\",\"keccak256\":\"0x493033a8d1b176a037b2cc6a04dad01a5c157722049bbecf632ca876224dd4b2\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/ERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/ERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\nimport {IERC165} from \\\"./IERC165.sol\\\";\\n\\n/**\\n * @dev Implementation of the {IERC165} interface.\\n *\\n * Contracts that want to implement ERC-165 should inherit from this contract and override {supportsInterface} to check\\n * for the additional interface id that will be supported. For example:\\n *\\n * ```solidity\\n * function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {\\n *     return interfaceId == type(MyInterface).interfaceId || super.supportsInterface(interfaceId);\\n * }\\n * ```\\n */\\nabstract contract ERC165 is IERC165 {\\n    /**\\n     * @dev See {IERC165-supportsInterface}.\\n     */\\n    function supportsInterface(bytes4 interfaceId) public view virtual returns (bool) {\\n        return interfaceId == type(IERC165).interfaceId;\\n    }\\n}\\n\",\"keccak256\":\"0xddce8e17e3d3f9ed818b4f4c4478a8262aab8b11ed322f1bf5ed705bb4bd97fa\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v5.1.0) (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.20;\\n\\n/**\\n * @dev Interface of the ERC-165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[ERC].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[ERC section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x79796192ec90263f21b464d5bc90b777a525971d3de8232be80d9c4f9fb353b8\",\"license\":\"MIT\"},\"contracts/fees/FeeManager.sol\":{\"content\":\"// SPDX-License-Identifier: BUSL-1.1\\npragma solidity 0.8.24;\\n\\nimport \\\"@openzeppelin/contracts/access/AccessControl.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC20/IERC20.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC721/IERC721.sol\\\";\\nimport \\\"@openzeppelin/contracts/token/ERC1155/IERC1155.sol\\\";\\n\\ncontract FeeManager is AccessControl {\\n    bytes32 public constant MANAGER_ROLE = keccak256(\\\"MANAGER_ROLE\\\");\\n    uint256 public constant DEFAULT_FEE = 150; // 1.5% in basis points\\n    uint256 public constant FEE_DENOMINATOR = 10000;\\n\\n    // Token configuration struct for custom fees\\n    struct TokenConfig {\\n        uint256 fee; // Custom fee in basis points (e.g., 100 = 1%)\\n        uint256 minThreshold; // Minimum token holding required for custom fee\\n        address tokenAddress; // The address of the ERC-20, ERC-721, or ERC-1155 token\\n        uint8 tokenType; // 1 = ERC-20, 2 = ERC-721, 3 = ERC-1155\\n        uint256 tokenId; // Used for ERC-1155\\n    }\\n\\n    // List of tokens with custom fees\\n    TokenConfig[] public feeTokens;\\n\\n    // Events\\n    event TokenFeeConfigured(address tokenAddress, uint256 customFee, uint256 minThreshold, uint8 tokenType);\\n    event TokenRemoved(address tokenAddress);\\n\\n    constructor() {\\n        _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());\\n    }\\n\\n    function configureTokenFee(\\n        address tokenAddress,\\n        uint256 customFee,\\n        uint256 minThreshold,\\n        uint256 tokenId,\\n        uint8 tokenType\\n    ) external onlyRole(MANAGER_ROLE) {\\n        require(tokenAddress != address(0), \\\"Invalid token address\\\");\\n        require(customFee <= FEE_DENOMINATOR, \\\"Fee exceeds 100%\\\");\\n\\n        feeTokens.push(\\n            TokenConfig({\\n                fee: customFee,\\n                minThreshold: minThreshold,\\n                tokenAddress: tokenAddress,\\n                tokenType: tokenType,\\n                tokenId: tokenId\\n            })\\n        );\\n\\n        emit TokenFeeConfigured(tokenAddress, customFee, minThreshold, tokenType);\\n    }\\n\\n    function removeToken(address tokenAddress) external onlyRole(MANAGER_ROLE) {\\n        require(tokenAddress != address(0), \\\"Invalid token address\\\");\\n\\n        uint256 indexToRemove = type(uint256).max;\\n        uint256 tokensLength = feeTokens.length;\\n\\n        for (uint256 i = 0; i < tokensLength; i++) {\\n            if (feeTokens[i].tokenAddress == tokenAddress) {\\n                indexToRemove = i;\\n                break;\\n            }\\n        }\\n\\n        require(indexToRemove != type(uint256).max, \\\"Token not found\\\");\\n\\n        feeTokens[indexToRemove] = feeTokens[feeTokens.length - 1];\\n        feeTokens.pop();\\n\\n        emit TokenRemoved(tokenAddress);\\n    }\\n\\n    function getApplicableFee(address user) public view returns (uint256) {\\n        uint256 applicableFee = DEFAULT_FEE;\\n        uint256 feeTokensLength = feeTokens.length;\\n        for (uint256 i = 0; i < feeTokensLength; i++) {\\n            TokenConfig memory config = feeTokens[i];\\n            bool meetsThreshold = false;\\n\\n            if (config.tokenType == 1) {\\n                // ERC-20\\n                uint256 balance = IERC20(config.tokenAddress).balanceOf(user);\\n                meetsThreshold = balance >= config.minThreshold;\\n            } else if (config.tokenType == 2) {\\n                // ERC-721\\n                uint256 balance = IERC721(config.tokenAddress).balanceOf(user);\\n                meetsThreshold = balance >= config.minThreshold;\\n            } else if (config.tokenType == 3) {\\n                // ERC-1155\\n                uint256 balance = IERC1155(config.tokenAddress).balanceOf(user, config.tokenId);\\n                meetsThreshold = balance >= config.minThreshold;\\n            }\\n\\n            if (meetsThreshold) {\\n                applicableFee = config.fee;\\n                break; // Use the first qualifying custom fee\\n            }\\n        }\\n\\n        return applicableFee;\\n    }\\n\\n    function calculateFees(uint256 amount, address user, uint8 decimals)\\n        public\\n        view\\n        returns (uint256 userAmount, uint256 protocolFee)\\n    {\\n        uint256 feePercentage = getApplicableFee(user);\\n\\n        // Calculate protocol fee in basis points\\n        protocolFee = (amount * feePercentage) / FEE_DENOMINATOR;\\n\\n        // Ensure minimum fee for non-zero amounts\\n        if (protocolFee == 0 && amount > 0) {\\n            require(decimals <= 18, \\\"Token decimals too high\\\");\\n            require(decimals > 0, \\\"Decimals Can't be 0\\\");\\n            protocolFee = 10 ** (18 - decimals); // Minimum fee\\n        }\\n\\n        require(protocolFee <= amount, \\\"Fee exceeds amount\\\");\\n        userAmount = amount - protocolFee;\\n    }\\n\\n    function getFeeBreakdown(uint256 amount, address user, uint8 decimals)\\n        external\\n        view\\n        returns (uint256 userAmount, uint256 protocolFee)\\n    {\\n        return calculateFees(amount, user, decimals);\\n    }\\n\\n    function meetsCustomFeeRequirement(address user) public view returns (bool) {\\n        return getApplicableFee(user) != DEFAULT_FEE;\\n    }\\n}\\n\",\"keccak256\":\"0x6b49e74b3d97bdd93dacb4d9e3b8263c1d737d2d71aece3a31e851953d936ae3\",\"license\":\"BUSL-1.1\"}},\"version\":1}",
+  "bytecode": "0x608060405234801561000f575f80fd5b5061001a5f33610020565b506100c9565b5f828152602081815260408083206001600160a01b038516845290915281205460ff166100c0575f838152602081815260408083206001600160a01b03861684529091529020805460ff191660011790556100783390565b6001600160a01b0316826001600160a01b0316847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45060016100c3565b505f5b92915050565b611032806100d65f395ff3fe608060405234801561000f575f80fd5b5060043610610106575f3560e01c806391d148541161009e578063d542d5241161006e578063d542d52414610258578063d547741f1461026b578063d73792a91461027e578063df023aa214610287578063ec87621c1461029a575f80fd5b806391d1485414610218578063a217fddf1461022b578063ad10d49314610232578063cedaece714610245575f80fd5b80633a552ae6116100d95780633a552ae61461018a5780634fcc1def146101b25780635fa7b584146101ba5780638ef4403c146101cd575f80fd5b806301ffc9a71461010a578063248a9ca3146101325780632f2ff15d1461016257806336568abe14610177575b5f80fd5b61011d610118366004610d21565b6102c1565b60405190151581526020015b60405180910390f35b610154610140366004610d4f565b5f9081526020819052604090206001015490565b604051908152602001610129565b610175610170366004610d81565b6102f7565b005b610175610185366004610d81565b610321565b61019d610198366004610dbb565b610359565b60408051928352602083019190915201610129565b610154609681565b6101756101c8366004610df4565b6104a6565b6101e06101db366004610d4f565b6106fa565b6040805195865260208601949094526001600160a01b039092169284019290925260ff9091166060830152608082015260a001610129565b61011d610226366004610d81565b610748565b6101545f81565b610154610240366004610df4565b610770565b61011d610253366004610df4565b610977565b61019d610266366004610dbb565b61098b565b610175610279366004610d81565b6109a4565b61015461271081565b610175610295366004610e0d565b6109c8565b6101547f241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b0881565b5f6001600160e01b03198216637965db0b60e01b14806102f157506301ffc9a760e01b6001600160e01b03198316145b92915050565b5f8281526020819052604090206001015461031181610bdf565b61031b8383610bec565b50505050565b6001600160a01b038116331461034a5760405163334bd91960e11b815260040160405180910390fd5b6103548282610c7b565b505050565b5f805f61036585610770565b90506127106103748288610e6d565b61037e9190610e84565b91508115801561038d57505f86115b1561044c5760128460ff1611156103eb5760405162461bcd60e51b815260206004820152601760248201527f546f6b656e20646563696d616c7320746f6f206869676800000000000000000060448201526064015b60405180910390fd5b5f8460ff16116104335760405162461bcd60e51b81526020600482015260136024820152720446563696d616c732043616e2774206265203606c1b60448201526064016103e2565b61043e846012610ea3565b61044990600a610f9c565b91505b858211156104915760405162461bcd60e51b815260206004820152601260248201527111995948195e18d959591cc8185b5bdd5b9d60721b60448201526064016103e2565b61049b8287610faa565b925050935093915050565b7f241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b086104d081610bdf565b6001600160a01b03821661051e5760405162461bcd60e51b8152602060048201526015602482015274496e76616c696420746f6b656e206164647265737360581b60448201526064016103e2565b6001545f19905f5b8181101561057c57846001600160a01b03166001828154811061054b5761054b610fbd565b5f9182526020909120600260049092020101546001600160a01b0316036105745780925061057c565b600101610526565b505f1982036105bf5760405162461bcd60e51b815260206004820152600f60248201526e151bdad95b881b9bdd08199bdd5b99608a1b60448201526064016103e2565b600180546105ce908290610faa565b815481106105de576105de610fbd565b905f5260205f209060040201600183815481106105fd576105fd610fbd565b5f91825260209091208254600490920201908155600180830154818301556002808401805491840180546001600160a01b031981166001600160a01b039094169384178255915460ff600160a01b9182900416026001600160a81b0319909216909217179055600392830154929091019190915580548061068057610680610fd1565b5f828152602080822060045f199490940193840201828155600181018390556002810180546001600160a81b03191690556003019190915591556040516001600160a01b03861681527f4c910b69fe65a61f7531b9c5042b2329ca7179c77290aa7e2eb3afa3c8511fd3910160405180910390a150505050565b60018181548110610709575f80fd5b5f9182526020909120600490910201805460018201546002830154600390930154919350916001600160a01b03811691600160a01b90910460ff169085565b5f918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b6001545f90609690825b8181101561096e575f6001828154811061079657610796610fbd565b5f91825260208083206040805160a081018252600494909402909101805484526001808201549385019390935260028101546001600160a01b03811692850192909252600160a01b90910460ff166060840181905260039091015460808401529193500361087d5760408083015190516370a0823160e01b81526001600160a01b0389811660048301525f9216906370a08231906024015b602060405180830381865afa158015610849573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061086d9190610fe5565b6020840151111591506109559050565b816060015160ff166002036108c05760408083015190516370a0823160e01b81526001600160a01b0389811660048301525f9216906370a082319060240161082e565b816060015160ff166003036109555760408083015160808401519151627eeac760e11b81526001600160a01b038a8116600483015260248201939093525f929091169062fdd58e90604401602060405180830381865afa158015610926573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061094a9190610fe5565b602084015111159150505b8015610964575051925061096e565b505060010161077a565b50909392505050565b5f609661098383610770565b141592915050565b5f80610998858585610359565b91509150935093915050565b5f828152602081905260409020600101546109be81610bdf565b61031b8383610c7b565b7f241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b086109f281610bdf565b6001600160a01b038616610a405760405162461bcd60e51b8152602060048201526015602482015274496e76616c696420746f6b656e206164647265737360581b60448201526064016103e2565b612710851115610a855760405162461bcd60e51b815260206004820152601060248201526f4665652065786365656473203130302560801b60448201526064016103e2565b6040805160a08101825286815260208082018781526001600160a01b038a811684860181815260ff89811660608089018281526080808b018f81526001805480820182555f919091529b516004909c027fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf681019c909c5598517fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf78c015594517fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf88b0180549251909516600160a01b026001600160a81b03199092169716969096179590951790915593517fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf99096019590955585519081529283018a905282850189905282015291517f4518af97d43d63290f200db96d6afec3152ac498d23eaaecd409fb5a8c2a8b399281900390910190a1505050505050565b610be98133610ce4565b50565b5f610bf78383610748565b610c74575f838152602081815260408083206001600160a01b03861684529091529020805460ff19166001179055610c2c3390565b6001600160a01b0316826001600160a01b0316847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45060016102f1565b505f6102f1565b5f610c868383610748565b15610c74575f838152602081815260408083206001600160a01b0386168085529252808320805460ff1916905551339286917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45060016102f1565b610cee8282610748565b610d1d5760405163e2517d3f60e01b81526001600160a01b0382166004820152602481018390526044016103e2565b5050565b5f60208284031215610d31575f80fd5b81356001600160e01b031981168114610d48575f80fd5b9392505050565b5f60208284031215610d5f575f80fd5b5035919050565b80356001600160a01b0381168114610d7c575f80fd5b919050565b5f8060408385031215610d92575f80fd5b82359150610da260208401610d66565b90509250929050565b803560ff81168114610d7c575f80fd5b5f805f60608486031215610dcd575f80fd5b83359250610ddd60208501610d66565b9150610deb60408501610dab565b90509250925092565b5f60208284031215610e04575f80fd5b610d4882610d66565b5f805f805f60a08688031215610e21575f80fd5b610e2a86610d66565b9450602086013593506040860135925060608601359150610e4d60808701610dab565b90509295509295909350565b634e487b7160e01b5f52601160045260245ffd5b80820281158282048414176102f1576102f1610e59565b5f82610e9e57634e487b7160e01b5f52601260045260245ffd5b500490565b60ff82811682821603908111156102f1576102f1610e59565b600181815b80851115610ef657815f1904821115610edc57610edc610e59565b80851615610ee957918102915b93841c9390800290610ec1565b509250929050565b5f82610f0c575060016102f1565b81610f1857505f6102f1565b8160018114610f2e5760028114610f3857610f54565b60019150506102f1565b60ff841115610f4957610f49610e59565b50506001821b6102f1565b5060208310610133831016604e8410600b8410161715610f77575081810a6102f1565b610f818383610ebc565b805f1904821115610f9457610f94610e59565b029392505050565b5f610d4860ff841683610efe565b818103818111156102f1576102f1610e59565b634e487b7160e01b5f52603260045260245ffd5b634e487b7160e01b5f52603160045260245ffd5b5f60208284031215610ff5575f80fd5b505191905056fea26469706673582212205a707027ad2dcae804064986b77ef2e16d544deaa9f51a4d2fd7338cb3ae37ef64736f6c63430008180033",
+  "deployedBytecode": "0x608060405234801561000f575f80fd5b5060043610610106575f3560e01c806391d148541161009e578063d542d5241161006e578063d542d52414610258578063d547741f1461026b578063d73792a91461027e578063df023aa214610287578063ec87621c1461029a575f80fd5b806391d1485414610218578063a217fddf1461022b578063ad10d49314610232578063cedaece714610245575f80fd5b80633a552ae6116100d95780633a552ae61461018a5780634fcc1def146101b25780635fa7b584146101ba5780638ef4403c146101cd575f80fd5b806301ffc9a71461010a578063248a9ca3146101325780632f2ff15d1461016257806336568abe14610177575b5f80fd5b61011d610118366004610d21565b6102c1565b60405190151581526020015b60405180910390f35b610154610140366004610d4f565b5f9081526020819052604090206001015490565b604051908152602001610129565b610175610170366004610d81565b6102f7565b005b610175610185366004610d81565b610321565b61019d610198366004610dbb565b610359565b60408051928352602083019190915201610129565b610154609681565b6101756101c8366004610df4565b6104a6565b6101e06101db366004610d4f565b6106fa565b6040805195865260208601949094526001600160a01b039092169284019290925260ff9091166060830152608082015260a001610129565b61011d610226366004610d81565b610748565b6101545f81565b610154610240366004610df4565b610770565b61011d610253366004610df4565b610977565b61019d610266366004610dbb565b61098b565b610175610279366004610d81565b6109a4565b61015461271081565b610175610295366004610e0d565b6109c8565b6101547f241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b0881565b5f6001600160e01b03198216637965db0b60e01b14806102f157506301ffc9a760e01b6001600160e01b03198316145b92915050565b5f8281526020819052604090206001015461031181610bdf565b61031b8383610bec565b50505050565b6001600160a01b038116331461034a5760405163334bd91960e11b815260040160405180910390fd5b6103548282610c7b565b505050565b5f805f61036585610770565b90506127106103748288610e6d565b61037e9190610e84565b91508115801561038d57505f86115b1561044c5760128460ff1611156103eb5760405162461bcd60e51b815260206004820152601760248201527f546f6b656e20646563696d616c7320746f6f206869676800000000000000000060448201526064015b60405180910390fd5b5f8460ff16116104335760405162461bcd60e51b81526020600482015260136024820152720446563696d616c732043616e2774206265203606c1b60448201526064016103e2565b61043e846012610ea3565b61044990600a610f9c565b91505b858211156104915760405162461bcd60e51b815260206004820152601260248201527111995948195e18d959591cc8185b5bdd5b9d60721b60448201526064016103e2565b61049b8287610faa565b925050935093915050565b7f241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b086104d081610bdf565b6001600160a01b03821661051e5760405162461bcd60e51b8152602060048201526015602482015274496e76616c696420746f6b656e206164647265737360581b60448201526064016103e2565b6001545f19905f5b8181101561057c57846001600160a01b03166001828154811061054b5761054b610fbd565b5f9182526020909120600260049092020101546001600160a01b0316036105745780925061057c565b600101610526565b505f1982036105bf5760405162461bcd60e51b815260206004820152600f60248201526e151bdad95b881b9bdd08199bdd5b99608a1b60448201526064016103e2565b600180546105ce908290610faa565b815481106105de576105de610fbd565b905f5260205f209060040201600183815481106105fd576105fd610fbd565b5f91825260209091208254600490920201908155600180830154818301556002808401805491840180546001600160a01b031981166001600160a01b039094169384178255915460ff600160a01b9182900416026001600160a81b0319909216909217179055600392830154929091019190915580548061068057610680610fd1565b5f828152602080822060045f199490940193840201828155600181018390556002810180546001600160a81b03191690556003019190915591556040516001600160a01b03861681527f4c910b69fe65a61f7531b9c5042b2329ca7179c77290aa7e2eb3afa3c8511fd3910160405180910390a150505050565b60018181548110610709575f80fd5b5f9182526020909120600490910201805460018201546002830154600390930154919350916001600160a01b03811691600160a01b90910460ff169085565b5f918252602082815260408084206001600160a01b0393909316845291905290205460ff1690565b6001545f90609690825b8181101561096e575f6001828154811061079657610796610fbd565b5f91825260208083206040805160a081018252600494909402909101805484526001808201549385019390935260028101546001600160a01b03811692850192909252600160a01b90910460ff166060840181905260039091015460808401529193500361087d5760408083015190516370a0823160e01b81526001600160a01b0389811660048301525f9216906370a08231906024015b602060405180830381865afa158015610849573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061086d9190610fe5565b6020840151111591506109559050565b816060015160ff166002036108c05760408083015190516370a0823160e01b81526001600160a01b0389811660048301525f9216906370a082319060240161082e565b816060015160ff166003036109555760408083015160808401519151627eeac760e11b81526001600160a01b038a8116600483015260248201939093525f929091169062fdd58e90604401602060405180830381865afa158015610926573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061094a9190610fe5565b602084015111159150505b8015610964575051925061096e565b505060010161077a565b50909392505050565b5f609661098383610770565b141592915050565b5f80610998858585610359565b91509150935093915050565b5f828152602081905260409020600101546109be81610bdf565b61031b8383610c7b565b7f241ecf16d79d0f8dbfb92cbc07fe17840425976cf0667f022fe9877caa831b086109f281610bdf565b6001600160a01b038616610a405760405162461bcd60e51b8152602060048201526015602482015274496e76616c696420746f6b656e206164647265737360581b60448201526064016103e2565b612710851115610a855760405162461bcd60e51b815260206004820152601060248201526f4665652065786365656473203130302560801b60448201526064016103e2565b6040805160a08101825286815260208082018781526001600160a01b038a811684860181815260ff89811660608089018281526080808b018f81526001805480820182555f919091529b516004909c027fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf681019c909c5598517fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf78c015594517fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf88b0180549251909516600160a01b026001600160a81b03199092169716969096179590951790915593517fb10e2d527612073b26eecdfd717e6a320cf44b4afac2b0732d9fcbe2b7fa0cf99096019590955585519081529283018a905282850189905282015291517f4518af97d43d63290f200db96d6afec3152ac498d23eaaecd409fb5a8c2a8b399281900390910190a1505050505050565b610be98133610ce4565b50565b5f610bf78383610748565b610c74575f838152602081815260408083206001600160a01b03861684529091529020805460ff19166001179055610c2c3390565b6001600160a01b0316826001600160a01b0316847f2f8788117e7eff1d82e926ec794901d17c78024a50270940304540a733656f0d60405160405180910390a45060016102f1565b505f6102f1565b5f610c868383610748565b15610c74575f838152602081815260408083206001600160a01b0386168085529252808320805460ff1916905551339286917ff6391f5c32d9c69d2a47ea670b442974b53935d1edc7fd64eb21e047a839171b9190a45060016102f1565b610cee8282610748565b610d1d5760405163e2517d3f60e01b81526001600160a01b0382166004820152602481018390526044016103e2565b5050565b5f60208284031215610d31575f80fd5b81356001600160e01b031981168114610d48575f80fd5b9392505050565b5f60208284031215610d5f575f80fd5b5035919050565b80356001600160a01b0381168114610d7c575f80fd5b919050565b5f8060408385031215610d92575f80fd5b82359150610da260208401610d66565b90509250929050565b803560ff81168114610d7c575f80fd5b5f805f60608486031215610dcd575f80fd5b83359250610ddd60208501610d66565b9150610deb60408501610dab565b90509250925092565b5f60208284031215610e04575f80fd5b610d4882610d66565b5f805f805f60a08688031215610e21575f80fd5b610e2a86610d66565b9450602086013593506040860135925060608601359150610e4d60808701610dab565b90509295509295909350565b634e487b7160e01b5f52601160045260245ffd5b80820281158282048414176102f1576102f1610e59565b5f82610e9e57634e487b7160e01b5f52601260045260245ffd5b500490565b60ff82811682821603908111156102f1576102f1610e59565b600181815b80851115610ef657815f1904821115610edc57610edc610e59565b80851615610ee957918102915b93841c9390800290610ec1565b509250929050565b5f82610f0c575060016102f1565b81610f1857505f6102f1565b8160018114610f2e5760028114610f3857610f54565b60019150506102f1565b60ff841115610f4957610f49610e59565b50506001821b6102f1565b5060208310610133831016604e8410600b8410161715610f77575081810a6102f1565b610f818383610ebc565b805f1904821115610f9457610f94610e59565b029392505050565b5f610d4860ff841683610efe565b818103818111156102f1576102f1610e59565b634e487b7160e01b5f52603260045260245ffd5b634e487b7160e01b5f52603160045260245ffd5b5f60208284031215610ff5575f80fd5b505191905056fea26469706673582212205a707027ad2dcae804064986b77ef2e16d544deaa9f51a4d2fd7338cb3ae37ef64736f6c63430008180033",
+  "devdoc": {
+    "errors": {
+      "AccessControlBadConfirmation()": [
+        {
+          "details": "The caller of a function is not the expected one. NOTE: Don't confuse with {AccessControlUnauthorizedAccount}."
+        }
+      ],
+      "AccessControlUnauthorizedAccount(address,bytes32)": [
+        {
+          "details": "The `account` is missing a role."
+        }
+      ]
+    },
+    "events": {
+      "RoleAdminChanged(bytes32,bytes32,bytes32)": {
+        "details": "Emitted when `newAdminRole` is set as ``role``'s admin role, replacing `previousAdminRole` `DEFAULT_ADMIN_ROLE` is the starting admin for all roles, despite {RoleAdminChanged} not being emitted signaling this."
+      },
+      "RoleGranted(bytes32,address,address)": {
+        "details": "Emitted when `account` is granted `role`. `sender` is the account that originated the contract call. This account bears the admin role (for the granted role). Expected in cases where the role was granted using the internal {AccessControl-_grantRole}."
+      },
+      "RoleRevoked(bytes32,address,address)": {
+        "details": "Emitted when `account` is revoked `role`. `sender` is the account that originated the contract call:   - if using `revokeRole`, it is the admin role bearer   - if using `renounceRole`, it is the role bearer (i.e. `account`)"
+      }
+    },
+    "kind": "dev",
+    "methods": {
+      "getRoleAdmin(bytes32)": {
+        "details": "Returns the admin role that controls `role`. See {grantRole} and {revokeRole}. To change a role's admin, use {_setRoleAdmin}."
+      },
+      "grantRole(bytes32,address)": {
+        "details": "Grants `role` to `account`. If `account` had not been already granted `role`, emits a {RoleGranted} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleGranted} event."
+      },
+      "hasRole(bytes32,address)": {
+        "details": "Returns `true` if `account` has been granted `role`."
+      },
+      "renounceRole(bytes32,address)": {
+        "details": "Revokes `role` from the calling account. Roles are often managed via {grantRole} and {revokeRole}: this function's purpose is to provide a mechanism for accounts to lose their privileges if they are compromised (such as when a trusted device is misplaced). If the calling account had been revoked `role`, emits a {RoleRevoked} event. Requirements: - the caller must be `callerConfirmation`. May emit a {RoleRevoked} event."
+      },
+      "revokeRole(bytes32,address)": {
+        "details": "Revokes `role` from `account`. If `account` had been granted `role`, emits a {RoleRevoked} event. Requirements: - the caller must have ``role``'s admin role. May emit a {RoleRevoked} event."
+      },
+      "supportsInterface(bytes4)": {
+        "details": "See {IERC165-supportsInterface}."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 26,
+        "contract": "contracts/fees/FeeManager.sol:FeeManager",
+        "label": "_roles",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_struct(RoleData)21_storage)"
+      },
+      {
+        "astId": 796,
+        "contract": "contracts/fees/FeeManager.sol:FeeManager",
+        "label": "feeTokens",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_array(t_struct(TokenConfig)792_storage)dyn_storage"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_array(t_struct(TokenConfig)792_storage)dyn_storage": {
+        "base": "t_struct(TokenConfig)792_storage",
+        "encoding": "dynamic_array",
+        "label": "struct FeeManager.TokenConfig[]",
+        "numberOfBytes": "32"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_bytes32,t_struct(RoleData)21_storage)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+        "numberOfBytes": "32",
+        "value": "t_struct(RoleData)21_storage"
+      },
+      "t_struct(RoleData)21_storage": {
+        "encoding": "inplace",
+        "label": "struct AccessControl.RoleData",
+        "members": [
+          {
+            "astId": 18,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "hasRole",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_mapping(t_address,t_bool)"
+          },
+          {
+            "astId": 20,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "adminRole",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_bytes32"
+          }
+        ],
+        "numberOfBytes": "64"
+      },
+      "t_struct(TokenConfig)792_storage": {
+        "encoding": "inplace",
+        "label": "struct FeeManager.TokenConfig",
+        "members": [
+          {
+            "astId": 783,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "fee",
+            "offset": 0,
+            "slot": "0",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 785,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "minThreshold",
+            "offset": 0,
+            "slot": "1",
+            "type": "t_uint256"
+          },
+          {
+            "astId": 787,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "tokenAddress",
+            "offset": 0,
+            "slot": "2",
+            "type": "t_address"
+          },
+          {
+            "astId": 789,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "tokenType",
+            "offset": 20,
+            "slot": "2",
+            "type": "t_uint8"
+          },
+          {
+            "astId": 791,
+            "contract": "contracts/fees/FeeManager.sol:FeeManager",
+            "label": "tokenId",
+            "offset": 0,
+            "slot": "3",
+            "type": "t_uint256"
+          }
+        ],
+        "numberOfBytes": "128"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      },
+      "t_uint8": {
+        "encoding": "inplace",
+        "label": "uint8",
+        "numberOfBytes": "1"
+      }
+    }
+  }
+}
