@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract FeeManager is AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
@@ -106,7 +105,7 @@ contract FeeManager is AccessControl {
         return applicableFee;
     }
 
-    function calculateFees(address tokenAddress, uint256 amount, address user)
+    function calculateFees(uint256 amount, address user, uint8 decimals)
         public
         view
         returns (uint256 userAmount, uint256 protocolFee)
@@ -118,8 +117,8 @@ contract FeeManager is AccessControl {
 
         // Ensure minimum fee for non-zero amounts
         if (protocolFee == 0 && amount > 0) {
-            uint8 decimals = IERC20Metadata(tokenAddress).decimals();
             require(decimals <= 18, "Token decimals too high");
+            require(decimals > 0, "Decimals Can't be 0");
             protocolFee = 10 ** (18 - decimals); // Minimum fee
         }
 
@@ -127,12 +126,12 @@ contract FeeManager is AccessControl {
         userAmount = amount - protocolFee;
     }
 
-    function getFeeBreakdown(address tokenAddress, uint256 amount, address user)
+    function getFeeBreakdown(uint256 amount, address user, uint8 decimals)
         external
         view
         returns (uint256 userAmount, uint256 protocolFee)
     {
-        return calculateFees(tokenAddress, amount, user);
+        return calculateFees(amount, user, decimals);
     }
 
     function meetsCustomFeeRequirement(address user) public view returns (bool) {

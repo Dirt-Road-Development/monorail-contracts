@@ -57,7 +57,7 @@ contract BridgeTest is TestHelperOz5 {
 
     function test_noDiscount() public {
         (uint256 userAmountA, uint256 protocolFeeA) =
-            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
         assertEq(userAmountA, 98500000000);
         assertEq(protocolFeeA, 1500000000);
     }
@@ -87,7 +87,7 @@ contract BridgeTest is TestHelperOz5 {
         );
 
         (uint256 userAmountA, uint256 protocolFeeA) =
-            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
         assertEq(userAmountA, 99000000000);
         assertEq(protocolFeeA, 1000000000);
     }
@@ -102,7 +102,7 @@ contract BridgeTest is TestHelperOz5 {
         );
 
         (uint256 userAmountA, uint256 protocolFeeA) =
-            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
         assertEq(userAmountA, 98000000000);
         assertEq(protocolFeeA, 2000000000);
     }
@@ -117,7 +117,7 @@ contract BridgeTest is TestHelperOz5 {
         );
 
         (uint256 userAmountA, uint256 protocolFeeA) =
-            feeManager.getFeeBreakdown(address(usdc), 100_000 * 10 ** 6, address(this));
+            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
         assertEq(userAmountA, 95000000000);
         assertEq(protocolFeeA, 5000000000);
     }

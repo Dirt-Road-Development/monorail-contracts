@@ -7,6 +7,14 @@ network=$1
 echo "Starting Deployment on $network"
 
 if [ $network == "testnet" ]; then
+
+    cd deployments
+
+    rm -rf amoy-testnet
+    rm -rf europa-testnet
+
+    cd ..
+
     npx hardhat deploy --network europa-testnet --tags LibTypesV1,FeeManager,NativeSkaleStation,USDCs
     # npx hardhat deploy --network aurora-testnet --tags Station,USDC
     npx hardhat deploy --network amoy-testnet --tags LibTypesV1,NativeStation,USDC

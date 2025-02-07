@@ -172,7 +172,7 @@ contract BridgeTest is TestHelperOz5 {
 
     function test_customERC20CustomFees() public {
         (uint256 userAmountA, uint256 protocolFeeA) =
-            feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
+            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), mUSDC.decimals());
 
         assertEq(userAmountA, 98500000000);
         assertEq(protocolFeeA, 1500000000);
@@ -188,7 +188,7 @@ contract BridgeTest is TestHelperOz5 {
         );
 
         (uint256 userAmountB, uint256 protocolFeeB) =
-            feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
+            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), mUSDC.decimals());
 
         assertEq(userAmountB, 99000000000);
         assertEq(protocolFeeB, 1000000000);
