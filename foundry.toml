@@ -29,5 +29,8 @@ remappings = [
     '@openzeppelin/=node_modules/@openzeppelin/',
 ]
 
+optimizer = true
+optimizer_runs = 50000
+
 [fuzz]
 runs = 1000
