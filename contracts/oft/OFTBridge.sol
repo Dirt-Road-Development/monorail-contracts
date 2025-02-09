@@ -4,6 +4,7 @@ pragma solidity 0.8.24;
 import {MessagingFee, Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IOFT,SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IFeeManager} from "../interfaces/IFeeManager.sol";
@@ -12,7 +13,7 @@ import {LibTypesV1} from "../lib/LibTypesV1.sol";
 
 contract OFTBridge is AccessControl, ReentrancyGuard {
     
-    using SafeERC20 for IERC20;
+    using SafeERC20 for IERC20Metadata;
 
     IFeeManager public feeManager;
 
@@ -49,14 +50,22 @@ contract OFTBridge is AccessControl, ReentrancyGuard {
 
         IOFT oft = IOFT(token);
         
-        IERC20 erc20 = IERC20(token);
-        (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(sendParam.amountLD, _msgSender(), oft.sharedDecimals());
+        IERC20Metadata erc20 = IERC20Metadata(token);
+        (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(sendParam.amountLD, _msgSender(), erc20.decimals());
 
         erc20.safeTransferFrom(_msgSender(), address(this), sendParam.amountLD);
         erc20.safeTransfer(feeCollector, protocolFee);
         
-        oft.send(
-            sendParam,
+        oft.send{value: fee.nativeFee}(
+            SendParam({
+                dstEid: sendParam.dstEid,
+                to: sendParam.to,
+                amountLD: userAmount,
+                minAmountLD: (userAmount * 9_500) / 10_000,
+                extraOptions: sendParam.extraOptions,
+                composeMsg: sendParam.composeMsg,
+                oftCmd: sendParam.oftCmd
+            }),
             fee,
             _msgSender()
         );

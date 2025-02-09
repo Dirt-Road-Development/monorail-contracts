@@ -5,7 +5,7 @@ src = 'contracts'
 out = 'out'
 test = 'test'
 cache_path = 'cache/foundry'
-verbosity = 4
+verbosity = 2
 
 libs = [
     # We provide a set of useful contract utilities
