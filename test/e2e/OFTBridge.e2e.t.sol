@@ -27,7 +27,7 @@ import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/
 
 import "../../contracts/mock/SKALEToken.sol";
 
-contract OFTBridgeTest is TestHelperOz5 {
+contract OFTBridgeE2ETest is TestHelperOz5 {
 
 	using OptionsBuilder for bytes;
 	

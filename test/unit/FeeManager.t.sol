@@ -22,7 +22,7 @@ import {Test} from "forge-std/Test.sol";
 // DevTools imports
 // import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract BridgeTest is Test {
+contract FeeManagerUnitTest is Test {
     FeeManager private feeManager;
 
     address private userA = address(0x1);

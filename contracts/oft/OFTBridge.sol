@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import {MessagingFee, Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {IOFT,SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
@@ -11,13 +11,12 @@ import {IFeeManager} from "../interfaces/IFeeManager.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {LibTypesV1} from "../lib/LibTypesV1.sol";
 
-contract OFTBridge is AccessControl, ReentrancyGuard {
+contract OFTBridge is Context, ReentrancyGuard {
     
     using SafeERC20 for IERC20Metadata;
 
     IFeeManager public feeManager;
-
-    address private feeCollector;
+    address public feeCollector;
 
     // Events
     event BridgeInitiated(
