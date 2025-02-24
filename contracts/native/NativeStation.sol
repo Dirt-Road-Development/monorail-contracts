@@ -59,8 +59,10 @@ contract NativeStation is OApp, AccessControl {
     function bridge(LibTypesV1.TripDetails memory details, bytes calldata options)
         external
         payable
-        // Add Non Reenetrant????
-        returns (MessagingReceipt memory receipt)
+        returns (
+            // Add Non Reenetrant????
+            MessagingReceipt memory receipt
+        )
     {
         if (!supportedTokens[IERC20(details.token)]) {
             revert("Unsupported Token");

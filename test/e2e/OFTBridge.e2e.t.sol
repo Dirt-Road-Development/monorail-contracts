@@ -13,11 +13,10 @@ import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/Option
 import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 import {OFTMock} from "@layerzerolabs/oft-evm/test/mocks/OFTMock.sol";
-import {IOFT,SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import {IOFT, SendParam} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
 import {OFT} from "@layerzerolabs/oft-evm/contracts/OFT.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
 
 // Forge imports
 import "forge-std/console.sol";
@@ -28,9 +27,7 @@ import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/
 import "../../contracts/mock/SKALEToken.sol";
 
 contract OFTBridgeE2ETest is TestHelperOz5 {
-
-	using OptionsBuilder for bytes;
-	
+    using OptionsBuilder for bytes;
 
     uint32 internal constant A_EID = 1;
     uint32 internal constant B_EID = 2;
@@ -93,22 +90,19 @@ contract OFTBridgeE2ETest is TestHelperOz5 {
 
         OFTMock _aOFT = OFTMock(
             _deployOApp(
-                type(OFTMock).creationCode,
-                abi.encode("OFTa", "OFTa", address(endpoints[A_EID]), address(this))
+                type(OFTMock).creationCode, abi.encode("OFTa", "OFTa", address(endpoints[A_EID]), address(this))
             )
         );
 
         OFTMock _bOFT = OFTMock(
             _deployOApp(
-                type(OFTMock).creationCode,
-                abi.encode("OFTb", "OFTb", address(endpoints[B_EID]), address(this))
+                type(OFTMock).creationCode, abi.encode("OFTb", "OFTb", address(endpoints[B_EID]), address(this))
             )
         );
 
         OFTMock _cOFT = OFTMock(
             _deployOApp(
-                type(OFTMock).creationCode,
-                abi.encode("OFTc", "OFTc", address(endpoints[C_EID]), address(this))
+                type(OFTMock).creationCode, abi.encode("OFTc", "OFTc", address(endpoints[C_EID]), address(this))
             )
         );
 
@@ -122,24 +116,23 @@ contract OFTBridgeE2ETest is TestHelperOz5 {
         oapps[1] = address(bOFT);
         oapps[2] = address(cOFT);
 
-
         this.wireOApps(oapps);
 
         _aOFT.mint(aUser, 100 ether);
     }
 
     function test_constructor() public {
-    	console.log("Run");
+        console.log("Run");
     }
 
     function test_initialBalances() public {
-    	assertEq(IERC20(address(aOFT)).balanceOf(aUser), 100 ether);
-    	assertEq(IERC20(address(aOFT)).balanceOf(bUser), 0);
+        assertEq(IERC20(address(aOFT)).balanceOf(aUser), 100 ether);
+        assertEq(IERC20(address(aOFT)).balanceOf(bUser), 0);
         assertEq(IERC20(address(aOFT)).balanceOf(cUser), 0);
 
-    	assertEq(IERC20(address(bOFT)).balanceOf(aUser), 0);
+        assertEq(IERC20(address(bOFT)).balanceOf(aUser), 0);
         assertEq(IERC20(address(bOFT)).balanceOf(bUser), 0);
-    	assertEq(IERC20(address(bOFT)).balanceOf(cUser), 0);
+        assertEq(IERC20(address(bOFT)).balanceOf(cUser), 0);
 
         assertEq(IERC20(address(cOFT)).balanceOf(aUser), 0);
         assertEq(IERC20(address(cOFT)).balanceOf(bUser), 0);
@@ -147,16 +140,16 @@ contract OFTBridgeE2ETest is TestHelperOz5 {
     }
 
     function test_bridge(uint256 tokensToSend) public {
-    	// uint256 tokensToSend = 1 ether;
-    	vm.assume(tokensToSend > 0.001 ether && tokensToSend < 100 ether);
+        // uint256 tokensToSend = 1 ether;
+        vm.assume(tokensToSend > 0.001 ether && tokensToSend < 100 ether);
 
-		// 1. Approve aOFT on OFT Bridge A
+        // 1. Approve aOFT on OFT Bridge A
         vm.prank(aUser);
-		IERC20(address(aOFT)).approve(address(aOFTBridge), tokensToSend);
-    	
-		// 2. Setup Options
-		bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(400_000, 0);
-        
+        IERC20(address(aOFT)).approve(address(aOFTBridge), tokensToSend);
+
+        // 2. Setup Options
+        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(400_000, 0);
+
         // 3. Prepare the Sending Information
         SendParam memory sendParam = SendParam(
             B_EID,
@@ -173,7 +166,7 @@ contract OFTBridgeE2ETest is TestHelperOz5 {
 
         // 5. "Bridge" the token from aOFT -> bOFT
         vm.prank(aUser);
-       	aOFTBridge.bridge{value: fee.nativeFee}(address(aOFT), sendParam, fee);
+        aOFTBridge.bridge{value: fee.nativeFee}(address(aOFT), sendParam, fee);
 
         // 6. Verify the Message on Endpoint B
         verifyPackets(B_EID, addressToBytes32(address(bOFT)));
@@ -181,14 +174,14 @@ contract OFTBridgeE2ETest is TestHelperOz5 {
         // 7. Load Breakdown of Funds
         // Fee Manager Responses are Public
         // This allows the below assertions to be proven correct
-        (uint256 userAmount, uint256 protocolFee) = aFeeManager.getFeeBreakdown(tokensToSend, aUser, IERC20Metadata(address(aOFT)).decimals());
+        (uint256 userAmount, uint256 protocolFee) =
+            aFeeManager.getFeeBreakdown(tokensToSend, aUser, IERC20Metadata(address(aOFT)).decimals());
 
         // 8. Prove User Balance on New Chain
-       	assertEq(IERC20(address(bOFT)).balanceOf(aUser), _handleLayerZeroSlippage(tokensToSend - protocolFee, bOFT));
+        assertEq(IERC20(address(bOFT)).balanceOf(aUser), _handleLayerZeroSlippage(tokensToSend - protocolFee, bOFT));
 
         // 9. Prove Fee Collector Balance
         assertEq(IERC20(address(aOFT)).balanceOf(aFeeCollector), protocolFee);
-
     }
 
     function _handleLayerZeroSlippage(uint256 amount, IOFT layerZeroOFT) internal view returns (uint256) {

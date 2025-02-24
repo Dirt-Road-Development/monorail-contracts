@@ -8,7 +8,7 @@ import {IFeeManager} from "../../contracts/interfaces/IFeeManager.sol";
 
 import {USDC} from "../../contracts/mock/USDC.sol";
 import {USDCs} from "../../contracts/mock/USDCs.sol";
-import {SKALEToken } from "../../contracts/mock/SKALEToken.sol";
+import {SKALEToken} from "../../contracts/mock/SKALEToken.sol";
 
 import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
 
@@ -37,7 +37,6 @@ contract FeeManagerUnitTest is Test {
     uint256 private oneHundredUSDC = 100 * 10 ** 6;
 
     function setUp() public virtual {
-
         vm.deal(userA, 1000 ether);
         vm.deal(feeCollector, 1000 ether);
 
