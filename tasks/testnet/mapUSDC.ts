@@ -5,20 +5,10 @@ import { EndpointId } from '@layerzerolabs/lz-definitions'
 async function main() {
     if (network.name === 'europa-testnet') {
         const deploys = await deployments.all()
-        const auroraDeployments = await companionNetworks['aurora'].deployments.all()
         const amoyDeployments = await companionNetworks['amoy'].deployments.all()
         const [signer] = await ethers.getSigners()
 
         const station = new ethers.Contract(deploys['NativeSkaleStation'].address, deploys['NativeSkaleStation'].abi, signer)
-
-        // const addToken = await station.addToken(
-        //     EndpointId.AURORA_V2_TESTNET,
-        //     auroraDeployments["USDC"].address,
-        //     deploys["USDCs"].address,
-        //     true
-        // );
-
-        // await addToken.wait(1);
 
         const addToken2 = await station.addToken(
             EndpointId.AMOY_V2_TESTNET,
