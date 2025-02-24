@@ -14,6 +14,16 @@ const amoyTestnetNativeStation: OmniPointHardhat = {
     contractName: 'NativeStation',
 }
 
+const europaTestnetBasicOFT: OmniPointHardhat = {
+    eid: EndpointId.SKALE_V2_TESTNET,
+    contractName: "MonorailOFT"
+}
+
+const amoyTestnetBasicOFT: OmniPointHardhat = {
+    eid: EndpointId.AMOY_V2_TESTNET,
+    contractName: "BasicOFT"
+}
+
 const testnetConfig: OAppOmniGraphHardhat = {
     contracts: [
         {
@@ -21,6 +31,12 @@ const testnetConfig: OAppOmniGraphHardhat = {
         },
         {
             contract: amoyTestnetNativeStation
+        },
+        {
+            contract: europaTestnetBasicOFT
+        },
+        {
+            contract: amoyTestnetBasicOFT
         }
     ],
     connections: [
@@ -46,6 +62,42 @@ const testnetConfig: OAppOmniGraphHardhat = {
         {
             from: europaTestnetNativeStation,
             to: amoyTestnetNativeStation,
+            config: {
+                sendConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x955412c07d9bc1027eb4d481621ee063bfd9f4c6'],
+                    },
+                },
+                receiveConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x955412c07d9bc1027eb4d481621ee063bfd9f4c6'],
+                    },
+                },
+            },
+        },
+        {
+            from: amoyTestnetBasicOFT,
+            to: europaTestnetBasicOFT,
+            config: {
+                sendConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x55c175dd5b039331db251424538169d8495c18d1'],
+                    },
+                },
+                receiveConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x55c175dd5b039331db251424538169d8495c18d1'],
+                    },
+                },
+            },
+        },
+        {
+            from: europaTestnetBasicOFT,
+            to: amoyTestnetBasicOFT,
             config: {
                 sendConfig: {
                     ulnConfig: {
