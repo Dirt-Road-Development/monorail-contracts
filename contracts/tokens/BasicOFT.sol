@@ -11,7 +11,7 @@ contract BasicOFT is OFT {
         string memory _symbol,
         address _lzEndpoint
     ) OFT(_name, _symbol, _lzEndpoint, _msgSender()) Ownable(_msgSender()) {
-        _mint(_msgSender(), 1000000 * 10 ** 18);
+        _mint(_msgSender(), 1_000_000 ether);
     }
 
     function mint(uint256 amount, address to) external {
