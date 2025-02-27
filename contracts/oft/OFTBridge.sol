@@ -40,7 +40,7 @@ contract OFTBridge is Context, ReentrancyGuard {
         erc20.safeTransferFrom(_msgSender(), address(this), sendParam.amountLD);
         erc20.safeTransfer(feeCollector, protocolFee);
 
-        /* slither-disable-start arbitrary-send-eth */
+        // slither-disable-start arbitrary-send-eth
         oft.send{value: fee.nativeFee}(
             SendParam({
                 dstEid: sendParam.dstEid,
@@ -54,7 +54,7 @@ contract OFTBridge is Context, ReentrancyGuard {
             fee,
             _msgSender()
         );
-        /* slither-disable-end arbitrary-send-eth */
+        // slither-disable-end arbitrary-send-eth
 
         emit BridgeInitiated(msg.sender, sendParam.dstEid, sendParam.amountLD, protocolFee);
     }
