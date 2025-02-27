@@ -41,6 +41,7 @@ contract OFTBridge is Context, ReentrancyGuard {
         erc20.safeTransfer(feeCollector, protocolFee);
 
         // slither-disable-start arbitrary-send-eth
+        // slither-disable-next-line unused-return
         oft.send{value: fee.nativeFee}(
             SendParam({
                 dstEid: sendParam.dstEid,
