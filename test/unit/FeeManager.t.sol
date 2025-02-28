@@ -8,7 +8,7 @@ import {IFeeManager} from "../../contracts/interfaces/IFeeManager.sol";
 
 import {USDC} from "../../contracts/mock/USDC.sol";
 import {USDCs} from "../../contracts/mock/USDCs.sol";
-import {SKALEToken } from "../../contracts/mock/SKALEToken.sol";
+import {SKALEToken} from "../../contracts/mock/SKALEToken.sol";
 
 import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
 
@@ -22,7 +22,7 @@ import {Test} from "forge-std/Test.sol";
 // DevTools imports
 // import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract BridgeTest is Test {
+contract FeeManagerUnitTest is Test {
     FeeManager private feeManager;
 
     address private userA = address(0x1);
@@ -37,7 +37,6 @@ contract BridgeTest is Test {
     uint256 private oneHundredUSDC = 100 * 10 ** 6;
 
     function setUp() public virtual {
-
         vm.deal(userA, 1000 ether);
         vm.deal(feeCollector, 1000 ether);
 

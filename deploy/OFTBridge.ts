@@ -2,8 +2,10 @@ import assert from 'assert'
 
 import { type DeployFunction } from 'hardhat-deploy/types'
 
+import { EndpointId } from '@layerzerolabs/lz-definitions'
+
 // TODO declare your contract name here
-const contractName = 'NativeSkaleStation'
+const contractName = 'OFTBridge'
 
 const deploy: DeployFunction = async (hre) => {
     const { getNamedAccounts, deployments } = hre
@@ -16,15 +18,13 @@ const deploy: DeployFunction = async (hre) => {
     console.log(`Network: ${hre.network.name}`)
     console.log(`Deployer: ${deployer}`)
     
-    const endpointV2Deployment = await hre.deployments.get('EndpointV2')
     const feeManager = await hre.deployments.get("FeeManager");
 
     const { address } = await deploy(contractName, {
         from: deployer,
         args: [
-            endpointV2Deployment.address, // LayerZero's EndpointV2 address
             deployer,
-            feeManager.address // Switch to Multisig in Production
+            feeManager.address
         ],
         libraries: {
             LibTypesV1: (await deployments.get('LibTypesV1')).address,

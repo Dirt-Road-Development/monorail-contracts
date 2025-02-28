@@ -5,7 +5,7 @@ src = 'contracts'
 out = 'out'
 test = 'test'
 cache_path = 'cache/foundry'
-verbosity = 4
+verbosity = 2
 
 libs = [
     # We provide a set of useful contract utilities
@@ -28,6 +28,9 @@ remappings = [
     '@layerzerolabs/=node_modules/@layerzerolabs/',
     '@openzeppelin/=node_modules/@openzeppelin/',
 ]
+
+optimizer = true
+optimizer_runs = 50000
 
 [fuzz]
 runs = 1000

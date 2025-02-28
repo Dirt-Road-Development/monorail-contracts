@@ -21,7 +21,7 @@ import "forge-std/console.sol";
 // DevTools imports
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract MyOAppTest is TestHelperOz5 {
+contract MyOAppE2ETest is TestHelperOz5 {
     using OptionsBuilder for bytes;
 
     uint32 private aEid = 1;
@@ -36,7 +36,7 @@ contract MyOAppTest is TestHelperOz5 {
 
     function setUp() public virtual override {
         super.setUp();
-        
+
         vm.deal(userA, 1000 ether);
         vm.deal(userB, 1000 ether);
 

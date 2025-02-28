@@ -4,48 +4,46 @@ import type { OAppOmniGraphHardhat, OmniPointHardhat } from '@layerzerolabs/tool
 
 const USE_TESTNET = true
 
-const europaTestnetContract: OmniPointHardhat = {
+const europaTestnetNativeStation: OmniPointHardhat = {
     eid: EndpointId.SKALE_V2_TESTNET,
     contractName: 'NativeSkaleStation',
 }
 
-const amoyTestnetContract: OmniPointHardhat = {
+const amoyTestnetNativeStation: OmniPointHardhat = {
     eid: EndpointId.AMOY_V2_TESTNET,
     contractName: 'NativeStation',
 }
 
-const auroraTestnetContract: OmniPointHardhat = {
-    eid: EndpointId.AURORA_V2_TESTNET,
-    contractName: 'Station',
+const europaTestnetBasicOFT: OmniPointHardhat = {
+    eid: EndpointId.SKALE_V2_TESTNET,
+    contractName: "MonorailOFT"
+}
+
+const amoyTestnetBasicOFT: OmniPointHardhat = {
+    eid: EndpointId.AMOY_V2_TESTNET,
+    contractName: "BasicOFT"
 }
 
 const testnetConfig: OAppOmniGraphHardhat = {
     contracts: [
-        // {
-        // contract: celoTestnetContract,
-        /**
-         * This config object is optional.
-         * The callerBpsCap refers to the maximum fee (in basis points) that the contract can charge.
-         */
-
-        // config: {
-        //     callerBpsCap: BigInt(300),
-        // },
-        // },
         {
-            contract: europaTestnetContract,
+            contract: europaTestnetNativeStation
         },
         {
-            contract: amoyTestnetContract,
+            contract: amoyTestnetNativeStation
         },
-        // {
-        //     contract: auroraTestnetContract
-        // }
+        {
+            contract: europaTestnetBasicOFT
+        },
+        {
+            contract: amoyTestnetBasicOFT
+        }
     ],
     connections: [
+        // Native Stations
         {
-            from: amoyTestnetContract,
-            to: europaTestnetContract,
+            from: amoyTestnetNativeStation,
+            to: europaTestnetNativeStation,
             config: {
                 sendConfig: {
                     ulnConfig: {
@@ -62,8 +60,8 @@ const testnetConfig: OAppOmniGraphHardhat = {
             },
         },
         {
-            from: europaTestnetContract,
-            to: amoyTestnetContract,
+            from: europaTestnetNativeStation,
+            to: amoyTestnetNativeStation,
             config: {
                 sendConfig: {
                     ulnConfig: {
@@ -79,50 +77,42 @@ const testnetConfig: OAppOmniGraphHardhat = {
                 },
             },
         },
-        // {
-        //     from: auroraTestnetContract,
-        //     to: europaTestnetContract,
-        //     config: {
-        //         sendConfig: {
-        //             ulnConfig: {
-        //                 confirmations: BigInt(1),
-        //                 requiredDVNs: [
-        //                     "0x988d898a9acf43f61fdbc72aad6eb3f0542e19e1"
-        //                 ]
-        //             }
-        //         },
-        //         receiveConfig: {
-        //             ulnConfig: {
-        //                 confirmations: BigInt(1),
-        //                 requiredDVNs: [
-        //                     "0x988d898a9acf43f61fdbc72aad6eb3f0542e19e1"
-        //                 ]
-        //             }
-        //         }
-        //     },
-        // },
-        // {
-        //     from: europaTestnetContract,
-        //     to: auroraTestnetContract,
-        //     config: {
-        //         sendConfig: {
-        //             ulnConfig: {
-        //                 confirmations: BigInt(1),
-        //                 requiredDVNs: [
-        //                     "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-        //                 ]
-        //             }
-        //         },
-        //         receiveConfig: {
-        //             ulnConfig: {
-        //                 confirmations: BigInt(1),
-        //                 requiredDVNs: [
-        //                     "0x955412c07d9bc1027eb4d481621ee063bfd9f4c6"
-        //                 ]
-        //             }
-        //         }
-        //     },
-        // }
+        {
+            from: amoyTestnetBasicOFT,
+            to: europaTestnetBasicOFT,
+            config: {
+                sendConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x55c175dd5b039331db251424538169d8495c18d1'],
+                    },
+                },
+                receiveConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x55c175dd5b039331db251424538169d8495c18d1'],
+                    },
+                },
+            },
+        },
+        {
+            from: europaTestnetBasicOFT,
+            to: amoyTestnetBasicOFT,
+            config: {
+                sendConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x955412c07d9bc1027eb4d481621ee063bfd9f4c6'],
+                    },
+                },
+                receiveConfig: {
+                    ulnConfig: {
+                        confirmations: BigInt(1),
+                        requiredDVNs: ['0x955412c07d9bc1027eb4d481621ee063bfd9f4c6'],
+                    },
+                },
+            },
+        }
     ],
 }
 
