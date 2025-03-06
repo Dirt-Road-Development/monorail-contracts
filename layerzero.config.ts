@@ -46,10 +46,6 @@ const testnetConfig: OAppOmniGraphHardhat = {
             to: europaTestnetNativeStation,
             config: {
                 sendConfig: {
-                    executorConfig: {
-                        maxMessageSize: 10000,
-                        executor: '0x4Cf1B3Fa61465c2c907f82fC488B43223BA0CF93'
-                    },
                     ulnConfig: {
                         confirmations: BigInt(1),
                         requiredDVNs: ['0x55c175dd5b039331db251424538169d8495c18d1'],
@@ -68,10 +64,6 @@ const testnetConfig: OAppOmniGraphHardhat = {
             to: amoyTestnetNativeStation,
             config: {
                 sendConfig: {
-                    executorConfig: {
-                        maxMessageSize: 10000,
-                        executor: '0x86d08462EaA1559345d7F41f937B2C804209DB8A',
-                    },
                     ulnConfig: {
                         confirmations: BigInt(1),
                         requiredDVNs: ['0x955412c07d9bc1027eb4d481621ee063bfd9f4c6'],
@@ -90,10 +82,6 @@ const testnetConfig: OAppOmniGraphHardhat = {
             to: europaTestnetBasicOFT,
             config: {
                 sendConfig: {
-                    executorConfig: {
-                        maxMessageSize: 10000,
-                        executor: '0x4Cf1B3Fa61465c2c907f82fC488B43223BA0CF93',
-                    },
                     ulnConfig: {
                         confirmations: BigInt(1),
                         requiredDVNs: ['0x55c175dd5b039331db251424538169d8495c18d1'],
@@ -112,10 +100,6 @@ const testnetConfig: OAppOmniGraphHardhat = {
             to: amoyTestnetBasicOFT,
             config: {
                 sendConfig: {
-                    executorConfig: {
-                        maxMessageSize: 10000,
-                        executor: '0x86d08462EaA1559345d7F41f937B2C804209DB8A',
-                    },
                     ulnConfig: {
                         confirmations: BigInt(1),
                         requiredDVNs: ['0x955412c07d9bc1027eb4d481621ee063bfd9f4c6'],
