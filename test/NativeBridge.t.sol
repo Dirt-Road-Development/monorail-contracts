@@ -35,7 +35,7 @@ contract NativeBridgeTest is NativeStationFixture {
      * @dev Bridges 100 units of 6-decimal USDC from all source chains to aSkaleStation
      */
     function test_multichain100() public {
-        bridgeAllStableToASkaleStation(HUNDRED*USDC);
+        _bridgeAllStableToASkaleStation(HUNDRED_USDC);
     }
     
     /**
@@ -43,7 +43,7 @@ contract NativeBridgeTest is NativeStationFixture {
      * @dev Bridges 1,000 units of 6-decimal USDC from all source chains to aSkaleStation
      */
     function test_multichain1000() public {
-        bridgeAllStableToASkaleStation(THOUSAND*USDC);
+        _bridgeAllStableToASkaleStation(THOUSAND_USDC);
     }
 
     /**
@@ -51,7 +51,7 @@ contract NativeBridgeTest is NativeStationFixture {
      * @dev Bridges 1,000,000 units of 6-decimal USDC from all source chains to aSkaleStation
      */
     function test_multichain1000000() public {
-        bridgeAllStableToASkaleStation(MILLION*USDC);
+        _bridgeAllStableToASkaleStation(MILLION_USDC);
     }
 
     /**
@@ -59,7 +59,7 @@ contract NativeBridgeTest is NativeStationFixture {
      * @dev Bridges 10,000,000 units of 6-decimal USDC from all source chains to aSkaleStation
      */
     function test_multichain10000000() public {
-        bridgeAllStableToASkaleStation(TEN*MILLION_USDC);
+        _bridgeAllStableToASkaleStation(TEN_MILLION_USDC);
     }
 
     /**
@@ -67,9 +67,9 @@ contract NativeBridgeTest is NativeStationFixture {
      * @dev Tests bridging 100 USDC to SKALE Station and then bridging the user amount (after fees) back
      */
     function test_twoWay100() public {
-        (uint256 userAmount,) = getFee(HUNDRED*USDC, aUSDC.decimals());
-        bridgeToSkaleStation(HUNDRED*USDC, bUSDC, aUSDC, bStation);
-        bridgeFromSkaleStation(userAmount, aUSDC, bUSDC, bStation, B_EID);
+        (uint256 userAmount,) = _getFee(HUNDRED_USDC, aUSDC.decimals());
+        _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
+        _bridgeFromSkaleStation(userAmount, aUSDC, bUSDC, bStation, B_EID);
     }
 
     /**
