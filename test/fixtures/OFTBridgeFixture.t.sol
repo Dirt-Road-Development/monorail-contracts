@@ -26,36 +26,43 @@ import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/
 
 import "../../contracts/mock/SKALEToken.sol";
 
-contract OFTBridgeE2ETest is TestHelperOz5 {
+contract OFTBridgeFixture is TestHelperOz5 {
     using OptionsBuilder for bytes;
 
-    uint32 internal constant A_EID = 1;
-    uint32 internal constant B_EID = 2;
-    uint32 internal constant C_EID = 3;
+    uint256 public constant HUNDRED = 100e18;
+    uint256 public constant THOUSAND = 1_000e18;
+    uint256 public constant MILLION = 1_000_000e18;
+    uint256 public constant TEN_MILLION = 10_000_000e18;
 
-    address private aUser = address(0x1);
-    address private bUser = address(0x2);
-    address private cUser = address(0x3);
+    uint32 public constant A_EID = 1;
+    uint32 public constant B_EID = 2;
+    uint32 public constant C_EID = 3;
 
-    address private aFeeCollector = address(0x05);
-    address private bFeeCollector = address(0x05);
-    address private cFeeCollector = address(0x05);
+    address public aUser = address(0x1);
+    address public bUser = address(0x2);
+    address public cUser = address(0x3);
 
-    FeeManager internal aFeeManager;
-    FeeManager internal bFeeManager;
-    FeeManager internal cFeeManager;
+    address public aFeeCollector = address(0x05);
+    address public bFeeCollector = address(0x05);
+    address public cFeeCollector = address(0x05);
 
-    OFTBridge internal aOFTBridge;
-    OFTBridge internal bOFTBridge;
-    OFTBridge internal cOFTBridge;
+    FeeManager public aFeeManager;
+    FeeManager public bFeeManager;
+    FeeManager public cFeeManager;
 
-    IOFT internal aOFT;
-    IOFT internal bOFT;
-    IOFT internal cOFT;
+    OFTBridge public aOFTBridge;
+    OFTBridge public bOFTBridge;
+    OFTBridge public cOFTBridge;
 
-    SKALEToken internal skl;
+    IOFT public aOFT;
+    IOFT public bOFT;
+    IOFT public cOFT;
 
-    address[] internal nativeTokens;
+    SKALEToken public skl;
+
+    address[] public nativeTokens;
+
+    bytes public options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(600_000, 0);
 
     function setUp() public virtual override {
         super.setUp();
@@ -118,75 +125,77 @@ contract OFTBridgeE2ETest is TestHelperOz5 {
 
         this.wireOApps(oapps);
 
-        _aOFT.mint(aUser, 100 ether);
+        _aOFT.mint(aUser, TEN_MILLION);
     }
 
-    function test_constructor() public {
-        console.log("Run");
-    }
+    
 
-    function test_initialBalances() public {
-        assertEq(IERC20(address(aOFT)).balanceOf(aUser), 100 ether);
-        assertEq(IERC20(address(aOFT)).balanceOf(bUser), 0);
-        assertEq(IERC20(address(aOFT)).balanceOf(cUser), 0);
+    function _bridgeOFT(uint256 amount, address user, uint32 srcEndpointId, uint32 dstEndpointId) internal {
 
-        assertEq(IERC20(address(bOFT)).balanceOf(aUser), 0);
-        assertEq(IERC20(address(bOFT)).balanceOf(bUser), 0);
-        assertEq(IERC20(address(bOFT)).balanceOf(cUser), 0);
+        IOFT oftFrom = _getOFT(srcEndpointId);
+        IOFT oftTo = _getOFT(dstEndpointId);
+        OFTBridge bridgeFrom = _getOFTBridge(srcEndpointId);
 
-        assertEq(IERC20(address(cOFT)).balanceOf(aUser), 0);
-        assertEq(IERC20(address(cOFT)).balanceOf(bUser), 0);
-        assertEq(IERC20(address(cOFT)).balanceOf(cUser), 0);
-    }
-
-    function test_bridge(uint256 tokensToSend) public {
-        // uint256 tokensToSend = 1 ether;
-        vm.assume(tokensToSend > 0.001 ether && tokensToSend < 100 ether);
-
-        // 1. Approve aOFT on OFT Bridge A
-        vm.prank(aUser);
-        IERC20(address(aOFT)).approve(address(aOFTBridge), tokensToSend);
-
-        // 2. Setup Options
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(400_000, 0);
+        // 1 Approve aOFT on OFT Bridge A
+        vm.prank(user);
+        IERC20(address(oftFrom)).approve(address(bridgeFrom), amount);
 
         // 3. Prepare the Sending Information
         SendParam memory sendParam = SendParam(
-            B_EID,
-            addressToBytes32(aUser), // Recipient of bOFT
-            tokensToSend,
-            (tokensToSend * 9_500) / 10_000, // allow 1% slippage
+            dstEndpointId,
+            addressToBytes32(user), // Recipient of bOFT
+            amount,
+            (amount * 9_500) / 10_000, // allow 1% slippage
             options,
             "",
             ""
         );
 
         // 4. Quote the LayerZero Fee (separate from tx fee)
-        MessagingFee memory fee = aOFT.quoteSend(sendParam, false);
+        MessagingFee memory fee = oftFrom.quoteSend(sendParam, false);
 
         // 5. "Bridge" the token from aOFT -> bOFT
-        vm.prank(aUser);
-        aOFTBridge.bridge{value: fee.nativeFee}(address(aOFT), sendParam, fee);
+        vm.prank(user);
+        bridgeFrom.bridge{value: fee.nativeFee}(address(oftFrom), sendParam, fee);
 
         // 6. Verify the Message on Endpoint B
-        verifyPackets(B_EID, addressToBytes32(address(bOFT)));
+        verifyPackets(dstEndpointId, addressToBytes32(address(oftTo)));
 
         // 7. Load Breakdown of Funds
         // Fee Manager Responses are Public
         // This allows the below assertions to be proven correct
-        (uint256 userAmount, uint256 protocolFee) =
-            aFeeManager.getFeeBreakdown(tokensToSend, aUser, IERC20Metadata(address(aOFT)).decimals());
+        (uint256 userAmount, uint256 protocolFee) = _getFeeManager(srcEndpointId).getFeeBreakdown(amount, user, IERC20Metadata(address(oftFrom)).decimals());
 
         // 8. Prove User Balance on New Chain
-        assertEq(IERC20(address(bOFT)).balanceOf(aUser), _handleLayerZeroSlippage(tokensToSend - protocolFee, bOFT));
+        assertEq(IERC20(address(oftTo)).balanceOf(user), _handleLayerZeroSlippage(amount - protocolFee, oftTo));
 
         // 9. Prove Fee Collector Balance
-        assertEq(IERC20(address(aOFT)).balanceOf(aFeeCollector), protocolFee);
+        assertEq(IERC20(address(oftFrom)).balanceOf(aFeeCollector), protocolFee);
     }
 
     function _handleLayerZeroSlippage(uint256 amount, IOFT layerZeroOFT) internal view returns (uint256) {
         uint8 decimals = 18 - layerZeroOFT.sharedDecimals();
-        console.log("Decimals: ", decimals);
         return (amount / (10 ** decimals)) * (10 ** decimals);
+    }
+
+    function _getFeeManager(uint32 endpointId) internal view returns (FeeManager) {
+        if (endpointId == A_EID) return aFeeManager;
+        if (endpointId == B_EID) return bFeeManager;
+        if (endpointId == C_EID) return cFeeManager;
+        revert("Unknown Endpoint");
+    }
+
+    function _getOFT(uint32 endpointId) internal view returns (IOFT) {
+        if (endpointId == A_EID) return aOFT;
+        if (endpointId == B_EID) return bOFT;
+        if (endpointId == C_EID) return cOFT;
+        revert("Unknown Endpoint");
+    }
+
+    function _getOFTBridge(uint32 endpointId) internal view returns (OFTBridge) {
+        if (endpointId == A_EID) return aOFTBridge;
+        if (endpointId == B_EID) return bOFTBridge;
+        if (endpointId == C_EID) return cOFTBridge;
+        revert("Unknown Endpoint");
     }
 }
