@@ -109,17 +109,17 @@ contract NativeStation is OApp, AccessControl {
         }
 
         IERC20 localToken = IERC20(tokenMappings[details.token]);
-
+        
         if (deposits[localToken] < details.amount) {
             // revert InsufficentFundsInBridge(deposits[localToken], details.amount);
             revert InsufficentFundsInBridge();
         }
 
-        localToken.safeTransfer(details.to, details.amount);
-
         deposits[localToken] -= details.amount;
-
+        
         emit BridgeReceived(address(localToken), details.to, details.amount);
+
+        localToken.safeTransfer(details.to, details.amount);
     }
 
     function quote(LibTypesV1.TripDetails memory tripDetails, bytes memory options, bool payInLzToken)
