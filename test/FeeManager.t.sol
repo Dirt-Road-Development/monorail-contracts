@@ -120,27 +120,4 @@ contract FeeManagerUnitTest is Test {
         assertEq(userAmountA, 95000000000);
         assertEq(protocolFeeA, 5000000000);
     }
-
-    // function test_customERC20CustomFees() public {
-    //     (uint256 userAmountA, uint256 protocolFeeA) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
-
-    // assertEq(userAmountA, 98500000000);
-    // assertEq(protocolFeeA, 1500000000);
-
-    //     // uint256 balance = tokenA.balanceOf(address(this));
-
-    // feeManager.addToken(
-    //     address(tokenA),
-    //     100 * 10 ** 18,
-    //     100 * 10 ** 18,
-    //     1,
-    //     1
-    // );
-
-    //     (uint256 userAmountB, uint256 protocolFeeB) = feeManager.getFeeBreakdown(address(mUSDC), 100_000 * 10 ** 6, address(this));
-    //     console.log("RES: ", userAmountB, protocolFeeB);
-    //     assertEq(userAmountA, 99000000000);
-    //     assertEq(protocolFeeA, 1000000000);
-
-    // }
 }
