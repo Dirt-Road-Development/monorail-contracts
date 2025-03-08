@@ -18,9 +18,9 @@ import {Test} from "forge-std/Test.sol";
  * @title FeeManagerUnitTest
  * @dev Unit tests for the FeeManager contract focusing on fee calculations and token discount configurations
  * @notice Verifies fee calculations, discounts, and token configurations in the FeeManager contract
- * @author Original author
+ * @author TheGreatAxios
  */
-contract FeeManagerUnitTest is Test {
+contract FeeManagerTest is Test {
     /// @dev The FeeManager contract instance being tested
     FeeManager private feeManager;
     
