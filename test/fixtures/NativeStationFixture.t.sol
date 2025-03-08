@@ -57,7 +57,11 @@ contract NativeStationFixture is TestHelperOz5 {
     USDC public dUSDC;
     USDC public eUSDC;
     USDC public fUSDC;
+    
     SKALEToken public skl;
+
+    IERC20 public aToken;
+    IERC20 public bToken;
 
     FeeManager public feeManager;
 
@@ -75,6 +79,8 @@ contract NativeStationFixture is TestHelperOz5 {
 
         // Setup Native Tokens
         skl = new SKALEToken("SKALE", "SKL");
+        aToken = IERC20(new SKALEToken("A TOKEN", "ATOK"));
+        bToken = IERC20(new SKALEToken("B TOKEN", "BTOK"));
 
         address aNativeToken = address(skl);
         address bNativeToken = address(0);

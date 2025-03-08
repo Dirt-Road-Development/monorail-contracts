@@ -1,193 +1,112 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
+import "./fixtures/NativeStationFixture.t.sol";
 
-import "../contracts/native/NativeStation.sol";
-import "../contracts/native/NativeSkaleStation.sol";
-import "../contracts/fees/FeeManager.sol";
-import "../contracts/interfaces/IFeeManager.sol";
-
-import "../contracts/mock/USDC.sol";
-import "../contracts/mock/USDCs.sol";
-import "../contracts/mock/SKALEToken.sol";
-
-import {IMonorailNativeToken} from "../contracts/interfaces/IMonorailNativeToken.sol";
-// OApp imports
-import {
-    IOAppOptionsType3, EnforcedOptionParam
-} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OAppOptionsType3.sol";
-import {OptionsBuilder} from "@layerzerolabs/oapp-evm/contracts/oapp/libs/OptionsBuilder.sol";
-import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
-import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
-
-// OZ imports
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
-// Forge imports
-import "forge-std/console.sol";
-
-// DevTools imports
-import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
-
-contract NativeBridgeE2ETest is TestHelperOz5 {
-    using OptionsBuilder for bytes;
-
-    uint32 private aEid = 1;
-    uint32 private bEid = 2;
-
-    NativeSkaleStation private skaleStation;
-    NativeStation private station;
-    FeeManager private feeManager;
-
-    address private userA = address(0x1);
-    address private feeCollector = address(0x02);
-
-    USDC private usdc;
-    USDCs private mUSDC;
-    SKALEToken public skl;
-    SKALEToken public tokenA;
-    SKALEToken public tokenB;
-    SKALEToken public tokenC;
-
-    uint256 private oneHundredUSDC = 100 * 10 ** 6;
-
-    address[] public nativeTokens;
-
+/**
+ * @title NativeBridgeTest
+ * @dev Test contract for testing Native Bridge functionality across multiple chains
+ * @notice Contains tests for cross-chain stablecoin transfers through SKALE Station
+ * @author TheGreatAxios
+ */
+contract NativeBridgeTest is NativeStationFixture {
+    /**
+     * @notice Sets up the test environment
+     * @dev Full LayerZero setup is handled in super.setUp() from NativeStationFixture
+     */
     function setUp() public virtual override {
         super.setUp();
-
-        vm.deal(userA, 1000 ether);
-        vm.deal(feeCollector, 1000 ether);
-
-        skl = new SKALEToken("SKALE", "SKL");
-        tokenA = new SKALEToken("TokenA", "TKA");
-        tokenB = new SKALEToken("TokenB", "TKB");
-        tokenC = new SKALEToken("TokenB", "TKC");
-
-        nativeTokens.push(address(0));
-        nativeTokens.push(address(skl));
-
-        createEndpoints(2, LibraryType.UltraLightNode, nativeTokens);
-
-        feeManager = new FeeManager();
-
-        feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
-
-        station = NativeStation(
-            payable(
-                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[aEid]), bEid, address(this)))
-            )
-        );
-        skaleStation = NativeSkaleStation(
-            payable(
-                _deployOApp(
-                    type(NativeSkaleStation).creationCode,
-                    abi.encode(address(endpoints[bEid]), feeCollector, IFeeManager(address(feeManager)))
-                )
-            )
-        );
-
-        address[] memory oapps = new address[](2);
-
-        oapps[0] = address(station);
-        oapps[1] = address(skaleStation);
-
-        this.wireOApps(oapps);
-
-        usdc = new USDC("USDC", "USDC");
-        mUSDC = new USDCs("USDC.s", "USDC.s", 6, address(skaleStation));
-
-        skaleStation.addToken(aEid, address(usdc), address(mUSDC));
-
-        station.addToken(address(mUSDC), address(usdc));
     }
 
+    /**
+     * @notice Tests the constructor and verifies default state
+     * @dev Checks that all station contracts have the correct owner set
+     */
     function test_constructor() public {
-        assertEq(station.owner(), address(this));
-        assertEq(skaleStation.owner(), address(this));
+        assertEq(aSkaleStation.owner(), address(this));
+        assertEq(bStation.owner(), address(this));
+        assertEq(cStation.owner(), address(this));
+        assertEq(dStation.owner(), address(this));
+        assertEq(eStation.owner(), address(this));
+        assertEq(fStation.owner(), address(this));
     }
 
-    function test_multichainBridge() public {
-        // Step 1. Approve Token - 100 USDC
-        usdc.approve(address(station), 100 * 10 ** 6);
-
-        // Step 2. Prepare Message
-        bytes memory options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0);
-
-        // Step 3. Prepare Trip Details
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(usdc), address(this), 100 * 10 ** 6);
-
-        // Step 4. Get Quote Fee
-        MessagingFee memory fee = station.quote(details, options, false);
-
-        // Step 5. Send
-        /* MessagingReceipt memory receipt = */
-        station.bridge{value: fee.nativeFee}(details, options);
-
-        // STEP 6 & 7. Deliver packet manually.
-        verifyPackets(bEid, addressToBytes32(address(skaleStation)));
-
-        // Step 8. Assert Balances
-        assertEq(mUSDC.balanceOf(address(this)), 98_500_000);
-        assertEq(mUSDC.balanceOf(feeCollector), 1_500_000);
-
-        // Step 9. Asset Locked Supply
-        assertEq(usdc.balanceOf(address(station)), oneHundredUSDC);
-
-        // Step 10. Assert Minted Supply
-        assertEq(skaleStation.supplyAvailable(IMonorailNativeToken(address(mUSDC))), oneHundredUSDC);
-
-        // Step 11. Approve SKALEStation for 50 USDC
-        mUSDC.approve(address(skaleStation), 50 * 10 ** 6);
-
-        // Step 13. Prepare Trip Details
-        LibTypesV1.TripDetails memory details2 = LibTypesV1.TripDetails(address(mUSDC), address(this), 50 * 10 ** 6);
-
-        // Step 14. Quote Native Gas Fee
-        MessagingFee memory fee2 = skaleStation.quote(aEid, details2, options, false);
-
-        // Step 15. Approve SKL Tokens by Fee
-        skl.approve(address(skaleStation), fee2.nativeFee);
-
-        // Step 16. Send
-        /* MessagingReceipt memory receipt2 = */
-        skaleStation.bridge(aEid, details2, fee2, options);
-
-        // STEP 17 & 18. Deliver packet manually.
-        verifyPackets(aEid, addressToBytes32(address(station)));
-
-        // Step 19. Verify Balances
-        assertEq(mUSDC.balanceOf(feeCollector), 2_250_000);
-        assertEq(mUSDC.balanceOf(address(this)), 48_500_000);
-
-        // Step 20. Assert Minted Supply
-        assertEq(skaleStation.supplyAvailable(IMonorailNativeToken(address(mUSDC))), 50750000);
-
-        // Step 21. Check Fainal User Balance
-        assertEq(usdc.balanceOf(address(this)), 99999949250000);
-        assertEq(usdc.balanceOf(address(station)), 50750000);
+    /**
+     * @notice Tests bridging 100 USDC across multiple chains
+     * @dev Bridges 100 units of 6-decimal USDC from all source chains to aSkaleStation
+     */
+    function test_multichain100() public {
+        bridgeAllStableToASkaleStation(HUNDRED*USDC);
+    }
+    
+    /**
+     * @notice Tests bridging 1,000 USDC across multiple chains
+     * @dev Bridges 1,000 units of 6-decimal USDC from all source chains to aSkaleStation
+     */
+    function test_multichain1000() public {
+        bridgeAllStableToASkaleStation(THOUSAND*USDC);
     }
 
-    function test_customERC20CustomFees() public {
-        (uint256 userAmountA, uint256 protocolFeeA) =
-            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), mUSDC.decimals());
+    /**
+     * @notice Tests bridging 1,000,000 USDC across multiple chains
+     * @dev Bridges 1,000,000 units of 6-decimal USDC from all source chains to aSkaleStation
+     */
+    function test_multichain1000000() public {
+        bridgeAllStableToASkaleStation(MILLION*USDC);
+    }
 
-        assertEq(userAmountA, 98500000000);
-        assertEq(protocolFeeA, 1500000000);
+    /**
+     * @notice Tests bridging 10,000,000 USDC across multiple chains
+     * @dev Bridges 10,000,000 units of 6-decimal USDC from all source chains to aSkaleStation
+     */
+    function test_multichain10000000() public {
+        bridgeAllStableToASkaleStation(TEN*MILLION_USDC);
+    }
 
-        uint256 balance = tokenA.balanceOf(address(this));
+    /**
+     * @notice Tests two-way bridge functionality with 100 USDC
+     * @dev Tests bridging 100 USDC to SKALE Station and then bridging the user amount (after fees) back
+     */
+    function test_twoWay100() public {
+        (uint256 userAmount,) = getFee(HUNDRED*USDC, aUSDC.decimals());
+        bridgeToSkaleStation(HUNDRED*USDC, bUSDC, aUSDC, bStation);
+        bridgeFromSkaleStation(userAmount, aUSDC, bUSDC, bStation, B_EID);
+    }
 
+    /**
+     * @notice Fuzz test for depositing various amounts across multiple chains
+     * @dev Tests parallel deposits from all chains with randomly generated amounts
+     * @param amount The fuzzed amount to bridge (between 100 and 100,000,000 * 1e6)
+     */
+    function testFuzz_multichainDeposit6Dec(uint256 amount) public {
+        vm.assume(amount <= 100_000_000 * 1e6); // 100,000,000 * 1e6 === Amount Created to Deployer of USDC Mocks
+        vm.assume(amount >= 100); // At least 0.0001 USDC
+        _bridgeAllStableToASkaleStation(amount);
+    }
+    
+    /**
+     * @notice Tests custom fee configuration for ERC20 tokens with 100 USDC
+     * @dev Verifies fee calculations before and after setting custom token fees
+     */
+    function test_customFeeERC20100() public {
+        // Get fee breakdown before custom configuration
+        (uint256 amountBefore, uint256 feeBefore) =
+            feeManager.getFeeBreakdown(HUNDRED_USDC, address(this), aUSDC.decimals());
+        assertEq(amountBefore, 98500000);
+        assertEq(feeBefore, 1500000);
+        
+        // Configure custom token fee
         feeManager.configureTokenFee(
-            address(tokenA),
+            address(aToken),
             100, // 100 basis points = 1%
             100 * 10 ** 18, // minimum holding requirement
             0,
             1 // ERC20
         );
-
-        (uint256 userAmountB, uint256 protocolFeeB) =
-            feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), mUSDC.decimals());
-
-        assertEq(userAmountB, 99000000000);
-        assertEq(protocolFeeB, 1000000000);
+        
+        // Get fee breakdown after custom configuration
+        (uint256 amountAfter, uint256 feeAfter) =
+            feeManager.getFeeBreakdown(HUNDRED_USDC, address(this), aUSDC.decimals());
+        assertEq(amountAfter, 99000000);
+        assertEq(feeAfter, 1000000);
     }
 }
