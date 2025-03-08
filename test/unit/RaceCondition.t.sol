@@ -200,8 +200,15 @@ contract RaceConditionTest is TestHelperOz5 {
         _bridgeAllStableToASkaleStation(amount);
     }
 
-    function test_multichainConsolidatedExit() public {
-        _bridgeAllStableToASkaleStation(HUNDRED_USDC);
+    function test_multichainAndBack100() public {
+        // _bridgeAllStableToASkaleStation(HUNDRED_USDC);
+        (uint256 userAmount, uint256 protocolFee) = _getFee(HUNDRED_USDC, aUSDC.decimals());
+        
+        _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
+        _bridgeFromSkaleStation(userAmount, aUSDC, bUSDC, bStation, B_EID);
+        
+        
+
     }
 
     function _bridgeAllStableToASkaleStation(uint256 amount) internal {
@@ -220,6 +227,11 @@ contract RaceConditionTest is TestHelperOz5 {
         assertEq(aSkaleStation.supplyAvailable(IMonorailNativeToken(address(aUSDC))), userAmount * 5 + protocolFee * 5);
     }
 
+    /*
+     * @notice This functions bridges from some arbitrary chain to SKALE
+     * @param tokenA The token on arbitrary chain
+     * @param tokenB The token on SKALE Chain
+     */
     function _bridgeToSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station) internal {
         
         uint256 startingUserBalance = tokenB.balanceOf(address(this));
@@ -247,6 +259,48 @@ contract RaceConditionTest is TestHelperOz5 {
         // 7 Check Balance
         assertEq(tokenB.balanceOf(address(this)), userAmount + startingUserBalance);
         assertEq(tokenB.balanceOf(feeCollector), protocolFee + startingFeeCollectorBalance);
+    }
+
+    /*
+     * @notice This functions bridges from SKALE to some arbitrary chain
+     * @param tokenA The token on SKALE Chain
+     * @param tokenB The token on arbitrary chain
+     */
+    function _bridgeFromSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station, uint32 dstEndpointId) internal {
+
+        uint256 startingTokenAUserBalance = tokenA.balanceOf(address(this));
+        uint256 startingTokenBUserBalance = tokenB.balanceOf(address(this));
+        uint256 startingFeeCollectorBalance = tokenA.balanceOf(feeCollector);
+        
+        // 1 Approve
+        tokenA.approve(address(aSkaleStation), amount);
+        
+        // 2 Trip Details
+        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount);
+        
+        // 3 Get Quote Fee
+        MessagingFee memory fee = aSkaleStation.quote(dstEndpointId, details, options, false);
+        
+        skl.approve(address(aSkaleStation), fee.nativeFee);
+
+        // 4 Bridge to A
+        aSkaleStation.bridge(dstEndpointId, details, fee, options);
+        
+        // 5 Deliver
+        verifyPackets(dstEndpointId, addressToBytes32(address(station)));
+ 
+        /*
+         * @notice Use tokenB since fee is taken from chain b 
+         */
+        (uint256 userAmount, uint256 protocolFee) = _getFee(amount, IERC20Metadata(tokenA).decimals());
+        
+        // 7 Check Balance
+        // Notice -> the user balance is subtracted on token A
+        // Notice -> the protoocl fee is increase on token A
+        // Notice -> the user amount is added to token B        
+        assertEq(tokenA.balanceOf(address(this)), startingTokenAUserBalance - amount);
+        assertEq(tokenA.balanceOf(feeCollector), protocolFee + startingFeeCollectorBalance);
+        assertEq(tokenB.balanceOf(address(this)), startingTokenBUserBalance + userAmount);
     }
 
     function _getFee(uint256 amount, uint8 decimals) internal view returns (uint256 userAmount, uint256 protocolFee) {
