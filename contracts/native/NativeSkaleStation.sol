@@ -16,7 +16,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeERC20 for IMonorailNativeToken;
 
-    bytes32 public constant WITHDRAW_ROLE = keccak256("WITHDRAW_ROLE");
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
 
     address private feeCollector;
@@ -39,7 +38,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
-        _grantRole(WITHDRAW_ROLE, _msgSender());
 
         if (_feeCollector == address(0)) {
             revert("Fee Collector Address Must Not Be 0");
@@ -79,10 +77,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         }
 
         // 2. Calculate FeeBreakdown
-        // LibFeeCalculatorV1.FeeBreakdown memory fees = LibFeeCalculatorV1.calculateFees(
-        //     details.amount,
-        //     nativeToken.decimals()
-        // );
         (uint256 userAmount, uint256 protocolFee) =
             feeManager.getFeeBreakdown(details.amount, _msgSender(), nativeToken.decimals());
 
