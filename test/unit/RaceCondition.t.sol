@@ -29,6 +29,8 @@ import "forge-std/console.sol";
 // DevTools imports
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
+// error InsufficentFundsInBridge(uint256 amountInBridge, uint256 neededAmount);
+
 contract RaceConditionTest is TestHelperOz5 {
     
     using OptionsBuilder for bytes;
@@ -206,10 +208,20 @@ contract RaceConditionTest is TestHelperOz5 {
         
         _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
         _bridgeFromSkaleStation(userAmount, aUSDC, bUSDC, bStation, B_EID);
-        
-        
-
     }
+
+    /// forge-config: default.allow_internal_expect_revert = true
+    // function test_InsufficientExitSupply() public {
+        
+    //     (uint256 userAmount, uint256 protocolFee) = _getFee(HUNDRED_USDC, aUSDC.decimals());
+        
+    //     _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
+    //     _bridgeFromSkaleStation(userAmount, aUSDC, dUSDC, dStation, D_EID);
+
+        // vm.expectRevert();
+        // vm.expectRevert(InsufficentFundsInBridge.selector);
+        // vm.expectRevert(abi.encodeWithSelector(InsufficentFundsInBridge.selector, 0, userAmount));
+    // }
 
     function _bridgeAllStableToASkaleStation(uint256 amount) internal {
 
@@ -305,5 +317,16 @@ contract RaceConditionTest is TestHelperOz5 {
 
     function _getFee(uint256 amount, uint8 decimals) internal view returns (uint256 userAmount, uint256 protocolFee) {
         return feeManager.getFeeBreakdown(amount, address(this), decimals);
+    }
+
+    // Credit to: https://github.com/foundry-rs/foundry/issues/9061#issuecomment-2399460276
+    function _expectRevert(bytes4 selector, address target, bytes memory cd) internal {
+        vm.expectRevert(selector);
+        (bool success, bytes memory ret) = address(target).call(cd);
+        if (!success) {
+            assembly ("memory-safe") {
+                revert(add(ret, 0x20), returndatasize())
+            }
+        }
     }
 }

@@ -14,6 +14,8 @@ error TokenBridgingPaused();
 error TokenNotAdded();
 error UnsupportedChain();
 error UnsupportedToken();
+// error InsufficentFundsInBridge(uint256 amountInBridge, uint256 neededAmount);
+error InsufficentFundsInBridge();
 
 contract NativeStation is OApp, AccessControl {
     using SafeERC20 for IERC20;
@@ -109,7 +111,8 @@ contract NativeStation is OApp, AccessControl {
         IERC20 localToken = IERC20(tokenMappings[details.token]);
 
         if (deposits[localToken] < details.amount) {
-            revert("Insufficient Funds in Bridge");
+            // revert InsufficentFundsInBridge(deposits[localToken], details.amount);
+            revert InsufficentFundsInBridge();
         }
 
         localToken.safeTransfer(details.to, details.amount);
