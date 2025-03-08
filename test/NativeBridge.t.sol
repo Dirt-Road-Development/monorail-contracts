@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
 
-import "../../contracts/native/NativeStation.sol";
-import "../../contracts/native/NativeSkaleStation.sol";
-import "../../contracts/fees/FeeManager.sol";
-import "../../contracts/interfaces/IFeeManager.sol";
+import "../contracts/native/NativeStation.sol";
+import "../contracts/native/NativeSkaleStation.sol";
+import "../contracts/fees/FeeManager.sol";
+import "../contracts/interfaces/IFeeManager.sol";
 
-import "../../contracts/mock/USDC.sol";
-import "../../contracts/mock/USDCs.sol";
-import "../../contracts/mock/SKALEToken.sol";
+import "../contracts/mock/USDC.sol";
+import "../contracts/mock/USDCs.sol";
+import "../contracts/mock/SKALEToken.sol";
 
-import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
+import {IMonorailNativeToken} from "../contracts/interfaces/IMonorailNativeToken.sol";
 // OApp imports
 import {
     IOAppOptionsType3, EnforcedOptionParam

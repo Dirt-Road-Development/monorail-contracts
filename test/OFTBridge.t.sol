@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
 
-import {FeeManager} from "../../contracts/fees/FeeManager.sol";
-import {IFeeManager} from "../../contracts/interfaces/IFeeManager.sol";
-import {OFTBridge} from "../../contracts/oft/OFTBridge.sol";
+import {FeeManager} from "../contracts/fees/FeeManager.sol";
+import {IFeeManager} from "../contracts/interfaces/IFeeManager.sol";
+import {OFTBridge} from "../contracts/oft/OFTBridge.sol";
 
 import "forge-std/console.sol";
 import {Test} from "forge-std/Test.sol";

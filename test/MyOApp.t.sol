@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 // MyOApp imports
-import {MyOApp} from "../../contracts/mock/MyOApp.sol";
+import {MyOApp} from "../contracts/mock/MyOApp.sol";
 
 // OApp imports
 import {

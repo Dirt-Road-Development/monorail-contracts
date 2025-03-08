@@ -1,16 +1,16 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
 
-import {NativeStation} from "../../contracts/native/NativeStation.sol";
-import {NativeSkaleStation} from "../../contracts/native/NativeSkaleStation.sol";
-import {FeeManager} from "../../contracts/fees/FeeManager.sol";
-import {IFeeManager} from "../../contracts/interfaces/IFeeManager.sol";
+import {NativeStation} from "../contracts/native/NativeStation.sol";
+import {NativeSkaleStation} from "../contracts/native/NativeSkaleStation.sol";
+import {FeeManager} from "../contracts/fees/FeeManager.sol";
+import {IFeeManager} from "../contracts/interfaces/IFeeManager.sol";
 
-import {USDC} from "../../contracts/mock/USDC.sol";
-import {USDCs} from "../../contracts/mock/USDCs.sol";
-import {SKALEToken} from "../../contracts/mock/SKALEToken.sol";
+import {USDC} from "../contracts/mock/USDC.sol";
+import {USDCs} from "../contracts/mock/USDCs.sol";
+import {SKALEToken} from "../contracts/mock/SKALEToken.sol";
 
-import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
+import {IMonorailNativeToken} from "../contracts/interfaces/IMonorailNativeToken.sol";
 
 // OZ imports
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
