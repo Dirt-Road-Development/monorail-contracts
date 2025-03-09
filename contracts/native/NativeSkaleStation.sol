@@ -104,48 +104,50 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     ) external nonReentrant returns (MessagingReceipt memory receipt) {
         IMonorailNativeToken nativeToken = IMonorailNativeToken(details.token);
 
-        // 1. Validate Token is Supported
+        // 1 Validate Token is Supported
         if (!supported[nativeToken][destinationLayerZeroEndpointId]) {
             revert("Token Not Supported");
         }
 
-        // Explicit Check Occurs here. Without getFeeBreakdown throws arithmetic underflow/overflow error
+        // 2 Explicit Check Occurs here. Without getFeeBreakdown throws arithmetic underflow/overflow error
         if (details.amount > nativeToken.balanceOf(_msgSender())) {
             revert InsufficentBalance(details.amount, nativeToken.balanceOf(_msgSender()));
         }
 
-        // 2. Calculate FeeBreakdown
+        // 3 Calculate FeeBreakdown
         (uint256 userAmount, uint256 protocolFee) =
             feeManager.getFeeBreakdown(details.amount, _msgSender(), nativeToken.decimals());
 
-        // // 4. Check Supply & Reduce Accordinly
+        // 4 Check Supply of Token
         if (userAmount > supplyAvailable[nativeToken]) { // Is this check necessary?
             revert TokenSupplyInsufficent(userAmount, supplyAvailable[nativeToken]);
         }
 
+        // 5 Check Supply by Chain
         if (userAmount > supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId]) {
             revert TokenSupplyInsufficentForChain(userAmount, supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId], destinationLayerZeroEndpointId);
         }
 
+        // Reduce Supply
         supplyAvailable[nativeToken] -= userAmount;
         supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId] -= userAmount;
 
-        // 3. User Transfers Tokens to Contract
+        // 7 User Transfers Tokens to Contract
         nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
         
-        // 5. Transfer Fees to Fee Collector
+        // 8 Transfer Protocol Fee to Fee Collector
         nativeToken.safeTransfer(feeCollector, protocolFee);
         
-        // 4.5 Check Balance
+        // 9 Burn User Amount of Native Tokens that will be unlocked on destination
+        nativeToken.burn(userAmount);
+
+        // 10 Book balance Check -> remove?
         (bool isBalanced, uint256 countedSupply, uint256 availableSupply) = isSupplyBalanced(nativeToken);
         if (!isBalanced) {
             revert SupplyInbalance(address(nativeToken), countedSupply, availableSupply);
         }
 
-        // 7. Burn Native Tokens that will be unlocked on destination
-        nativeToken.burn(userAmount);
-
-        // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
+        // 11 Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
         bytes memory _payload = abi.encode(details.token, details.to, userAmount);
         receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
     }
