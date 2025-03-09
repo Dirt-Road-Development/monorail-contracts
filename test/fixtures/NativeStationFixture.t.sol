@@ -229,12 +229,12 @@ contract NativeStationFixture is TestHelperOz5 {
      * @param tokenA The token on SKALE Chain
      * @param tokenB The token on arbitrary chain
      */
-    function _bridgeFromSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station, uint32 dstEndpointId) internal {
+    function _bridgeFromSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station, uint32 dstEndpointId) public {
 
         uint256 startingTokenAUserBalance = tokenA.balanceOf(address(this));
         uint256 startingTokenBUserBalance = tokenB.balanceOf(address(this));
         uint256 startingFeeCollectorBalance = tokenA.balanceOf(feeCollector);
-        
+
         // 1 Approve
         tokenA.approve(address(aSkaleStation), amount);
         
@@ -245,7 +245,7 @@ contract NativeStationFixture is TestHelperOz5 {
         MessagingFee memory fee = aSkaleStation.quote(dstEndpointId, details, options, false);
         
         skl.approve(address(aSkaleStation), fee.nativeFee);
-
+    
         // 4 Bridge to A
         aSkaleStation.bridge(dstEndpointId, details, fee, options);
         

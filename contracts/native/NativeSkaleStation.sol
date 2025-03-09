@@ -12,6 +12,11 @@ import {IFeeManager} from "../interfaces/IFeeManager.sol";
 import {LibTypesV1} from "../lib/LibTypesV1.sol";
 import {SKALEOApp} from "../SKALEOApp.sol";
 
+error InsufficentBalance(uint256 attemptedAmount, uint256 actualBalance);
+error TokenSupplyInsufficent(uint256 expectedAmount, uint256 actualAmount);
+error TokenSupplyInsufficentForChain(uint256 expectedAmount, uint256 actualAmount, uint256 layerZeroDstEid);
+error SupplyInbalance(address token, uint256 countedSupply, uint256 expectedSupply);
+
 contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeERC20 for IMonorailNativeToken;
@@ -21,17 +26,30 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
     address private feeCollector;
     IFeeManager public feeManager;
 
+    /// @notice any monorail tokens should have a list of supported endpoints
+    /// @dev this is used in conjunction with supportedEndpoints to properly balance supply
+    mapping(IMonorailNativeToken => uint32[]) public endpointsByToken;
+
+    /// @notice this is the total amount of supply for a given token [on the SKALE Side]
     mapping(IMonorailNativeToken => uint256) public supplyAvailable;
 
-    // LayerZero Chain Id => Origin Token => Local Native Token
-    mapping(uint32 => mapping(address => IMonorailNativeToken)) public tokens;
-    // Native Token => Supported Bool
+    /// @notice SKALE Token -> LayerZero Dest. Endpoint Id -> Total Supply
+    mapping(IMonorailNativeToken => mapping(uint32 => uint256)) public supplyAvailableByChain;
+
+    /// @notice Native Token -> LayerZero Dest. Endpoint Id -> Supported Bool
+    /// @dev While this is technically a duplicate of above, it helps when there is no active balance
     mapping(IMonorailNativeToken => mapping(uint32 => bool)) public supported;
+
+    /// @notice LayerZero Chain Id => Origin Token => Local Native Token
+    /// @dev This extra mapping is insurance on the exit bridge to ensure that an incorrect
+    /// value is not inputted for the origin tokne that is being exited too
+    mapping(uint32 => mapping(address => IMonorailNativeToken)) public tokens;
 
     event AddToken(
         uint32 indexed layerZeroEndpointId, address indexed originTokenAddress, address indexed localTokenAddress
     );
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
+    event SupplyImbalance(address indexed nativeToken, uint256 indexed countedSupply, uint256 indexed expectedSupply);
 
     constructor(address _layerZeroEndpoint, address _feeCollector, IFeeManager _feeManager)
         SKALEOApp(_layerZeroEndpoint)
@@ -57,8 +75,23 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         }
 
         IMonorailNativeToken localToken = IMonorailNativeToken(localTokenAddress);
-        tokens[layerZeroEndpointId][originTokenAddress] = localToken;
+        
+        // 1 -> Add Support for Token
+        // Local Token === Address on this chain
+        // LayerZeroEndpointId === Destination Id
         supported[localToken][layerZeroEndpointId] = true;
+
+        // 2 -> Add Cross Chain Address Mapping to Ensure Proper Linking
+        // LayerZeroEndpointId === Destination Id
+        // Origin Token Address === Address on the origin chain
+        // Local Token === Address on this chain
+        tokens[layerZeroEndpointId][originTokenAddress] = localToken;
+        
+        // 3 -> Add Endpoint to token bucket
+        // LayerZeroEndpointId === Destination Id
+        // Local Token === Address on this chain
+        endpointsByToken[localToken].push(layerZeroEndpointId);
+        
 
         emit AddToken(layerZeroEndpointId, originTokenAddress, localTokenAddress);
     }
@@ -76,25 +109,45 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
             revert("Token Not Supported");
         }
 
+        // Explicit Check Occurs here. Without getFeeBreakdown throws arithmetic underflow/overflow error
+        if (details.amount > nativeToken.balanceOf(_msgSender())) {
+            revert InsufficentBalance(details.amount, nativeToken.balanceOf(_msgSender()));
+        }
+
         // 2. Calculate FeeBreakdown
         (uint256 userAmount, uint256 protocolFee) =
             feeManager.getFeeBreakdown(details.amount, _msgSender(), nativeToken.decimals());
 
+        // // 4. Check Supply & Reduce Accordinly
+        if (userAmount > supplyAvailable[nativeToken]) { // Is this check necessary?
+            revert TokenSupplyInsufficent(userAmount, supplyAvailable[nativeToken]);
+        }
+
+        if (userAmount > supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId]) {
+            revert TokenSupplyInsufficentForChain(userAmount, supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId], destinationLayerZeroEndpointId);
+        }
+
+        supplyAvailable[nativeToken] -= userAmount;
+        supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId] -= userAmount;
+
         // 3. User Transfers Tokens to Contract
         nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
-
-        // 4. Reduce Supply by Burn Token Amount
-        supplyAvailable[nativeToken] -= userAmount;
-
+        
         // 5. Transfer Fees to Fee Collector
         nativeToken.safeTransfer(feeCollector, protocolFee);
+        
+        // 4.5 Check Balance
+        (bool isBalanced, uint256 countedSupply, uint256 availableSupply) = isSupplyBalanced(nativeToken);
+        if (!isBalanced) {
+            revert SupplyInbalance(address(nativeToken), countedSupply, availableSupply);
+        }
+
+        // 7. Burn Native Tokens that will be unlocked on destination
+        nativeToken.burn(userAmount);
 
         // 6. Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
         bytes memory _payload = abi.encode(details.token, details.to, userAmount);
         receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
-
-        // 7. Burn Native Tokens that will be unlocked on destination
-        nativeToken.burn(userAmount);
     }
 
     function quote(uint32 dstEid, LibTypesV1.TripDetails memory tripDetails, bytes memory options, bool payInLzToken)
@@ -132,8 +185,37 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard {
         emit BridgeReceived(address(nativeToken), to, userAmount);
 
         supplyAvailable[nativeToken] += amount;
+        supplyAvailableByChain[nativeToken][_origin.srcEid] += amount;
 
+        (bool isBalanced, uint256 countedSupply, uint256 availableSupply) = isSupplyBalanced(nativeToken);
+        if (!isBalanced) {
+            // Emit Event instead of Reverting. Why? This ensures that tokens are minted to the user
+            // We could potentially put these in a separate valut with a timelock and claim mechanism 
+            // to manually handle imbalances
+            // The reality is that an imbalance is impossible I'm just paranoid :)
+            emit SupplyImbalance(address(nativeToken), countedSupply, availableSupply);
+        }
+
+        // End Supply Balance Section
+        // Should these be moved before the state changes?
         nativeToken.mint(to, userAmount);
         nativeToken.mint(feeCollector, protocolFee);
+    }
+
+    function isSupplyBalanced(IMonorailNativeToken nativeToken) public view returns (bool, uint256, uint256){
+        /**
+          * @notice Start Supply Balance Section
+          * @dev This section is used to keep the books. Auditors may tell me it's unecessary
+                 but the belief is that if this occurs we can audit the flow of funds to determine
+                 where the imbalance occured and work to fix it through the manual movement of funds
+         */
+        uint32[] memory endpoints = endpointsByToken[nativeToken];
+        uint256 endpointsLength = endpoints.length;
+        uint256 countedSupply;
+        for (uint256 i = 0; i < endpointsLength; i++) {
+            countedSupply += supplyAvailableByChain[nativeToken][endpoints[i]];
+        }
+
+        return (countedSupply == supplyAvailable[nativeToken], countedSupply, supplyAvailable[nativeToken]);
     }
 }
