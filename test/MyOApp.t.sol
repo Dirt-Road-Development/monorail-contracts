@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 // MyOApp imports
-import {MyOApp} from "../../contracts/mock/MyOApp.sol";
+import {MyOApp} from "../contracts/mock/MyOApp.sol";
 
 // OApp imports
 import {
@@ -21,7 +21,7 @@ import "forge-std/console.sol";
 // DevTools imports
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
 
-contract MyOAppE2ETest is TestHelperOz5 {
+contract MyOAppTest is TestHelperOz5 {
     using OptionsBuilder for bytes;
 
     uint32 private aEid = 1;

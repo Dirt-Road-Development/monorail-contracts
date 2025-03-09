@@ -6,6 +6,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+error FeeExceedsAmount(uint256 fee, uint256 amount);
+
 contract FeeManager is AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     uint256 public constant DEFAULT_FEE = 150; // 1.5% in basis points
@@ -122,7 +124,8 @@ contract FeeManager is AccessControl {
             protocolFee = 10 ** (18 - decimals); // Minimum fee
         }
 
-        require(protocolFee <= amount, "Fee exceeds amount");
+        // require(protocolFee <= amount, "Fee exceeds amount");
+        if (protocolFee > amount) revert FeeExceedsAmount(protocolFee, amount);
         userAmount = amount - protocolFee;
     }
 
