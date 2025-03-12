@@ -3,8 +3,10 @@ pragma solidity 0.8.24;
 
 import "../../contracts/native/NativeStation.sol";
 import "../../contracts/native/NativeSkaleStation.sol";
+import "../../contracts/native/InterchainRegistry.sol";
 import "../../contracts/fees/FeeManager.sol";
 import "../../contracts/interfaces/IFeeManager.sol";
+import "../../contracts/interfaces/IInterchainRegistry.sol";
 
 import "../../contracts/mock/USDC.sol";
 import "../../contracts/mock/USDCs.sol";
@@ -64,13 +66,14 @@ contract NativeStationFixture is TestHelperOz5 {
     IERC20 public bToken;
 
     FeeManager public feeManager;
+    InterchainRegistry public interchainRegistry;
 
     address public userA = address(0x1);
     address public feeCollector = address(0x2);
 
     address[] public nativeTokens;
 
-    bytes public options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0);
+    bytes public options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(2_500_000, 0);
 
     function setUp() public virtual override {
         super.setUp();
@@ -104,13 +107,15 @@ contract NativeStationFixture is TestHelperOz5 {
         feeManager = new FeeManager();
         feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
 
+        interchainRegistry = new InterchainRegistry("local-test-suite");
+
         address[] memory oapps = new address[](6);
 
         aSkaleStation = NativeSkaleStation(
             payable(
                 _deployOApp(
                     type(NativeSkaleStation).creationCode,
-                    abi.encode(address(endpoints[A_EID]), feeCollector, IFeeManager(address(feeManager)))
+                    abi.encode(address(endpoints[A_EID]), feeCollector, IFeeManager(address(feeManager)), IInterchainRegistry(address(interchainRegistry)))
                 )
             )
         );
@@ -203,7 +208,7 @@ contract NativeStationFixture is TestHelperOz5 {
         tokenA.approve(address(station), amount);
         
         // 2 Trip Details
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount);
+        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount, bytes32(0));
         
         // 3 Get Quote Fee
         MessagingFee memory fee = station.quote(details, options, false);
@@ -239,7 +244,7 @@ contract NativeStationFixture is TestHelperOz5 {
         tokenA.approve(address(aSkaleStation), amount);
         
         // 2 Trip Details
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount);
+        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount, bytes32(0));
         
         // 3 Get Quote Fee
         MessagingFee memory fee = aSkaleStation.quote(dstEndpointId, details, options, false);

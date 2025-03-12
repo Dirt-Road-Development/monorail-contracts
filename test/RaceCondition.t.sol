@@ -17,7 +17,7 @@ contract RaceConditionTest is NativeStationFixture {
     function test_RevertWhen_TokenSupplyInsufficientForChainPartialBalance() public {
         _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
         
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(aUSDC), address(this), 25e6);
+        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(aUSDC), address(this), 25e6, bytes32(0));
         MessagingFee memory fee = aSkaleStation.quote(D_EID, details, options, false);
         skl.approve(address(aSkaleStation), fee.nativeFee);
         aUSDC.approve(address(aSkaleStation), 25e6);
@@ -35,7 +35,7 @@ contract RaceConditionTest is NativeStationFixture {
     function test_RevertWhen_TokenSupplyInsufficientForChainFullBalance() public {
         _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
         
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(aUSDC), address(this), 98.5e6);
+        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(aUSDC), address(this), 98.5e6, bytes32(0));
         MessagingFee memory fee = aSkaleStation.quote(D_EID, details, options, false);
         skl.approve(address(aSkaleStation), fee.nativeFee);
         aUSDC.approve(address(aSkaleStation), 98.5e6);
@@ -54,7 +54,7 @@ contract RaceConditionTest is NativeStationFixture {
         vm.assume(tokensToSend > 100 && tokensToSend <= 98.5e6); // At least 0.0001 USDC
         _bridgeToSkaleStation(HUNDRED_USDC, bUSDC, aUSDC, bStation);
         
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(aUSDC), address(this), tokensToSend);
+        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(aUSDC), address(this), tokensToSend, bytes32(0));
         MessagingFee memory fee = aSkaleStation.quote(D_EID, details, options, false);
         skl.approve(address(aSkaleStation), fee.nativeFee);
         aUSDC.approve(address(aSkaleStation), tokensToSend);
