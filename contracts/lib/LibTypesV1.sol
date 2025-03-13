@@ -6,6 +6,6 @@ library LibTypesV1 {
         address token;
         address to;
         uint256 amount;
-        bytes32 finalDestination; // SKALE Chain Name Hash
+        bytes32 interchainDestination; // SKALE Chain Name Hash
     }
 }

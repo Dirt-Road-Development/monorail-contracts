@@ -152,7 +152,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         // }
 
         // 11 Send LZ Message -> Reminder MUST APPROVE SKL Token for Proper Fee Amount
-        bytes memory _payload = abi.encode(details.token, details.to, userAmount);
+        bytes memory _payload = abi.encode(details.token, details.to, userAmount, bytes32(0));
         receipt = _lzSend(destinationLayerZeroEndpointId, _payload, options, fee, msg.sender);
     }
 
@@ -211,31 +211,11 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
 
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][data.token];
 
-        // if (finalChainDestination == bytes32(0)) {
-            // _mintTokens(nativeToken, to, amount, _origin.srcEid);
-            (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(data.amount, data.to, nativeToken.decimals());
-
-            emit BridgeReceived(address(nativeToken), data.to, userAmount);
-
-            supplyAvailable[nativeToken] += data.amount;
-            supplyAvailableByChain[nativeToken][_origin.srcEid] += data.amount;
-
-            // (bool isBalanced, uint256 countedSupply, uint256 availableSupply) = isSupplyBalanced(nativeToken);
-            // if (!isBalanced) {
-                // Emit Event instead of Reverting. Why? This ensures that tokens are minted to the user
-                // We could potentially put these in a separate valut with a timelock and claim mechanism 
-                // to manually handle imbalances
-                // The reality is that an imbalance is impossible I'm just paranoid :)
-                // emit SupplyImbalance(address(nativeToken), countedSupply, availableSupply);
-            // }
-
-            // End Supply Balance Section
-            // Should these be moved before the state changes?
-            nativeToken.mint(data.to, userAmount);
-            nativeToken.mint(feeCollector, protocolFee);
-        // } else {
-            // _mintTokens(nativeToken, address(this), amount, _origin.srcEid);
-            // executeInterchainTranfer(to, address(nativeToken), finalChainDestination, amount);
+        if (data.interchainDestination == bytes32(0)) {
+            _mintTokens(nativeToken, data.to, data.amount, _origin.srcEid);
+        } else {
+            _mintTokens(nativeToken, address(this), data.amount, _origin.srcEid);
+            executeInterchainTranfer(data.to, address(nativeToken), data.interchainDestination, data.amount);
             // IInterchainRegistry.SupportedToken memory interchainSupportedToken = interchainRegistry.getTokenByRoute(finalChainDestination, address(nativeToken));
             // if (!interchainSupportedToken.supported) {
             //     emit InterchainRouteNotSupported(finalChainDestination, address(nativeToken));
@@ -246,7 +226,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
             // if (interchainSupportedToken.supported && interchainSupportedToken.hasWrapper) {
             //     _wrapTokens(nativeToken, IERC20Wrapper(interchainSupportedToken.wrapper), amount);
             // }
-        // }
+        }
         
     }
 

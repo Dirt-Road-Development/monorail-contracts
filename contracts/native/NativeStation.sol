@@ -82,7 +82,7 @@ contract NativeStation is OApp, AccessControl {
         deposits[IERC20(details.token)] += details.amount;
 
         // Encodes message as bytes.
-        bytes memory _payload = abi.encode(details.token, details.to, details.amount);
+        bytes memory _payload = abi.encode(details);
         receipt = _lzSend(skaleEndpointId, _payload, options, MessagingFee(msg.value, 0), payable(msg.sender));
     }
 
