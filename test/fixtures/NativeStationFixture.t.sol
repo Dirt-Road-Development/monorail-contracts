@@ -4,13 +4,17 @@ pragma solidity 0.8.24;
 import "../../contracts/native/NativeStation.sol";
 import "../../contracts/native/NativeSkaleStation.sol";
 import "../../contracts/native/InterchainRegistry.sol";
+
 import "../../contracts/fees/FeeManager.sol";
+
 import "../../contracts/interfaces/IFeeManager.sol";
 import "../../contracts/interfaces/IInterchainRegistry.sol";
+import "../../contracts/interfaces/ITokenManagerERC20.sol";
 
 import "../../contracts/mock/USDC.sol";
 import "../../contracts/mock/USDCs.sol";
 import "../../contracts/mock/SKALEToken.sol";
+import "../../contracts/mock/MockTokenManagerERC20.sol";
 
 import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
 // OApp imports
@@ -46,6 +50,7 @@ contract NativeStationFixture is TestHelperOz5 {
     uint32 public constant E_EID = 5;
     uint32 public constant F_EID = 6;
 
+    MockTokenManagerERC20 public aTokenManagerERC20;
     NativeSkaleStation public aSkaleStation;
     NativeStation public bStation;
     NativeStation public cStation;
@@ -108,6 +113,7 @@ contract NativeStationFixture is TestHelperOz5 {
         feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
 
         interchainRegistry = new InterchainRegistry("local-test-suite");
+        aTokenManagerERC20 = new MockTokenManagerERC20(new MockTokenManagerERC20.Token[](0));
 
         address[] memory oapps = new address[](6);
 
@@ -115,7 +121,7 @@ contract NativeStationFixture is TestHelperOz5 {
             payable(
                 _deployOApp(
                     type(NativeSkaleStation).creationCode,
-                    abi.encode(address(endpoints[A_EID]), feeCollector, IFeeManager(address(feeManager)), IInterchainRegistry(address(interchainRegistry)))
+                    abi.encode(address(endpoints[A_EID]), feeCollector, IFeeManager(address(feeManager)), IInterchainRegistry(address(interchainRegistry)), ITokenManagerERC20(address(aTokenManagerERC20)))
                 )
             )
         );

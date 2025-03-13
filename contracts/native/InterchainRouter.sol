@@ -19,8 +19,11 @@ contract InterchainRouter is ReentrancyGuard {
 
 	event FailedToWrap(address indexed nativeToken, address indexed wrapper, uint256 indexed amount);
 
-	constructor(IInterchainRegistry _interchainRegistry) {
-		tokenManagerERC20 = ITokenManagerERC20(0xD2aAA00500000000000000000000000000000000);
+	constructor(
+		IInterchainRegistry _interchainRegistry,
+		ITokenManagerERC20 _tokenManagerERC20
+	) {
+		tokenManagerERC20 = _tokenManagerERC20;
 		interchainRegistry = _interchainRegistry;
 	}
 	
@@ -37,20 +40,25 @@ contract InterchainRouter is ReentrancyGuard {
 			return;
 		}
 
+		address interchainTokenAddress = sourceToken;
 		if (interchainSupportedToken.supported && interchainSupportedToken.hasWrapper) {
 			_wrapTokens(user, IERC20(sourceToken), IERC20Wrapper(interchainSupportedToken.wrapper), amount);
+			interchainTokenAddress = interchainSupportedToken.wrapper;
+			IERC20Wrapper(interchainSupportedToken.wrapper).approve(address(tokenManagerERC20), amount);
 		}
 
+		
 		tokenManagerERC20.transferToSchainERC20Direct(
 			interchainSupportedToken.schainName,
-			sourceToken,
+			interchainTokenAddress,
 			amount,
 			user
 		);
 	}
 	
 
-	function _wrapTokens(address user, IERC20 sourceToken, IERC20Wrapper wrapper, uint256 amount) internal returns (bool) {
+	function _wrapTokens(address user, IERC20 sourceToken, IERC20Wrapper wrapper, uint256 amount) internal {
+		sourceToken.approve(address(wrapper), amount);
         bool success = wrapper.depositFor(address(this), amount);
         if (!success) {
             emit FailedToWrap(address(sourceToken), address(wrapper), amount);

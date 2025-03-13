@@ -22,6 +22,8 @@ contract InterchainRegistry is AccessControl {
 
 	constructor(string memory location) {
 		REGISTRY_LOCATION = location; // e.g elated-tan-skat
+		_grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
+		_grantRole(REGISTRY_ROLE, _msgSender());
 	}
 
 	function getTokenByRoute(bytes32 chainHash, address token) external view returns (SupportedToken memory) {

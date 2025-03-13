@@ -12,6 +12,7 @@ import {IFeeManager} from "../interfaces/IFeeManager.sol";
 import {LibTypesV1} from "../lib/LibTypesV1.sol";
 import {SKALEOApp} from "../SKALEOApp.sol";
 import {IInterchainRegistry} from "../interfaces/IInterchainRegistry.sol";
+import {ITokenManagerERC20} from "../interfaces/ITokenManagerERC20.sol";
 import {InterchainRouter} from "./InterchainRouter.sol";
 
 error InsufficentBalance(uint256 attemptedAmount, uint256 actualBalance);
@@ -55,8 +56,8 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
     
     event SupplyImbalance(address indexed nativeToken, uint256 indexed countedSupply, uint256 indexed expectedSupply);
 
-    constructor(address _layerZeroEndpoint, address _feeCollector, IFeeManager _feeManager, IInterchainRegistry _interchainRegistry)
-        SKALEOApp(_layerZeroEndpoint) InterchainRouter(_interchainRegistry)
+    constructor(address _layerZeroEndpoint, address _feeCollector, IFeeManager _feeManager, IInterchainRegistry _interchainRegistry, ITokenManagerERC20 _tokenManagerERC20)
+        SKALEOApp(_layerZeroEndpoint) InterchainRouter(_interchainRegistry, _tokenManagerERC20)
     {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
@@ -165,7 +166,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         fee = _quote(dstEid, payload, options, payInLzToken);
     }
 
-    function _mintTokens(IMonorailNativeToken nativeToken, address receiver, uint256 amount, uint32 sourceEndpointId) internal {
+    function _mintTokens(IMonorailNativeToken nativeToken, address receiver, uint256 amount, uint32 sourceEndpointId) internal returns (uint256, uint256) {
         
         (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(amount, receiver, nativeToken.decimals());
 
@@ -187,6 +188,8 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         // Should these be moved before the state changes?
         nativeToken.mint(receiver, userAmount);
         nativeToken.mint(feeCollector, protocolFee);
+
+        return (userAmount, protocolFee);
     }
 
     
@@ -214,8 +217,8 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         if (data.interchainDestination == bytes32(0)) {
             _mintTokens(nativeToken, data.to, data.amount, _origin.srcEid);
         } else {
-            _mintTokens(nativeToken, address(this), data.amount, _origin.srcEid);
-            executeInterchainTranfer(data.to, address(nativeToken), data.interchainDestination, data.amount);
+            (uint256 userAmount,) = _mintTokens(nativeToken, address(this), data.amount, _origin.srcEid);
+            executeInterchainTranfer(data.to, address(nativeToken), data.interchainDestination, userAmount);
             // IInterchainRegistry.SupportedToken memory interchainSupportedToken = interchainRegistry.getTokenByRoute(finalChainDestination, address(nativeToken));
             // if (!interchainSupportedToken.supported) {
             //     emit InterchainRouteNotSupported(finalChainDestination, address(nativeToken));
