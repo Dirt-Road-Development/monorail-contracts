@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
+
 import "./fixtures/OFTBridgeFixture.t.sol";
 
 /**
@@ -9,7 +10,6 @@ import "./fixtures/OFTBridgeFixture.t.sol";
  * @author TheGreatAxios
  */
 contract OFTBridgeTest is OFTBridgeFixture {
-    
     /**
      * @notice Sets up the test environment
      * @dev Inherits setup from OFTBridgeFixture
@@ -27,17 +27,17 @@ contract OFTBridgeTest is OFTBridgeFixture {
         assertEq(aFeeManager.hasRole(bytes32(0), address(this)), true);
         assertEq(bFeeManager.hasRole(bytes32(0), address(this)), true);
         assertEq(cFeeManager.hasRole(bytes32(0), address(this)), true);
-        
+
         // Verify fee collectors are correctly set
         assertEq(aOFTBridge.feeCollector(), aFeeCollector);
         assertEq(bOFTBridge.feeCollector(), bFeeCollector);
         assertEq(cOFTBridge.feeCollector(), cFeeCollector);
-        
+
         // Verify fee managers are correctly linked
         assertEq(address(aOFTBridge.feeManager()), address(aFeeManager));
         assertEq(address(bOFTBridge.feeManager()), address(bFeeManager));
         assertEq(address(cOFTBridge.feeManager()), address(cFeeManager));
-        
+
         // Verify bridge contracts start with zero ETH balance
         assertEq(address(aOFTBridge).balance, 0);
         assertEq(address(bOFTBridge).balance, 0);
@@ -51,7 +51,7 @@ contract OFTBridgeTest is OFTBridgeFixture {
     function test_initialBalances() public {
         // Verify aUser has initial balance on chain A
         assertEq(IERC20(address(aOFT)).balanceOf(aUser), TEN_MILLION);
-        
+
         // Verify all other users have zero balances across all chains
         assertEq(IERC20(address(aOFT)).balanceOf(bUser), 0);
         assertEq(IERC20(address(aOFT)).balanceOf(cUser), 0);

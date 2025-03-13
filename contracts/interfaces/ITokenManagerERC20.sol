@@ -18,28 +18,18 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with SKALE IMA.  If not, see <https://www.gnu.org/licenses/>.
  */
-
 pragma solidity >=0.6.10 <0.9.0;
 
 interface ITokenManagerERC20 {
-    function exitToMainERC20(
-        address contractOnMainnet,
-        uint256 amount
-    ) external;
-    function transferToSchainERC20(
-        string calldata targetSchainName,
-        address contractOnMainnet,
-        uint256 amount
-    ) external;
+    function exitToMainERC20(address contractOnMainnet, uint256 amount) external;
+    function transferToSchainERC20(string calldata targetSchainName, address contractOnMainnet, uint256 amount)
+        external;
     function transferToSchainERC20Direct(
         string calldata targetSchainName,
         address contractOnMainnet,
         uint256 amount,
         address receiver
     ) external;
-    function addERC20TokenByOwner(
-        string calldata targetChainName,
-        address erc20OnMainnet,
-        address erc20OnSchain
-    ) external;
+    function addERC20TokenByOwner(string calldata targetChainName, address erc20OnMainnet, address erc20OnSchain)
+        external;
 }

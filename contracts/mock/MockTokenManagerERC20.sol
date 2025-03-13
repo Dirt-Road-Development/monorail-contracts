@@ -9,11 +9,10 @@ import {console} from "forge-std/console.sol";
 error UnimplementedFunction();
 
 contract MockTokenManagerERC20 is ITokenManagerERC20 {
-    
     struct Token {
         address sourceToken;
         address destinationToken;
-        string destinationChain;   
+        string destinationChain;
     }
 
     // Source Token => Destination Chain => Destination Token
@@ -26,12 +25,9 @@ contract MockTokenManagerERC20 is ITokenManagerERC20 {
         }
     }
 
-    function transferToSchainERC20Direct(
-        string calldata schainName,
-        address token,
-        uint256 amount,
-        address receiver
-    ) external {
+    function transferToSchainERC20Direct(string calldata schainName, address token, uint256 amount, address receiver)
+        external
+    {
         bool success = IERC20(token).transferFrom(msg.sender, address(this), amount);
         require(success, "TransferFrom failed");
 
@@ -43,23 +39,21 @@ contract MockTokenManagerERC20 is ITokenManagerERC20 {
         tokenMappings[token.sourceToken][token.destinationChain] = token.destinationToken;
     }
 
-    function exitToMainERC20(
-        address /*contractOnMainnet */,
-        uint256 /* amount */
-    ) external pure {
+    function exitToMainERC20(address, /*contractOnMainnet */ uint256 /* amount */ ) external pure {
         revert UnimplementedFunction();
     }
+
     function transferToSchainERC20(
-        string calldata /* targetSchainName */,
-        address /* contractOnMainnet */,
+        string calldata, /* targetSchainName */
+        address, /* contractOnMainnet */
         uint256 /* amount */
     ) external pure {
         revert UnimplementedFunction();
     }
-    
+
     function addERC20TokenByOwner(
-        string calldata /* targetChainName */,
-        address /* erc20OnMainnet */,
+        string calldata, /* targetChainName */
+        address, /* erc20OnMainnet */
         address /* erc20OnSchain */
     ) external pure {
         revert UnimplementedFunction();

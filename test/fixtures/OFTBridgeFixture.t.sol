@@ -128,10 +128,7 @@ contract OFTBridgeFixture is TestHelperOz5 {
         _aOFT.mint(aUser, TEN_MILLION);
     }
 
-    
-
     function _bridgeOFT(uint256 amount, address user, uint32 srcEndpointId, uint32 dstEndpointId) internal {
-
         IOFT oftFrom = _getOFT(srcEndpointId);
         IOFT oftTo = _getOFT(dstEndpointId);
         OFTBridge bridgeFrom = _getOFTBridge(srcEndpointId);
@@ -164,7 +161,8 @@ contract OFTBridgeFixture is TestHelperOz5 {
         // 7. Load Breakdown of Funds
         // Fee Manager Responses are Public
         // This allows the below assertions to be proven correct
-        (uint256 userAmount, uint256 protocolFee) = _getFeeManager(srcEndpointId).getFeeBreakdown(amount, user, IERC20Metadata(address(oftFrom)).decimals());
+        (uint256 userAmount, uint256 protocolFee) =
+            _getFeeManager(srcEndpointId).getFeeBreakdown(amount, user, IERC20Metadata(address(oftFrom)).decimals());
 
         // 8. Prove User Balance on New Chain
         assertEq(IERC20(address(oftTo)).balanceOf(user), _handleLayerZeroSlippage(amount - protocolFee, oftTo));

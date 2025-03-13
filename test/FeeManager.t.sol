@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
+
 import {NativeStation} from "../contracts/native/NativeStation.sol";
 import {NativeSkaleStation} from "../contracts/native/NativeSkaleStation.sol";
 import {FeeManager} from "../contracts/fees/FeeManager.sol";
@@ -23,28 +24,28 @@ import {Test} from "forge-std/Test.sol";
 contract FeeManagerTest is Test {
     /// @dev The FeeManager contract instance being tested
     FeeManager private feeManager;
-    
+
     /// @dev Test user address
     address private userA = address(0x1);
-    
+
     /// @dev Fee collector address
     address private feeCollector = address(0x02);
-    
+
     /// @dev USDC token instance
     USDC private usdc;
-    
+
     /// @dev SKALE token instance
     SKALEToken public skl;
-    
+
     /// @dev Token A instance for discount testing
     SKALEToken public tokenA;
-    
+
     /// @dev Token B instance for discount testing
     SKALEToken public tokenB;
-    
+
     /// @dev Token C instance for discount testing
     SKALEToken public tokenC;
-    
+
     /// @dev Constant for 100 USDC (with 6 decimals)
     uint256 private oneHundredUSDC = 100 * 10 ** 6;
 
@@ -56,14 +57,14 @@ contract FeeManagerTest is Test {
         // Fund test accounts
         vm.deal(userA, 1000 ether);
         vm.deal(feeCollector, 1000 ether);
-        
+
         // Deploy token contracts
         skl = new SKALEToken("SKALE", "SKL");
         tokenA = new SKALEToken("TokenA", "TKA");
         tokenB = new SKALEToken("TokenB", "TKB");
         tokenC = new SKALEToken("TokenB", "TKC"); // Note: Symbol duplication with TokenB
         usdc = new USDC("USDC", "USDC");
-        
+
         // Deploy and configure FeeManager
         feeManager = new FeeManager();
         feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
@@ -84,7 +85,7 @@ contract FeeManagerTest is Test {
     function test_noDiscount() public {
         (uint256 userAmountA, uint256 protocolFeeA) =
             feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
-        
+
         // With default 1.5% fee, user should receive 98.5% of amount
         assertEq(userAmountA, 98500000000);
         assertEq(protocolFeeA, 1500000000);
@@ -102,7 +103,7 @@ contract FeeManagerTest is Test {
             0,
             1 // ERC20
         );
-        
+
         // Verify token was added with correct parameters
         (,,, uint8 tokenType, uint256 tokenId) = feeManager.feeTokens(0);
         assertEq(tokenType, 1);
@@ -121,10 +122,10 @@ contract FeeManagerTest is Test {
             0,
             1 // ERC20
         );
-        
+
         (uint256 userAmountA, uint256 protocolFeeA) =
             feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
-        
+
         // With 1% fee, user should receive 99% of amount
         assertEq(userAmountA, 99000000000);
         assertEq(protocolFeeA, 1000000000);
@@ -142,10 +143,10 @@ contract FeeManagerTest is Test {
             0,
             1 // ERC20
         );
-        
+
         (uint256 userAmountA, uint256 protocolFeeA) =
             feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
-        
+
         // With 2% fee, user should receive 98% of amount
         assertEq(userAmountA, 98000000000);
         assertEq(protocolFeeA, 2000000000);
@@ -163,10 +164,10 @@ contract FeeManagerTest is Test {
             0,
             1 // ERC20
         );
-        
+
         (uint256 userAmountA, uint256 protocolFeeA) =
             feeManager.getFeeBreakdown(100_000 * 10 ** 6, address(this), usdc.decimals());
-        
+
         // With 5% fee, user should receive 95% of amount
         assertEq(userAmountA, 95000000000);
         assertEq(protocolFeeA, 5000000000);

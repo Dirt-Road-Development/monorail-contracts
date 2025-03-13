@@ -53,12 +53,16 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
     );
     event BridgeReceived(address indexed token, address indexed to, uint256 indexed amount);
     event InterchainRouteNotSupported(bytes32 indexed finalChainDestination, address indexed nativeToken);
-    
+
     event SupplyImbalance(address indexed nativeToken, uint256 indexed countedSupply, uint256 indexed expectedSupply);
 
-    constructor(address _layerZeroEndpoint, address _feeCollector, IFeeManager _feeManager, IInterchainRegistry _interchainRegistry, ITokenManagerERC20 _tokenManagerERC20)
-        SKALEOApp(_layerZeroEndpoint) InterchainRouter(_interchainRegistry, _tokenManagerERC20)
-    {
+    constructor(
+        address _layerZeroEndpoint,
+        address _feeCollector,
+        IFeeManager _feeManager,
+        IInterchainRegistry _interchainRegistry,
+        ITokenManagerERC20 _tokenManagerERC20
+    ) SKALEOApp(_layerZeroEndpoint) InterchainRouter(_interchainRegistry, _tokenManagerERC20) {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
         _grantRole(MANAGER_ROLE, _msgSender());
 
@@ -80,7 +84,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         }
 
         IMonorailNativeToken localToken = IMonorailNativeToken(localTokenAddress);
-        
+
         // 1 -> Add Support for Token
         // Local Token === Address on this chain
         // LayerZeroEndpointId === Destination Id
@@ -91,12 +95,11 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         // Origin Token Address === Address on the origin chain
         // Local Token === Address on this chain
         tokens[layerZeroEndpointId][originTokenAddress] = localToken;
-        
+
         // 3 -> Add Endpoint to token bucket
         // LayerZeroEndpointId === Destination Id
         // Local Token === Address on this chain
         endpointsByToken[localToken].push(layerZeroEndpointId);
-        
 
         emit AddToken(layerZeroEndpointId, originTokenAddress, localTokenAddress);
     }
@@ -124,13 +127,18 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
             feeManager.getFeeBreakdown(details.amount, _msgSender(), nativeToken.decimals());
 
         // 4 Check Supply of Token
-        if (userAmount > supplyAvailable[nativeToken]) { // Is this check necessary?
+        if (userAmount > supplyAvailable[nativeToken]) {
+            // Is this check necessary?
             revert TokenSupplyInsufficent(userAmount, supplyAvailable[nativeToken]);
         }
 
         // 5 Check Supply by Chain
         if (userAmount > supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId]) {
-            revert TokenSupplyInsufficentForChain(userAmount, supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId], destinationLayerZeroEndpointId);
+            revert TokenSupplyInsufficentForChain(
+                userAmount,
+                supplyAvailableByChain[nativeToken][destinationLayerZeroEndpointId],
+                destinationLayerZeroEndpointId
+            );
         }
 
         // Reduce Supply
@@ -139,10 +147,10 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
 
         // 7 User Transfers Tokens to Contract
         nativeToken.safeTransferFrom(_msgSender(), address(this), details.amount);
-        
+
         // 8 Transfer Protocol Fee to Fee Collector
         nativeToken.safeTransfer(feeCollector, protocolFee);
-        
+
         // 9 Burn User Amount of Native Tokens that will be unlocked on destination
         nativeToken.burn(userAmount);
 
@@ -166,8 +174,10 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         fee = _quote(dstEid, payload, options, payInLzToken);
     }
 
-    function _mintTokens(IMonorailNativeToken nativeToken, address receiver, uint256 amount, uint32 sourceEndpointId) internal returns (uint256, uint256) {
-        
+    function _mintTokens(IMonorailNativeToken nativeToken, address receiver, uint256 amount, uint32 sourceEndpointId)
+        internal
+        returns (uint256, uint256)
+    {
         (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(amount, receiver, nativeToken.decimals());
 
         emit BridgeReceived(address(nativeToken), receiver, userAmount);
@@ -178,7 +188,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         (bool isBalanced, uint256 countedSupply, uint256 availableSupply) = isSupplyBalanced(nativeToken);
         if (!isBalanced) {
             // Emit Event instead of Reverting. Why? This ensures that tokens are minted to the user
-            // We could potentially put these in a separate valut with a timelock and claim mechanism 
+            // We could potentially put these in a separate valut with a timelock and claim mechanism
             // to manually handle imbalances
             // The reality is that an imbalance is impossible I'm just paranoid :)
             emit SupplyImbalance(address(nativeToken), countedSupply, availableSupply);
@@ -191,8 +201,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
 
         return (userAmount, protocolFee);
     }
-
-    
 
     /**
      * @dev Called when data is received from the protocol. It overrides the equivalent function in the parent contract.
@@ -208,7 +216,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
     ) internal virtual override {
-
         LibTypesV1.TripDetails memory data = abi.decode(payload, (LibTypesV1.TripDetails));
         // (address token, address to, uint256 amount, bytes32 finalChainDestination) = abi.decode(payload, (address, address, uint256, bytes32)); // TripDetails
 
@@ -222,7 +229,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
             // IInterchainRegistry.SupportedToken memory interchainSupportedToken = interchainRegistry.getTokenByRoute(finalChainDestination, address(nativeToken));
             // if (!interchainSupportedToken.supported) {
             //     emit InterchainRouteNotSupported(finalChainDestination, address(nativeToken));
-            //     nativeToken.safeTransfer(to, amount);    
+            //     nativeToken.safeTransfer(to, amount);
             //     return; // Exit Early
             // }
 
@@ -230,15 +237,14 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
             //     _wrapTokens(nativeToken, IERC20Wrapper(interchainSupportedToken.wrapper), amount);
             // }
         }
-        
     }
 
-    function isSupplyBalanced(IMonorailNativeToken nativeToken) public view returns (bool, uint256, uint256){
+    function isSupplyBalanced(IMonorailNativeToken nativeToken) public view returns (bool, uint256, uint256) {
         /**
-          * @notice Start Supply Balance Section
-          * @dev This section is used to keep the books. Auditors may tell me it's unecessary
-                 but the belief is that if this occurs we can audit the flow of funds to determine
-                 where the imbalance occured and work to fix it through the manual movement of funds
+         * @notice Start Supply Balance Section
+         * @dev This section is used to keep the books. Auditors may tell me it's unecessary
+         *              but the belief is that if this occurs we can audit the flow of funds to determine
+         *              where the imbalance occured and work to fix it through the manual movement of funds
          */
         uint32[] memory endpoints = endpointsByToken[nativeToken];
         uint256 endpointsLength = endpoints.length;

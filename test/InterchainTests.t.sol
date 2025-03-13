@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
+
 import "./fixtures/InterchainFixture.t.sol";
 
 /**
@@ -22,6 +23,5 @@ contract InterchainTest is InterchainFixture {
         _bridgeToInterchain(HUNDRED_USDC, bUSDC, IERC20Metadata(address(nebulaUSDC)), bStation);
         assertEq(userAmount, 98.5e6);
         assertEq(nebulaUSDC.balanceOf(address(this)), userAmount);
-
     }
 }
