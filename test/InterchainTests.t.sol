@@ -18,10 +18,31 @@ contract InterchainTest is InterchainFixture {
         super.setUp();
     }
 
-    function test_toNebula() public {
+    function test_toNebula100USDC() public {
         (uint256 userAmount,) = _getFee(HUNDRED_USDC, aUSDC.decimals());
         _bridgeToInterchain(HUNDRED_USDC, bUSDC, IERC20Metadata(address(nebulaUSDC)), bStation);
         assertEq(userAmount, 98.5e6);
+        assertEq(nebulaUSDC.balanceOf(address(this)), userAmount);
+    }
+
+    function test_toNebula1000USDC() public {
+        (uint256 userAmount,) = _getFee(THOUSAND_USDC, aUSDC.decimals());
+        _bridgeToInterchain(THOUSAND_USDC, bUSDC, IERC20Metadata(address(nebulaUSDC)), bStation);
+        assertEq(userAmount, 985e6);
+        assertEq(nebulaUSDC.balanceOf(address(this)), userAmount);
+    }
+
+    function test_toNebula1000000USDC() public {
+        (uint256 userAmount,) = _getFee(MILLION_USDC, aUSDC.decimals());
+        _bridgeToInterchain(MILLION_USDC, bUSDC, IERC20Metadata(address(nebulaUSDC)), bStation);
+        assertEq(userAmount, 985_000e6);
+        assertEq(nebulaUSDC.balanceOf(address(this)), userAmount);
+    }
+
+    function test_toNebula10000000USDC() public {
+        (uint256 userAmount,) = _getFee(TEN_MILLION_USDC, aUSDC.decimals());
+        _bridgeToInterchain(TEN_MILLION_USDC, bUSDC, IERC20Metadata(address(nebulaUSDC)), bStation);
+        assertEq(userAmount, 9_850_000e6);
         assertEq(nebulaUSDC.balanceOf(address(this)), userAmount);
     }
 }
