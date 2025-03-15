@@ -185,15 +185,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         supplyAvailable[nativeToken] += amount;
         supplyAvailableByChain[nativeToken][sourceEndpointId] += amount;
 
-        (bool isBalanced, uint256 countedSupply, uint256 availableSupply) = isSupplyBalanced(nativeToken);
-        if (!isBalanced) {
-            // Emit Event instead of Reverting. Why? This ensures that tokens are minted to the user
-            // We could potentially put these in a separate valut with a timelock and claim mechanism
-            // to manually handle imbalances
-            // The reality is that an imbalance is impossible I'm just paranoid :)
-            emit SupplyImbalance(address(nativeToken), countedSupply, availableSupply);
-        }
-
         // End Supply Balance Section
         // Should these be moved before the state changes?
         nativeToken.mint(receiver, userAmount);
@@ -217,7 +208,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         bytes calldata // Any extra data or options to trigger on receipt.
     ) internal virtual override {
         LibTypesV1.TripDetails memory data = abi.decode(payload, (LibTypesV1.TripDetails));
-        // (address token, address to, uint256 amount, bytes32 finalChainDestination) = abi.decode(payload, (address, address, uint256, bytes32)); // TripDetails
 
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][data.token];
 
@@ -226,33 +216,6 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         } else {
             (uint256 userAmount,) = _mintTokens(nativeToken, address(this), data.amount, _origin.srcEid);
             executeInterchainTranfer(data.to, address(nativeToken), data.interchainDestination, userAmount);
-            // IInterchainRegistry.SupportedToken memory interchainSupportedToken = interchainRegistry.getTokenByRoute(finalChainDestination, address(nativeToken));
-            // if (!interchainSupportedToken.supported) {
-            //     emit InterchainRouteNotSupported(finalChainDestination, address(nativeToken));
-            //     nativeToken.safeTransfer(to, amount);
-            //     return; // Exit Early
-            // }
-
-            // if (interchainSupportedToken.supported && interchainSupportedToken.hasWrapper) {
-            //     _wrapTokens(nativeToken, IERC20Wrapper(interchainSupportedToken.wrapper), amount);
-            // }
         }
-    }
-
-    function isSupplyBalanced(IMonorailNativeToken nativeToken) public view returns (bool, uint256, uint256) {
-        /**
-         * @notice Start Supply Balance Section
-         * @dev This section is used to keep the books. Auditors may tell me it's unecessary
-         *              but the belief is that if this occurs we can audit the flow of funds to determine
-         *              where the imbalance occured and work to fix it through the manual movement of funds
-         */
-        uint32[] memory endpoints = endpointsByToken[nativeToken];
-        uint256 endpointsLength = endpoints.length;
-        uint256 countedSupply;
-        for (uint256 i = 0; i < endpointsLength; i++) {
-            countedSupply += supplyAvailableByChain[nativeToken][endpoints[i]];
-        }
-
-        return (countedSupply == supplyAvailable[nativeToken], countedSupply, supplyAvailable[nativeToken]);
     }
 }
