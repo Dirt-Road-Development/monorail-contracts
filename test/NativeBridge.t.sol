@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.24;
+
 import "./fixtures/NativeStationFixture.t.sol";
 
 /**
@@ -37,7 +38,7 @@ contract NativeBridgeTest is NativeStationFixture {
     function test_multichain100() public {
         _bridgeAllStableToASkaleStation(HUNDRED_USDC);
     }
-    
+
     /**
      * @notice Tests bridging 1,000 USDC across multiple chains
      * @dev Bridges 1,000 units of 6-decimal USDC from all source chains to aSkaleStation
@@ -82,7 +83,7 @@ contract NativeBridgeTest is NativeStationFixture {
         vm.assume(amount >= 100); // At least 0.0001 USDC
         _bridgeAllStableToASkaleStation(amount);
     }
-    
+
     /**
      * @notice Tests custom fee configuration for ERC20 tokens with 100 USDC
      * @dev Verifies fee calculations before and after setting custom token fees
@@ -93,7 +94,7 @@ contract NativeBridgeTest is NativeStationFixture {
             feeManager.getFeeBreakdown(HUNDRED_USDC, address(this), aUSDC.decimals());
         assertEq(amountBefore, 98500000);
         assertEq(feeBefore, 1500000);
-        
+
         // Configure custom token fee
         feeManager.configureTokenFee(
             address(aToken),
@@ -102,7 +103,7 @@ contract NativeBridgeTest is NativeStationFixture {
             0,
             1 // ERC20
         );
-        
+
         // Get fee breakdown after custom configuration
         (uint256 amountAfter, uint256 feeAfter) =
             feeManager.getFeeBreakdown(HUNDRED_USDC, address(this), aUSDC.decimals());

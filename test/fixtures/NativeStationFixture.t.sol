@@ -3,12 +3,18 @@ pragma solidity 0.8.24;
 
 import "../../contracts/native/NativeStation.sol";
 import "../../contracts/native/NativeSkaleStation.sol";
+import "../../contracts/native/InterchainRegistry.sol";
+
 import "../../contracts/fees/FeeManager.sol";
+
 import "../../contracts/interfaces/IFeeManager.sol";
+import "../../contracts/interfaces/IInterchainRegistry.sol";
+import "../../contracts/interfaces/ITokenManagerERC20.sol";
 
 import "../../contracts/mock/USDC.sol";
 import "../../contracts/mock/USDCs.sol";
 import "../../contracts/mock/SKALEToken.sol";
+import "../../contracts/mock/MockTokenManagerERC20.sol";
 
 import {IMonorailNativeToken} from "../../contracts/interfaces/IMonorailNativeToken.sol";
 // OApp imports
@@ -20,7 +26,7 @@ import {MessagingFee} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 
 // OZ imports
-import {IERC20,IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {IERC20, IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 // DevTools imports
 import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/TestHelperOz5.sol";
@@ -29,9 +35,8 @@ import {TestHelperOz5} from "@layerzerolabs/test-devtools-evm-foundry/contracts/
 import "forge-std/console.sol";
 
 contract NativeStationFixture is TestHelperOz5 {
-    
     using OptionsBuilder for bytes;
-    
+
     uint256 public constant HUNDRED_USDC = 100 * 10 ** 6;
     uint256 public constant THOUSAND_USDC = 1_000 * 10 ** 6;
     uint256 public constant MILLION_USDC = 1_000_000 * 10 ** 6;
@@ -44,6 +49,7 @@ contract NativeStationFixture is TestHelperOz5 {
     uint32 public constant E_EID = 5;
     uint32 public constant F_EID = 6;
 
+    MockTokenManagerERC20 public aTokenManagerERC20;
     NativeSkaleStation public aSkaleStation;
     NativeStation public bStation;
     NativeStation public cStation;
@@ -57,20 +63,21 @@ contract NativeStationFixture is TestHelperOz5 {
     USDC public dUSDC;
     USDC public eUSDC;
     USDC public fUSDC;
-    
+
     SKALEToken public skl;
 
     IERC20 public aToken;
     IERC20 public bToken;
 
     FeeManager public feeManager;
+    InterchainRegistry public interchainRegistry;
 
     address public userA = address(0x1);
     address public feeCollector = address(0x2);
 
     address[] public nativeTokens;
 
-    bytes public options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(1_000_000, 0);
+    bytes public options = OptionsBuilder.newOptions().addExecutorLzReceiveOption(2_500_000, 0);
 
     function setUp() public virtual override {
         super.setUp();
@@ -104,47 +111,66 @@ contract NativeStationFixture is TestHelperOz5 {
         feeManager = new FeeManager();
         feeManager.grantRole(feeManager.MANAGER_ROLE(), address(this));
 
+        interchainRegistry = new InterchainRegistry("local-test-suite");
+        aTokenManagerERC20 = new MockTokenManagerERC20(new MockTokenManagerERC20.Token[](0));
+
         address[] memory oapps = new address[](6);
 
         aSkaleStation = NativeSkaleStation(
             payable(
                 _deployOApp(
                     type(NativeSkaleStation).creationCode,
-                    abi.encode(address(endpoints[A_EID]), feeCollector, IFeeManager(address(feeManager)))
+                    abi.encode(
+                        address(endpoints[A_EID]),
+                        feeCollector,
+                        IFeeManager(address(feeManager)),
+                        IInterchainRegistry(address(interchainRegistry)),
+                        ITokenManagerERC20(address(aTokenManagerERC20))
+                    )
                 )
             )
         );
 
         bStation = NativeStation(
             payable(
-                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[B_EID]), A_EID, address(this)))
+                _deployOApp(
+                    type(NativeStation).creationCode, abi.encode(address(endpoints[B_EID]), A_EID, address(this))
+                )
             )
         );
 
         cStation = NativeStation(
             payable(
-                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[C_EID]), A_EID, address(this)))
+                _deployOApp(
+                    type(NativeStation).creationCode, abi.encode(address(endpoints[C_EID]), A_EID, address(this))
+                )
             )
         );
 
         dStation = NativeStation(
             payable(
-                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[D_EID]), A_EID, address(this)))
+                _deployOApp(
+                    type(NativeStation).creationCode, abi.encode(address(endpoints[D_EID]), A_EID, address(this))
+                )
             )
         );
 
         eStation = NativeStation(
             payable(
-                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[E_EID]), A_EID, address(this)))
+                _deployOApp(
+                    type(NativeStation).creationCode, abi.encode(address(endpoints[E_EID]), A_EID, address(this))
+                )
             )
         );
 
         fStation = NativeStation(
             payable(
-                _deployOApp(type(NativeStation).creationCode, abi.encode(address(endpoints[F_EID]), A_EID, address(this)))
+                _deployOApp(
+                    type(NativeStation).creationCode, abi.encode(address(endpoints[F_EID]), A_EID, address(this))
+                )
             )
         );
-        
+
         oapps[0] = address(aSkaleStation);
         oapps[1] = address(bStation);
         oapps[2] = address(cStation);
@@ -175,7 +201,6 @@ contract NativeStationFixture is TestHelperOz5 {
     }
 
     function _bridgeAllStableToASkaleStation(uint256 amount) internal {
-
         // 1. Get Shared Fee
         (uint256 userAmount, uint256 protocolFee) = _getFee(amount, aUSDC.decimals());
 
@@ -195,30 +220,32 @@ contract NativeStationFixture is TestHelperOz5 {
      * @param tokenA The token on arbitrary chain
      * @param tokenB The token on SKALE Chain
      */
-    function _bridgeToSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station) internal {
-        
+    function _bridgeToSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station)
+        internal
+    {
         uint256 startingUserBalance = tokenB.balanceOf(address(this));
         uint256 startingFeeCollectorBalance = tokenB.balanceOf(feeCollector);
         // 1 Approve
         tokenA.approve(address(station), amount);
-        
+
         // 2 Trip Details
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount);
-        
+        LibTypesV1.TripDetails memory details =
+            LibTypesV1.TripDetails(address(tokenA), address(this), amount, bytes32(0));
+
         // 3 Get Quote Fee
         MessagingFee memory fee = station.quote(details, options, false);
-        
+
         // 4 Bridge to A
         station.bridge{value: fee.nativeFee}(details, options);
-        
+
         // 5 Deliver
         verifyPackets(A_EID, addressToBytes32(address(aSkaleStation)));
- 
+
         /*
          * @notice Use tokenB since fee is taken from chain b 
          */
         (uint256 userAmount, uint256 protocolFee) = _getFee(amount, IERC20Metadata(tokenB).decimals());
-        
+
         // 7 Check Balance
         assertEq(tokenB.balanceOf(address(this)), userAmount + startingUserBalance);
         assertEq(tokenB.balanceOf(feeCollector), protocolFee + startingFeeCollectorBalance);
@@ -229,38 +256,44 @@ contract NativeStationFixture is TestHelperOz5 {
      * @param tokenA The token on SKALE Chain
      * @param tokenB The token on arbitrary chain
      */
-    function _bridgeFromSkaleStation(uint256 amount, IERC20Metadata tokenA, IERC20Metadata tokenB, NativeStation station, uint32 dstEndpointId) public {
-
+    function _bridgeFromSkaleStation(
+        uint256 amount,
+        IERC20Metadata tokenA,
+        IERC20Metadata tokenB,
+        NativeStation station,
+        uint32 dstEndpointId
+    ) public {
         uint256 startingTokenAUserBalance = tokenA.balanceOf(address(this));
         uint256 startingTokenBUserBalance = tokenB.balanceOf(address(this));
         uint256 startingFeeCollectorBalance = tokenA.balanceOf(feeCollector);
 
         // 1 Approve
         tokenA.approve(address(aSkaleStation), amount);
-        
+
         // 2 Trip Details
-        LibTypesV1.TripDetails memory details = LibTypesV1.TripDetails(address(tokenA), address(this), amount);
-        
+        LibTypesV1.TripDetails memory details =
+            LibTypesV1.TripDetails(address(tokenA), address(this), amount, bytes32(0));
+
         // 3 Get Quote Fee
         MessagingFee memory fee = aSkaleStation.quote(dstEndpointId, details, options, false);
-        
+
         skl.approve(address(aSkaleStation), fee.nativeFee);
-    
+
         // 4 Bridge to A
         aSkaleStation.bridge(dstEndpointId, details, fee, options);
-        
+
         // 5 Deliver
         verifyPackets(dstEndpointId, addressToBytes32(address(station)));
- 
+
         /*
          * @notice Use tokenB since fee is taken from chain b 
          */
         (uint256 userAmount, uint256 protocolFee) = _getFee(amount, IERC20Metadata(tokenA).decimals());
-        
+
         // 7 Check Balance
         // Notice -> the user balance is subtracted on token A
         // Notice -> the protoocl fee is increase on token A
-        // Notice -> the user amount is added to token B        
+        // Notice -> the user amount is added to token B
         assertEq(tokenA.balanceOf(address(this)), startingTokenAUserBalance - amount);
         assertEq(tokenA.balanceOf(feeCollector), protocolFee + startingFeeCollectorBalance);
         assertEq(tokenB.balanceOf(address(this)), startingTokenBUserBalance + userAmount);

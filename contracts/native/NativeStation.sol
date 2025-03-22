@@ -4,11 +4,13 @@ pragma solidity 0.8.24;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {OApp, MessagingFee, Origin} from "@layerzerolabs/oapp-evm/contracts/oapp/OApp.sol";
 import {MessagingReceipt} from "@layerzerolabs/oapp-evm/contracts/oapp/OAppSender.sol";
 import {LibTypesV1} from "../lib/LibTypesV1.sol";
 import {IOFT} from "@layerzerolabs/oft-evm/contracts/interfaces/IOFT.sol";
+import {LayerZeroMessageTracker} from "./LayerZeroMessageTracker.sol";
 
 error TokenBridgingPaused();
 error TokenNotAdded();
@@ -17,7 +19,7 @@ error UnsupportedToken();
 // error InsufficentFundsInBridge(uint256 amountInBridge, uint256 neededAmount);
 error InsufficentFundsInBridge();
 
-contract NativeStation is OApp, AccessControl {
+contract NativeStation is OApp, AccessControl, LayerZeroMessageTracker, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
@@ -61,6 +63,7 @@ contract NativeStation is OApp, AccessControl {
     function bridge(LibTypesV1.TripDetails memory details, bytes calldata options)
         external
         payable
+        nonReentrant
         returns (
             // Add Non Reenetrant????
             MessagingReceipt memory receipt
@@ -82,24 +85,23 @@ contract NativeStation is OApp, AccessControl {
         deposits[IERC20(details.token)] += details.amount;
 
         // Encodes message as bytes.
-        bytes memory _payload = abi.encode(details.token, details.to, details.amount);
+        bytes memory _payload = abi.encode(details);
         receipt = _lzSend(skaleEndpointId, _payload, options, MessagingFee(msg.value, 0), payable(msg.sender));
     }
 
     /**
      * @dev Called when data is received from the protocol. It overrides the equivalent function in the parent contract.
      * Protocol messages are defined as packets, comprised of the following parameters.
-     * @param _origin A struct containing information about where the packet came from.
-     * @param _guid A global unique identifier for tracking the packet.
      * @param payload Encoded message.
      */
     function _lzReceive(
-        Origin calldata _origin,
+        Origin calldata,
         bytes32 _guid,
         bytes calldata payload,
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
-    ) internal virtual override {
+    ) internal virtual override nonReentrant {
+        _processMessage(_guid);
         // Decode the payload to get the message
         // In this case, type is string, but depends on your encoding!
         LibTypesV1.TripDetails memory details = abi.decode(payload, (LibTypesV1.TripDetails));
@@ -109,14 +111,14 @@ contract NativeStation is OApp, AccessControl {
         }
 
         IERC20 localToken = IERC20(tokenMappings[details.token]);
-        
+
         if (deposits[localToken] < details.amount) {
             // revert InsufficentFundsInBridge(deposits[localToken], details.amount);
             revert InsufficentFundsInBridge();
         }
 
         deposits[localToken] -= details.amount;
-        
+
         emit BridgeReceived(address(localToken), details.to, details.amount);
 
         localToken.safeTransfer(details.to, details.amount);
