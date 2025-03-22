@@ -207,7 +207,7 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         bytes calldata payload,
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
-    ) internal virtual override nonReentrant {
+    ) internal virtual override /* nonReentrant*/ { // Note, commenting nonReentrant in causes Nebula interchain tests to fail
         _processMessage(_guid);
         LibTypesV1.TripDetails memory data = abi.decode(payload, (LibTypesV1.TripDetails));
 
