@@ -18,7 +18,8 @@
  *   You should have received a copy of the GNU Affero General Public License
  *   along with SKALE IMA.  If not, see <https://www.gnu.org/licenses/>.
  */
-pragma solidity >=0.6.10 <0.9.0;
+// Original pragma solidity >=0.6.10 <0.9.0;
+pragma solidity 0.8.24;
 
 interface ITokenManagerERC20 {
     function exitToMainERC20(address contractOnMainnet, uint256 amount) external;

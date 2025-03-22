@@ -19,26 +19,6 @@ interface IInterchainRegistry {
     }
 
     /**
-     * @dev Emitted when a token is registered for a chain.
-     * @param chainHash The hash identifying the chain.
-     * @param token The address of the token being registered.
-     * @param wrapper The address of the wrapper contract (zero address if none).
-     */
-    event RegisterToken(bytes32 indexed chainHash, address indexed token, address indexed wrapper);
-
-    /**
-     * @dev Returns the registry location string.
-     * @return The location string (e.g., "elated-tan-skat").
-     */
-    function REGISTRY_LOCATION() external view returns (string memory);
-
-    /**
-     * @dev Returns the constant role hash for the registry role.
-     * @return The keccak256 hash of "REGISTRY_ROLE".
-     */
-    function REGISTRY_ROLE() external view returns (bytes32);
-
-    /**
      * @dev Retrieves the supported token details for a given chain and token.
      * @param chainHash The hash identifying the chain.
      * @param token The address of the token.

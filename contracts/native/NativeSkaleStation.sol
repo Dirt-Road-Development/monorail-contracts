@@ -14,13 +14,14 @@ import {SKALEOApp} from "../SKALEOApp.sol";
 import {IInterchainRegistry} from "../interfaces/IInterchainRegistry.sol";
 import {ITokenManagerERC20} from "../interfaces/ITokenManagerERC20.sol";
 import {InterchainRouter} from "./InterchainRouter.sol";
+import {LayerZeroMessageTracker} from "./LayerZeroMessageTracker.sol";
 
 error InsufficentBalance(uint256 attemptedAmount, uint256 actualBalance);
 error TokenSupplyInsufficent(uint256 expectedAmount, uint256 actualAmount);
 error TokenSupplyInsufficentForChain(uint256 expectedAmount, uint256 actualAmount, uint256 layerZeroDstEid);
 error SupplyInbalance(address token, uint256 countedSupply, uint256 expectedSupply);
 
-contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, InterchainRouter {
+contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, InterchainRouter, LayerZeroMessageTracker {
     using SafeERC20 for IERC20;
     using SafeERC20 for IMonorailNativeToken;
 
@@ -206,7 +207,8 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         bytes calldata payload,
         address, // Executor address as specified by the OApp.
         bytes calldata // Any extra data or options to trigger on receipt.
-    ) internal virtual override {
+    ) internal virtual override nonReentrant {
+        _processMessage(_guid);
         LibTypesV1.TripDetails memory data = abi.decode(payload, (LibTypesV1.TripDetails));
 
         IMonorailNativeToken nativeToken = tokens[_origin.srcEid][data.token];

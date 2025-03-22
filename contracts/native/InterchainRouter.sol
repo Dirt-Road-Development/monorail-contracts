@@ -10,7 +10,10 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 
 error FailedToUnwrap();
 
-contract InterchainRouter is ReentrancyGuard {
+/**
+ * @dev This contract should be inherited by another contract. It makes assumptions that the contract is properly tracking token allocations per user
+ **/
+abstract contract InterchainRouter is ReentrancyGuard {
     using SafeERC20 for IERC20;
 
     IInterchainRegistry public interchainRegistry;
@@ -52,20 +55,24 @@ contract InterchainRouter is ReentrancyGuard {
     }
 
     function _wrapTokens(address user, IERC20 sourceToken, IERC20Wrapper wrapper, uint256 amount) internal {
-        sourceToken.approve(address(wrapper), amount);
-        bool success = wrapper.depositFor(address(this), amount);
-        if (!success) {
+        bool approveSuccess = sourceToken.approve(address(wrapper), amount);
+        if (!approveSuccess) {
+            emit FailedToWrap(address(sourceToken), address(wrapper), amount);
+            sourceToken.safeTransfer(user, amount);
+        }
+        bool depositSuccess = wrapper.depositFor(address(this), amount);
+        if (!depositSuccess) {
             emit FailedToWrap(address(sourceToken), address(wrapper), amount);
             sourceToken.safeTransfer(user, amount);
         }
     }
 
-    function _unwrapTokens(address user, IERC20Wrapper wrapper, uint256 amount) internal {
-        bool success = wrapper.withdrawTo(address(this), amount);
-        if (!success) {
-            revert FailedToUnwrap();
-        }
+    // function _unwrapTokens(address user, IERC20Wrapper wrapper, uint256 amount) internal {
+    //     bool success = wrapper.withdrawTo(address(this), amount);
+    //     if (!success) {
+    //         revert FailedToUnwrap();
+    //     }
 
-        wrapper.underlying().safeTransfer(user, amount);
-    }
+    //     wrapper.underlying().safeTransfer(user, amount);
+    // }
 }
