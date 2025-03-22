@@ -205,9 +205,9 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         Origin calldata _origin,
         bytes32 _guid,
         bytes calldata payload,
-        address, // Executor address as specified by the OApp.
-        bytes calldata // Any extra data or options to trigger on receipt.
-    ) internal virtual override nonReentrant { // Note, commenting nonReentrant in causes Nebula interchain tests to fail
+        address,
+        bytes calldata
+    ) internal virtual override nonReentrant {
         _processMessage(_guid);
         LibTypesV1.TripDetails memory data = abi.decode(payload, (LibTypesV1.TripDetails));
 
@@ -216,7 +216,11 @@ contract NativeSkaleStation is SKALEOApp, AccessControl, ReentrancyGuard, Interc
         if (data.interchainDestination == bytes32(0)) {
             _mintTokens(nativeToken, data.to, data.amount, _origin.srcEid);
         } else {
-            (uint256 userAmount,) = _mintTokens(nativeToken, address(this), data.amount, _origin.srcEid);
+            (uint256 userAmount, uint256 protocolFee) = feeManager.getFeeBreakdown(data.amount, address(this), nativeToken.decimals());
+            supplyAvailable[nativeToken] += data.amount;
+            supplyAvailableByChain[nativeToken][_origin.srcEid] += data.amount;
+            nativeToken.mint(address(this), userAmount);
+            nativeToken.mint(feeCollector, protocolFee);
             _executeInterchainTranfer(data.to, address(nativeToken), data.interchainDestination, userAmount);
         }
     }

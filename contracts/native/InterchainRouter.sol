@@ -118,19 +118,36 @@ contract InterchainRouter is ReentrancyGuard {
      * @param wrapper Wrapper contract interface
      * @param amount Amount of tokens to wrap
      */
-    function _wrapTokens(address user, IERC20 sourceToken, IERC20Wrapper wrapper, uint256 amount) internal {
-        bool approveSuccess = sourceToken.approve(address(wrapper), amount);
+    function _wrapTokens(address user, IERC20 sourceToken, IERC20Wrapper wrapper, uint256 amount) 
+        internal
+    {
+        // Step 1: Attempt approval without reverting
+        bool approveSuccess;
+        try sourceToken.approve(address(wrapper), amount) returns (bool success) {
+            approveSuccess = success;
+        } catch {
+            approveSuccess = false;
+        }
+
         if (!approveSuccess) {
             claimableTokens[user][sourceToken] = amount;
             emit FailedToWrap(address(sourceToken), address(wrapper), amount);
             return;
         }
-        
-        bool depositSuccess = wrapper.depositFor(address(this), amount);
+
+        // Step 2: Attempt deposit without reverting
+        bool depositSuccess;
+        try wrapper.depositFor(address(this), amount) returns (bool success) {
+            depositSuccess = success;
+        } catch {
+            depositSuccess = false;
+        }
+
         if (!depositSuccess) {
             claimableTokens[user][sourceToken] = amount;
             emit FailedToWrap(address(sourceToken), address(wrapper), amount);
-            return;
+            // Reset approval to 0 to avoid dangling approvals
+            sourceToken.approve(address(wrapper), 0);
         }
     }
 
