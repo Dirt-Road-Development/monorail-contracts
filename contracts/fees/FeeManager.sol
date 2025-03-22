@@ -6,9 +6,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
+import "../interfaces/IFeeManager.sol";
+
 error FeeExceedsAmount(uint256 fee, uint256 amount);
 
-contract FeeManager is AccessControl {
+contract FeeManager is IFeeManager, AccessControl {
     bytes32 public constant MANAGER_ROLE = keccak256("MANAGER_ROLE");
     uint256 public constant DEFAULT_FEE = 150; // 1.5% in basis points
     uint256 public constant FEE_DENOMINATOR = 10000;
@@ -27,7 +29,6 @@ contract FeeManager is AccessControl {
 
     // Events
     event TokenFeeConfigured(address tokenAddress, uint256 customFee, uint256 minThreshold, uint8 tokenType);
-    event TokenRemoved(address tokenAddress);
 
     constructor() {
         _grantRole(DEFAULT_ADMIN_ROLE, _msgSender());
