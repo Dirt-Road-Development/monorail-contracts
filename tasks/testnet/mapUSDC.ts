@@ -13,7 +13,7 @@ async function main() {
         const addToken2 = await station.addToken(
             EndpointId.AMOY_V2_TESTNET,
             amoyDeployments['USDC'].address,
-            deploys['USDCs'].address
+            "0x6CE77Fc7970F6984eF3E8748A3826972Ec409Fb9"
         )
 
         await addToken2.wait(1)
@@ -27,9 +27,9 @@ async function main() {
             deploys['NativeStation'].abi,
             signer
         )
-        const europaDeployments = await companionNetworks['europa'].deployments.all()
+        // const europaDeployments = await companionNetworks['europa'].deployments.all()
 
-        const addToken = await station.addToken(europaDeployments['USDCs'].address, deploys['USDC'].address)
+        const addToken = await station.addToken("0x6CE77Fc7970F6984eF3E8748A3826972Ec409Fb9", deploys['USDC'].address)
 
         await addToken.wait(1)
     }

@@ -15,11 +15,12 @@ if [ $network == "testnet" ]; then
 
     cd ..
 
-    npx hardhat deploy --network europa-testnet --tags LibTypesV1,FeeManager,InterchainRegistry,NativeSkaleStation,OFTBridge,USDCs,MonorailOFT
+    npx hardhat deploy --network europa-testnet --tags LibTypesV1,FeeManager,InterchainRegistry,NativeSkaleStation,OFTBridge,MonorailOFT
     npx hardhat deploy --network amoy-testnet --tags LibTypesV1,FeeManager,NativeStation,OFTBridge,USDC,BasicOFT
     npx hardhat lz:oapp:wire --oapp-config layerzero.config.ts
     npx hardhat run ./tasks/testnet/mapUSDC.ts --network europa-testnet
     npx hardhat run ./tasks/testnet/mapUSDC.ts --network amoy-testnet
+    npx hardhat run ./tasks/testnet/registerInterchainTokens.ts --network europa-testnet
 else
     echo "Mainnet Not yet Supported!" >&2
     exit 1
