@@ -32,9 +32,8 @@ contract InterchainRouter is ReentrancyGuard {
         interchainRegistry = _interchainRegistry;
     }
 
-    function executeInterchainTranfer(address user, address sourceToken, bytes32 destinationChainHash, uint256 amount)
-        public
-        nonReentrant
+    function _executeInterchainTranfer(address user, address sourceToken, bytes32 destinationChainHash, uint256 amount)
+        internal
     {
         if (destinationChainHash == bytes32(0)) {
             return;
